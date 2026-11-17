@@ -271,26 +271,22 @@ const actions = {
 
     const eventService = getters.eventsInterface.getService({ netId, amount, currency })
 
-    const graphEvents = await eventService.getEventsFromGraph({ methodName: 'getStatistic' })
+    let statistic = []
+    try {
+      const graphEvents = await eventService.getEventsFromGraph({ methodName: 'getStatistic' })
+      statistic = graphEvents?.events || []
 
-    let statistic = graphEvents?.events
-
-    if (!statistic || !statistic.length) {
-      const fresh = await eventService.getStatisticsRpc({ eventsCount: 10 })
-
-      statistic = fresh || []
+      if (!statistic.length) {
+        const fresh = await eventService.getStatisticsRpc({ eventsCount: 10 })
+        statistic = fresh || []
+      }
+    } catch (err) {
+      console.warn('updateSelectEvents events fetch failed:', err.message)
     }
-
-    const { nextDepositIndex, anonymitySet } = await dispatch('getLastDepositIndex', {
-      currency,
-      amount,
-      netId
-    })
 
     statistic = statistic.sort((a, b) => Number(a.leafIndex) - Number(b.leafIndex))
 
     const latestDeposits = []
-
     for (const event of statistic.slice(-10)) {
       latestDeposits.unshift({
         index: event.leafIndex,
@@ -298,17 +294,29 @@ const actions = {
       })
     }
 
-    commit('SAVE_LAST_EVENTS', {
-      amount,
-      currency,
-      latestDeposits
-    })
-    commit('SAVE_LAST_INDEX', {
-      amount,
-      currency,
-      anonymitySet,
-      nextDepositIndex
-    })
+    if (latestDeposits.length) {
+      commit('SAVE_LAST_EVENTS', {
+        amount,
+        currency,
+        latestDeposits
+      })
+    }
+
+    try {
+      const { nextDepositIndex, anonymitySet } = await dispatch('getLastDepositIndex', {
+        currency,
+        amount,
+        netId
+      })
+      commit('SAVE_LAST_INDEX', {
+        amount,
+        currency,
+        anonymitySet: anonymitySet?.toString?.(10) ?? anonymitySet,
+        nextDepositIndex
+      })
+    } catch (err) {
+      console.warn('updateSelectEvents getLastDepositIndex failed:', err.message)
+    }
   },
   async updateEvents({ getters, rootGetters }, payload) {
     try {
@@ -849,19 +857,23 @@ const actions = {
     }
   },
   async updateLastIndex({ dispatch, commit, rootState }, { currency, amount }) {
-    const netId = rootState.metamask.netId
-    const { nextDepositIndex, anonymitySet } = await dispatch('getLastDepositIndex', {
-      currency,
-      netId,
-      amount
-    })
+    try {
+      const netId = rootState.metamask.netId
+      const { nextDepositIndex, anonymitySet } = await dispatch('getLastDepositIndex', {
+        currency,
+        netId,
+        amount
+      })
 
-    commit('SAVE_LAST_INDEX', {
-      amount,
-      currency,
-      anonymitySet,
-      nextDepositIndex
-    })
+      commit('SAVE_LAST_INDEX', {
+        amount,
+        currency,
+        anonymitySet,
+        nextDepositIndex
+      })
+    } catch (err) {
+      console.warn('updateLastIndex failed:', currency, amount, err.message)
+    }
   },
   async loadEvent({ getters, rootGetters }, { note, type, eventName, eventToFind }) {
     try {

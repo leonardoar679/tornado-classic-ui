@@ -1,10 +1,12 @@
 import 'dotenv/config'
 
 import fs from 'fs'
-import { uniqBy } from 'lodash'
+import lodash from 'lodash'
 
 import networkConfig from '../networkConfig.js'
-import ABI from '../abis/Instance.abi.json'
+import ABI from '../abis/Instance.abi.json' with { type: 'json' }
+
+const { uniqBy } = lodash
 import { loadCachedEvents, getPastEvents } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'

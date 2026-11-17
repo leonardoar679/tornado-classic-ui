@@ -52,28 +52,41 @@ export const actions = {
     await dispatch('preselectRpc', { netId })
   },
   async preselectRpc({ getters, commit, dispatch }, { netId }) {
-    const savedRpc = getters.getRpc(netId)
-    const { isValid } = await dispatch('checkRpc', { ...savedRpc, netId })
-
-    if (isValid) {
-      return
-    }
-
     const { rpcUrls } = networkConfig[`netId${netId}`]
+    const isPlaceholderUrl = (url) =>
+      !url || String(url).includes('/null') || String(url).includes('/undefined')
 
+    // Prefer keyed providers (Infura/Alchemy) over public endpoints that often
+    // pass getChainId then rate-limit eth_getLogs. Walk networkConfig order.
     for (const [, { name, url }] of Object.entries(rpcUrls)) {
+      if (isPlaceholderUrl(url)) {
+        continue
+      }
       const { isValid, error } = await dispatch('checkRpc', { url, netId })
       if (isValid) {
         commit('SAVE_RPC', { netId, name, url })
         return
-      } else {
-        console.error('preselectRpc', url, error)
+      }
+      console.error('preselectRpc', url, error)
+    }
+
+    // Fall back to whatever was persisted from a previous session
+    const savedRpc = getters.getRpc(netId)
+    if (!isPlaceholderUrl(savedRpc?.url)) {
+      const { isValid } = await dispatch('checkRpc', { ...savedRpc, netId })
+      if (isValid) {
+        return
       }
     }
+
     throw new Error(this.app.i18n.t('rpcSelectError'))
   },
   async checkRpc(_, { url, netId }) {
     try {
+      if (!url || String(url).includes('/null') || String(url).includes('/undefined')) {
+        return { isValid: false, error: this.app.i18n.t('rpcIsDown') }
+      }
+
       const web3 = createWeb3(url)
 
       const chainId = await web3.eth.getChainId()

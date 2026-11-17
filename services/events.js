@@ -162,8 +162,15 @@ class EventService {
     const savedEvents = await this.getEvents(eventsType.DEPOSIT)
 
     if (savedEvents?.events.length) {
-      const { events } = await this.updateEvents(eventsType.DEPOSIT, savedEvents)
-      return events
+      try {
+        const { events } = await this.updateEvents(eventsType.DEPOSIT, savedEvents)
+        return events
+      } catch (err) {
+        // Public RPCs often rate-limit eth_getLogs; keep the cached set so the
+        // Statistics "Latest deposits" panel still renders.
+        console.warn('getStatisticsRpc updateEvents failed, using cache:', err.message)
+        return savedEvents.events
+      }
     }
 
     const blockRange = 4950

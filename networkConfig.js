@@ -27,8 +27,19 @@ export default {
     networkName: 'Ethereum Mainnet',
     deployedBlock: 9116966,
     rpcUrls: {
-      // verified public RPCs (chainlist) - archive-capable ones first for,
-      // compliance lookups of historical notes; the app failover walks this list,
+      // Keyed providers first: public endpoints often pass getChainId then
+      // rate-limit eth_getLogs (empty latest deposits / proposals). Failover
+      // walks this object in insertion order.
+      Infura: {
+        name: 'Infura',
+        url: `https://mainnet.infura.io/v3/${INFURA_KEY}`
+      },
+      Alchemy: {
+        name: 'Alchemy',
+        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
+      },
+      // verified public RPCs (chainlist) - archive-capable ones preferred for
+      // compliance lookups of historical notes
       drpc: {
         name: 'dRPC',
         url: 'https://eth.drpc.org'
@@ -60,14 +71,6 @@ export default {
       nowNodes: {
         name: 'NOWNodes',
         url: 'https://public-eth.nownodes.io'
-      },
-      Infura: {
-        name: 'Infura',
-        url: `https://mainnet.infura.io/v3/${INFURA_KEY}`
-      },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
       }
     },
     multicall: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
@@ -248,14 +251,6 @@ export default {
     multicall: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicNode: {
-        name: 'PublicNode',
-        url: 'https://polygon-bor-rpc.publicnode.com'
-      },
-      drpc: {
-        name: 'dRPC',
-        url: 'https://polygon.drpc.org'
-      },
       Infura: {
         name: 'Infura',
         url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`
@@ -263,6 +258,14 @@ export default {
       Alchemy: {
         name: 'Alchemy',
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_KEY}`
+      },
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://polygon-bor-rpc.publicnode.com'
+      },
+      drpc: {
+        name: 'dRPC',
+        url: 'https://polygon.drpc.org'
       }
     },
     tokens: {
@@ -308,6 +311,14 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     ovmGasPriceOracleContract: '0x420000000000000000000000000000000000000F',
     rpcUrls: {
+      Infura: {
+        name: 'Infura',
+        url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`
+      },
+      Alchemy: {
+        name: 'Alchemy',
+        url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_OPTIMISM_KEY}`
+      },
       optimism: {
         name: 'Optimism Public RPC',
         url: 'https://mainnet.optimism.io'
@@ -315,14 +326,6 @@ export default {
       publicNode: {
         name: 'PublicNode',
         url: 'https://optimism-rpc.publicnode.com'
-      },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_OPTIMISM_KEY}`
-      },
-      Infura: {
-        name: 'Infura',
-        url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`
       }
     },
     tokens: {
@@ -367,6 +370,14 @@ export default {
     multicall: '0x842eC2c7D803033Edf55E478F461FC547Bc54EB2',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
+      Infura: {
+        name: 'Infura',
+        url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`
+      },
+      Alchemy: {
+        name: 'Alchemy',
+        url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ARBITRUM_KEY}`
+      },
       Arbitrum: {
         name: 'Arbitrum Public RPC',
         url: 'https://arb1.arbitrum.io/rpc'
@@ -374,14 +385,6 @@ export default {
       publicNode: {
         name: 'PublicNode',
         url: 'https://arbitrum-one-rpc.publicnode.com'
-      },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ARBITRUM_KEY}`
-      },
-      Infura: {
-        name: 'Infura',
-        url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`
       }
     },
     tokens: {

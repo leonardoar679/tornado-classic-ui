@@ -7,29 +7,65 @@ import {
   GET_REGISTERED,
   GET_WITHDRAWALS,
   GET_NOTE_ACCOUNTS,
-  GET_ENCRYPTED_NOTES
+  GET_ENCRYPTED_NOTES,
+  GET_PROPOSALS,
+  GET_DELEGATES,
+  GET_UNDELEGATES,
+  GET_VOTED
 } from './queries.js'
 
 const isEmptyArray = (arr) => !Array.isArray(arr) || !arr.length
 
 const first = 1000
 
-// Apollo v4 removed the `uri` option on ApolloClient — routes go through an explicit HttpLink
-const dynamicUri = ({ getContext }) => {
-  const { chainId } = getContext()
-  return CHAIN_GRAPH_URLS[chainId]
+// Hosted-service names are dead; use decentralized gateway + API keys (classic-ui upstream).
+const APIKEY_URLS = {
+  1: '8b164501e1862078eff5fb9dda136c6c',
+  10: 'd2db349f28c895aa2272421996404c8d',
+  56: '30503850823438e04497429381e416f7',
+  100: 'd2db349f28c895aa2272421996404c8d',
+  137: 'd2db349f28c895aa2272421996404c8d',
+  42161: 'd2db349f28c895aa2272421996404c8d',
+  43114: 'd2db349f28c895aa2272421996404c8d',
+  88888888: 'c978a2a9a36f30ba63457b707e821e6c'
+}
+
+function getApiKey(chainId) {
+  if (typeof window !== 'undefined') {
+    const customApiKey = window.localStorage.getItem('graphApiKey')
+    if (customApiKey) {
+      return customApiKey
+    }
+  }
+  return APIKEY_URLS[chainId]
 }
 
 const CHAIN_GRAPH_URLS = {
-  1: 'https://api.thegraph.com/subgraphs/name/tornadocash/mainnet-tornado-subgraph',
-  5: 'https://api.thegraph.com/subgraphs/name/tornadocash/goerli-tornado-subgraph',
-  10: 'https://api.thegraph.com/subgraphs/name/tornadocash/optimism-tornado-subgraph',
-  56: 'https://api.thegraph.com/subgraphs/name/tornadocash/bsc-tornado-subgraph',
-  100: 'https://api.thegraph.com/subgraphs/name/tornadocash/xdai-tornado-subgraph',
-  137: 'https://api.thegraph.com/subgraphs/name/tornadocash/matic-tornado-subgraph',
-  42161: 'https://api.thegraph.com/subgraphs/name/tornadocash/arbitrum-tornado-subgraph',
-  43114: 'https://api.thegraph.com/subgraphs/name/tornadocash/avalanche-tornado-subgraph'
+  1: 'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/Ec6fVMDVqXTDQZ3c4jxcyV3zBXqkdgMWfhdtCgtqn7Sh',
+  10: 'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/GvkbnEVhLD6KArXpEzLFtSKRmspBW29ApKFqR5FjuP2P',
+  56: 'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/CiwGzefDBZCavXRPnwarnnF8xDDoLw4boBuySomJWYnV',
+  100: 'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/F1m8vxuGatCBRvP8fPnnWUJ1oK7kfE1DGdRacqoamLjF',
+  137: 'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/HUMgwMYNrPQpnBJgesFXyy5u6jSiJ6u5nNWQng9ayCmD',
+  42161:
+    'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/8x8o6XFAqYZmiPwrJ51UxGTaZLYyW1fFtghvsEy7a1KJ',
+  43114:
+    'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/CqUYVKJT9Jsyt7qnGNrf4FJNHw75ZbFGuzaJgqdaFASo',
+  88888888:
+    'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/DgKwfAbLfynpiq7fDJy59LDnVnia4Y5nYeRDBYi9qezc'
 }
+
+const GOV_GRAPH_URL =
+  'https://gateway.thegraph.com/api/{apiKey}/subgraphs/id/2Z6mFMqDdwHSvbMLS3Zy3egmrEwHXLxHaDgeAHt9NrnG'
+
+// Apollo v4 removed the `uri` option on ApolloClient — routes go through an explicit HttpLink
+const dynamicUri = ({ getContext }) => {
+  const { chainId } = getContext()
+  return CHAIN_GRAPH_URLS[chainId].replace('{apiKey}', getApiKey(chainId))
+}
+
+const registryUri = () => CHAIN_GRAPH_URLS[88888888].replace('{apiKey}', getApiKey(88888888))
+
+const governanceUri = () => GOV_GRAPH_URL.replace('{apiKey}', getApiKey(10))
 
 const defaultOptions = {
   query: {
@@ -45,9 +81,13 @@ const client = new ApolloClient({
 })
 
 const registryClient = new ApolloClient({
-  link: new HttpLink({
-    uri: 'https://api.thegraph.com/subgraphs/name/tornadocash/tornado-relayer-registry'
-  }),
+  link: new HttpLink({ uri: registryUri }),
+  cache: new InMemoryCache(),
+  defaultOptions
+})
+
+const governanceClient = new ApolloClient({
+  link: new HttpLink({ uri: governanceUri }),
   cache: new InMemoryCache(),
   defaultOptions
 })
@@ -116,6 +156,7 @@ async function getAllRegisters(fromBlock) {
     return { lastSyncBlock: '', events: [] }
   }
 }
+
 async function getAllDeposits({ currency, amount, fromBlock, netId }) {
   try {
     let deposits = []
@@ -127,7 +168,7 @@ async function getAllDeposits({ currency, amount, fromBlock, netId }) {
         break
       }
 
-      if (result.length < 900) {
+      if (result.length < first) {
         deposits = deposits.concat(result)
         break
       }
@@ -252,7 +293,7 @@ async function getAllWithdrawals({ currency, amount, fromBlock, netId }) {
         break
       }
 
-      if (result.length < 900) {
+      if (result.length < first) {
         withdrawals = withdrawals.concat(result)
         break
       }
@@ -355,7 +396,7 @@ async function getAllEncryptedNotes({ fromBlock, netId }) {
         break
       }
 
-      if (result.length < 900) {
+      if (result.length < first) {
         encryptedNotes = encryptedNotes.concat(result)
         break
       }
@@ -418,6 +459,136 @@ async function getEncryptedNotes({ fromBlock, netId }) {
   return data.encryptedNotes
 }
 
+async function queryProposals({ first: pageSize, skip }) {
+  const { data } = await governanceClient.query({
+    query: gql(GET_PROPOSALS),
+    variables: { first: pageSize, skip }
+  })
+
+  if (!data) {
+    return []
+  }
+
+  return data.proposals
+}
+
+async function getProposalCreateds() {
+  try {
+    let proposals = []
+
+    while (true) {
+      const result = await queryProposals({ first, skip: proposals.length })
+
+      if (isEmptyArray(result)) {
+        break
+      }
+
+      if (result.length < first) {
+        proposals = proposals.concat(result)
+        break
+      }
+
+      proposals = proposals.concat(result)
+    }
+
+    if (!proposals) {
+      return []
+    }
+
+    return proposals.map((p) => ({
+      proposalId: p.proposalId,
+      proposer: p.proposer,
+      target: p.target,
+      startTime: p.startTime,
+      endTime: p.endTime,
+      description: p.description,
+      blockNumber: Number(p.blockNumber),
+      transactionHash: p.transactionHash,
+      executed: p.executed
+    }))
+  } catch {
+    return []
+  }
+}
+
+async function queryProposalVotes({ proposalId, fromBlock, skip }) {
+  const { data } = await governanceClient.query({
+    query: gql(GET_VOTED),
+    variables: { proposalId, first, skip, fromBlock }
+  })
+
+  if (!data) {
+    return []
+  }
+
+  return data.votes
+}
+
+async function getProposalVotes({ proposalId, fromBlock }) {
+  try {
+    let votes = []
+
+    while (true) {
+      const result = await queryProposalVotes({ proposalId, fromBlock, skip: votes.length })
+
+      if (isEmptyArray(result)) {
+        break
+      }
+
+      if (result.length < first) {
+        votes = votes.concat(result)
+        break
+      }
+
+      votes = votes.concat(result)
+    }
+
+    return votes
+  } catch {
+    return []
+  }
+}
+
+async function getDelegators({ delegatee }) {
+  try {
+    const [{ data: delegated }, { data: undelegated }] = await Promise.all([
+      governanceClient.query({
+        query: gql(GET_DELEGATES),
+        variables: { delegatee }
+      }),
+      governanceClient.query({
+        query: gql(GET_UNDELEGATES),
+        variables: { delegatee }
+      })
+    ])
+
+    const allEvents = [
+      ...(delegated?.delegates || []).map(({ account, blockNumber }) => ({
+        account,
+        blockNumber: Number(blockNumber),
+        type: 'delegate'
+      })),
+      ...(undelegated?.undelegates || []).map(({ account, blockNumber }) => ({
+        account,
+        blockNumber: Number(blockNumber),
+        type: 'undelegate'
+      }))
+    ].sort((a, b) => b.blockNumber - a.blockNumber)
+
+    const latestEvents = new Map()
+
+    for (const { account, type } of allEvents) {
+      if (!latestEvents.has(account)) {
+        latestEvents.set(account, type)
+      }
+    }
+
+    return [...latestEvents.entries()].filter(([, type]) => type === 'delegate').map(([account]) => account)
+  } catch {
+    return []
+  }
+}
+
 export default {
   getDeposits,
   getStatistic,
@@ -426,5 +597,8 @@ export default {
   getNoteAccounts,
   getAllRegisters,
   getAllWithdrawals,
-  getAllEncryptedNotes
+  getAllEncryptedNotes,
+  getProposalCreateds,
+  getProposalVotes,
+  getDelegators
 }

@@ -2,9 +2,10 @@ import { AbiCoder, dataSlice, dataLength } from 'ethers'
 import uniqBy from 'lodash/uniqBy'
 import chunk from 'lodash/chunk'
 
+import graph from '@/services/graph.js'
 import { lookupAddresses } from '@/services/index.js'
 import { CHUNK_COUNT_PER_BATCH_REQUEST } from '@/constants/index.js'
-import { toWei, fromWei } from 'web3-utils'
+import { toWei, fromWei, toChecksumAddress } from 'web3-utils'
 import { toBN } from '@/utils/bn.js'
 
 const CACHE_TX = {}
@@ -54,7 +55,9 @@ const createProposalComment = (resultAll, votedEvent) => {
       voter: null
     },
     delegator: null,
-    timestamp: null
+    from: votedEvent.from || null,
+    input: votedEvent.input || null,
+    timestamp: votedEvent.timestamp || null
   }
 }
 
@@ -182,14 +185,32 @@ const actions = {
     }
 
     try {
-      let votedEvents = await govInstance.getPastEvents('Voted', {
-        filter: {
-          // support: [false],
-          proposalId: proposal.id
-        },
-        fromBlock,
-        toBlock: 'latest'
-      })
+      let votedEvents = []
+
+      if (netId === 1) {
+        const votes = await graph.getProposalVotes({ proposalId: proposal.id, fromBlock })
+        votedEvents = votes.map((vote) => ({
+          transactionHash: vote.transactionHash,
+          blockNumber: Number(vote.blockNumber),
+          returnValues: {
+            proposalId: vote.proposalId,
+            voter: toChecksumAddress(vote.voter),
+            support: vote.support,
+            votes: vote.votes
+          },
+          from: vote.from ? toChecksumAddress(vote.from) : null,
+          input: vote.input || null,
+          timestamp: vote.timestamp || null
+        }))
+      } else {
+        votedEvents = await govInstance.getPastEvents('Voted', {
+          filter: {
+            proposalId: proposal.id
+          },
+          fromBlock,
+          toBlock: 'latest'
+        })
+      }
 
       console.log('fetchVotedEvents', votedEvents.length)
 

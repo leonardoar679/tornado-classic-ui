@@ -1,4 +1,6 @@
-import { uniqBy } from 'lodash'
+import lodash from 'lodash'
+
+const { uniqBy } = lodash
 
 import networkConfig from '../networkConfig.js'
 import { loadCachedEvents, save } from './helpers/index.js'
