@@ -1,13 +1,9 @@
 /**
  * Builds the SPA for Cloudflare Workers deployment.
  *
- * Sets an absolute app base ("/") before running `nuxt generate`: the Workers
- * static-assets SPA fallback serves index.html for every unknown path, and the
- * default relative base ('./' — kept for IPFS sub-path deploys) would resolve
- * asset URLs against the current route (e.g. /governance/_nuxt/... -> 404 on
- * multi-segment routes).
- *
  * Output: .output/public (consumed by wrangler.jsonc `assets.directory`).
+ * The app base URL is '/' by default (see nuxt.config.js); NUXT_APP_BASE_URL
+ * can still override it for sub-path deploys on regular hosts.
  *
  * Build-time env keys (INFURA_KEY, WALLET_CONNECT_PROJECT_ID, ...) are read
  * from the environment by nuxt.config.js and baked into the bundle — set them
@@ -31,8 +27,6 @@ const runNuxt = (args) => {
     process.exit(result.status ?? 1)
   }
 }
-
-process.env.NUXT_APP_BASE_URL = process.env.NUXT_APP_BASE_URL || '/'
 
 runNuxt(['generate', ...process.argv.slice(2)])
 

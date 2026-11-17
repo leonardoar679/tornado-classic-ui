@@ -20,14 +20,14 @@ ask you to enable the workers.dev subdomain — follow the printed link.
 
 | Script | Purpose |
 |---|---|
-| `npm run build:cloudflare` | Runs `nuxt generate` with an absolute asset base (`NUXT_APP_BASE_URL=/`) into `.output/public` |
+| `npm run build:cloudflare` | Runs `nuxt generate` into `.output/public` (app base `/`, the default) and restores `.nuxt` dev types afterwards |
 | `npm run deploy:cloudflare` | `build:cloudflare` + `wrangler deploy` |
 | `npm run preview:cloudflare` | `build:cloudflare` + `wrangler dev` (local preview on `http://localhost:8787`) |
 
-The absolute base override matters: the default build uses a relative base
-(`./`) so the bundle works from IPFS sub-paths, but the Workers SPA fallback
-serves `index.html` from *any* URL, and a relative base would resolve asset
-URLs against the current route (e.g. `/governance/_nuxt/...` → 404).
+The Workers SPA fallback serves `index.html` from *any* URL, so client-side
+routes work on hard refresh and deep links. (`NUXT_APP_BASE_URL` can still be
+set for sub-path deploys on regular hosts — it must be an absolute path like
+`/app/`; a relative `./` is not supported by Nuxt 4's server.)
 
 ## Configuration
 

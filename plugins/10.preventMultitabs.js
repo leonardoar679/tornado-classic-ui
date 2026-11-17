@@ -15,13 +15,13 @@ function main() {
 
     // the second tab proccesses the message
     if (e.key === 'secondTab' && window.id.toString() === window.localStorage.firstTab) {
-      console.log('There is another tab that already opened. We will close this one')
+      console.log('There is another tab that already opened')
       window.multipleTabsDetected = true
-      window.onbeforeunload = null
+      // Historically this redirected to https://twitter.com/tornadocash (now x.com),
+      // which looks like a browser hijack. Keep the warning, stay on the page.
       window.alert(
-        'Multiple tabs opened. Your page will be closed. Please only use single instance of https://tornado.cash'
+        'Another tab of this app is already open. Using multiple tabs may corrupt encrypted note data. Please close this tab and continue in the first one.'
       )
-      window.location = 'https://twitter.com/tornadocash'
     }
   }
 

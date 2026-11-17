@@ -41,11 +41,12 @@ export default defineNuxtConfig({
   css: ['~/assets/styles/app.scss'],
 
   app: {
-    // Relative base so the built SPA works from any sub-path (IPFS gateways, custom roots).
-    // `npm run deploy:cloudflare` overrides this to '/' via NUXT_APP_BASE_URL: the Workers
-    // SPA fallback serves index.html from any path, and a relative base would break
-    // asset URLs on multi-segment routes like /governance/proposal.
-    baseURL: process.env.NUXT_APP_BASE_URL || './',
+    // Base URL must be absolute ('/' or '/subpath/') - a relative './' (used by the
+    // old webpack build for IPFS) makes Nuxt 4's built server 302-redirect every
+    // request whose path doesn't start with the base, breaking `nuxt generate`
+    // (EISDIR on prerendered routes) and static previews. Override with
+    // NUXT_APP_BASE_URL for sub-path deploys on regular hosts.
+    baseURL: process.env.NUXT_APP_BASE_URL || '/',
     head: {
       title: 'Tornado.cash',
       htmlAttrs: { lang: 'en' },
@@ -54,7 +55,7 @@ export default defineNuxtConfig({
         {
           'http-equiv': 'Content-Security-Policy',
           content:
-            "img-src 'self' data:;font-src data:;style-src 'self' 'unsafe-inline';connect-src *;script-src 'self' 'unsafe-eval' 'unsafe-inline';default-src 'self';object-src 'none';base-uri 'none';upgrade-insecure-requests;child-src blob:;worker-src blob:;"
+            "img-src 'self' data:;font-src data:;style-src 'self' 'unsafe-inline';connect-src *;script-src 'self' 'unsafe-eval' 'unsafe-inline';default-src 'self';object-src 'none';base-uri 'none';child-src blob:;worker-src blob:;"
         },
         {
           name: 'Referer-Policy',

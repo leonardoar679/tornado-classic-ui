@@ -81,8 +81,13 @@ them explicitly for websnark's `assert` and the app's `Buffer` usage).
 - Plugins rewritten as numbered `plugins/NN.*.js` with `defineNuxtPlugin`; injected
   services are mirrored onto the Vuex store instance so `this.$provider` etc. inside
   store actions keep working; `store.app.i18n` = i18n global.
-- `app.html` removed (unsupported in Nuxt 4); IPFS gateway support now via relative
-  `app.baseURL: './'` + `router.options.js` runtime base.
+- `app.html` removed (unsupported in Nuxt 4); `app.baseURL` is `/` (a relative `./`
+   makes Nuxt 4's built server 302-redirect every request and breaks `nuxt
+   generate`); `router.options.js` still detects the IPFS path prefix at runtime.
+   Note: serving the built bundle from an IPFS *sub-path* additionally needs a
+   runtime asset-base (the old `__webpack_public_path__` trick) — not yet
+   reimplemented; root-served static hosting (Cloudflare Workers, nginx at domain
+   root) is fully supported.
 - `layouts/error.vue` → root `error.vue`; layout `<nuxt/>` → `<slot/>`; layout-level
   `middleware: 'provider'` → `middleware/provider.global.js` with `defineNuxtRouteMiddleware`.
 - `window.onNuxtReady` / `$nuxt.$loading` dropped (cosmetic fake progress removed).
