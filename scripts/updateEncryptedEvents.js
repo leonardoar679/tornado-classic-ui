@@ -5,9 +5,9 @@ import lodash from 'lodash'
 
 import networkConfig from '../networkConfig.js'
 import ABI from '../abis/TornadoProxy.abi.json' with { type: 'json' }
+import { getPastEvents, loadCachedEvents } from './helpers/index.js'
 
 const { uniqBy } = lodash
-import { getPastEvents, loadCachedEvents } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'
 const enabledChains = ['1', '5', '56']
@@ -65,7 +65,8 @@ async function saveEncryptedNote(netId) {
 }
 
 async function main() {
-  const [, , , chain] = process.argv
+  const [, , , chainArg] = process.argv
+  const chain = chainArg || '1'
   if (!enabledChains.includes(chain)) {
     throw new Error(`Supported chain ids ${enabledChains.join(', ')}`)
   }

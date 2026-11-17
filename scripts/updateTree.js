@@ -139,7 +139,8 @@ async function initMimc() {
 }
 
 async function main() {
-  const [, , , chain] = process.argv
+  const [, , , chainArg] = process.argv
+  const chain = chainArg || '1'
   if (!enabledChains.includes(chain)) {
     throw new Error(`Supported chain ids ${enabledChains.join(', ')}`)
   }

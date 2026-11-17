@@ -308,12 +308,14 @@ const actions = {
         amount,
         netId
       })
-      commit('SAVE_LAST_INDEX', {
-        amount,
-        currency,
-        anonymitySet: anonymitySet?.toString?.(10) ?? anonymitySet,
-        nextDepositIndex
-      })
+      if (nextDepositIndex != null) {
+        commit('SAVE_LAST_INDEX', {
+          amount,
+          currency,
+          anonymitySet: anonymitySet?.toString?.(10) ?? anonymitySet,
+          nextDepositIndex
+        })
+      }
     } catch (err) {
       console.warn('updateSelectEvents getLastDepositIndex failed:', err.message)
     }
@@ -326,7 +328,8 @@ const actions = {
 
       return freshEvents
     } catch (err) {
-      throw new Error(`Method updateEvents has error: ${err.message}`)
+      console.warn(`updateEvents failed (${payload.type}):`, err.message)
+      return null
     }
   },
   async updateCurrentEvents({ dispatch, rootGetters }, { amount, currency, lastEvent, type, netId }) {
@@ -364,7 +367,13 @@ const actions = {
         anonymitySet: toBN(nextDepositIndex)
       }
     } catch (err) {
-      throw new Error(`Method getLastDepositIndex has error: ${err.message}`)
+      // Do not throw: background callers (loadAllNotesData) fire many parallel
+      // nextIndex RPCs and Infura 429s were bubbling as Nuxt error overlays.
+      console.warn(`getLastDepositIndex failed (${params.currency} ${params.amount}):`, err.message)
+      return {
+        nextDepositIndex: null,
+        anonymitySet: null
+      }
     }
   },
   async loadEncryptedEvents(_, { netId }) {
@@ -571,6 +580,9 @@ const actions = {
       }
 
       const { nextDepositIndex: index } = await dispatch('getLastDepositIndex', { netId, currency, amount })
+      if (index == null) {
+        throw new Error(this.app.i18n.t('rpcSelectError') || 'Failed to fetch deposit index from RPC')
+      }
 
       const { ethAccount } = rootState.metamask
       const nativeCurrency = rootGetters['metamask/nativeCurrency']
@@ -864,6 +876,10 @@ const actions = {
         netId,
         amount
       })
+
+      if (nextDepositIndex == null) {
+        return
+      }
 
       commit('SAVE_LAST_INDEX', {
         amount,

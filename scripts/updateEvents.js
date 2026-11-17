@@ -5,9 +5,9 @@ import lodash from 'lodash'
 
 import networkConfig from '../networkConfig.js'
 import ABI from '../abis/Instance.abi.json' with { type: 'json' }
+import { loadCachedEvents, getPastEvents } from './helpers/index.js'
 
 const { uniqBy } = lodash
-import { loadCachedEvents, getPastEvents } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'
 const EVENTS = ['Deposit', 'Withdrawal']
@@ -79,7 +79,8 @@ async function main(type, netId) {
 }
 
 async function start() {
-  const [, , , chain] = process.argv
+  const [, , , chainArg] = process.argv
+  const chain = chainArg || '1'
   if (!enabledChains.includes(chain)) {
     throw new Error(`Supported chain ids ${enabledChains.join(', ')}`)
   }
