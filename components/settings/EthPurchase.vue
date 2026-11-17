@@ -1,17 +1,17 @@
 <template>
-  <b-field :type="type" :message="error">
-    <template slot="label">
+  <o-field :type="type" :message="error">
+    <template #label>
       {{ $t('ethPurchase', { currency }) }}
-      <b-tooltip
+      <o-tooltip
         :label="$t('ethPurchaseTooltip', { currency: selectedStatisticCurrency, networkCurrency: currency })"
-        size="is-small"
-        position="is-right"
-        multilined
+        size="small"
+        position="right"
+        multiline
       >
         <button class="button is-primary has-icon">
           <span class="icon icon-info"></span>
         </button>
-      </b-tooltip>
+      </o-tooltip>
     </template>
     <div
       class="field has-eth-purchase"
@@ -21,7 +21,7 @@
       <div class="columns is-mobile">
         <div class="column currency-container is-light">
           <div class="currency">{{ currency }}</div>
-          <b-input
+          <o-input
             ref="input"
             v-model.number="newValue"
             type="number"
@@ -52,13 +52,14 @@
         </div>
       </div>
     </div>
-  </b-field>
+  </o-field>
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
-import { EthPurchaseArrow } from '@/components/icons'
-import { debounce } from '@/utils'
-const { toBN, toWei } = require('web3-utils')
+import { EthPurchaseArrow } from '@/components/icons/index.js'
+import { debounce } from '@/utils/index.js'
+import { toWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
 export default {
   components: {
@@ -75,6 +76,7 @@ export default {
       required: true
     }
   },
+  emits: ['focus', 'blur', 'input', 'isValidEthToReceive'],
   data() {
     return {
       type: '',

@@ -7,29 +7,29 @@
     <div class="note">
       {{ $t('inOrderToUse', { currency: selectedCurrency }) }}
     </div>
-    <b-field class="withdraw-radio">
-      <b-radio v-model="approvalAmount" :native-value="defaultApprovalAmount" class="radio-relayer">
+    <o-field class="withdraw-radio">
+      <o-radio v-model="approvalAmount" :native-value="defaultApprovalAmount" class="radio-relayer">
         {{ defaultApprovalAmount }} {{ selectedCurrency }}
-      </b-radio>
-      <b-radio v-model="approvalAmount" :native-value="unlimitedValue" class="radio-metamask">
+      </o-radio>
+      <o-radio v-model="approvalAmount" :native-value="unlimitedValue" class="radio-metamask">
         {{ $t('unlimited') }}
-        <b-tooltip :label="$t('unlimitedTooltip')" position="is-top" multilined>
+        <o-tooltip :label="$t('unlimitedTooltip')" position="top" multiline>
           <button class="button is-primary has-icon">
             <span class="icon icon-info"></span>
           </button>
-        </b-tooltip>
-      </b-radio>
-    </b-field>
-    <b-button type="is-primary is-fullwidth" :disabled="isApproveBtnAlreadyPressed" @click="_approve">
+        </o-tooltip>
+      </o-radio>
+    </o-field>
+    <o-button variant="primary" expanded :disabled="isApproveBtnAlreadyPressed" @click="_approve">
       {{ $t('enable') }}
-    </b-button>
+    </o-button>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapActions, mapState, mapGetters } from 'vuex'
 
 export default {
+  emits: ['close'],
   data() {
     return {
       success: false,

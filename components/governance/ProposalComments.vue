@@ -1,13 +1,13 @@
 <template>
   <div class="proposal-comments">
     <div class="proposals-list--header proposal-comments--header">
-      <b-field class="field-tabs">
-        <template v-for="item in tabs">
-          <b-radio-button :key="item.id" v-model="currentTab" :native-value="item.id" type="is-primary">
+      <o-field class="field-tabs">
+        <template v-for="item in tabs" :key="item.id">
+          <o-radio v-model="currentTab" :native-value="item.id" variant="primary">
             <span>{{ $t(item.label) }}</span>
-          </b-radio-button>
+          </o-radio>
         </template>
-      </b-field>
+      </o-field>
     </div>
 
     <ProposalCommentsSkeleton v-if="isFetchingComments" :size="comments.length ? 1 : 3" />

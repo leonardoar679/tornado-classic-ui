@@ -1,21 +1,20 @@
 <template>
   <div class="modal-card box box-modal has-delete">
     <button type="button" class="delete" @click="$emit('close')" />
-    <b-tabs v-model="activeTab" :data-test="`tab_${activeTab}`" :animated="false" class="is-modal">
+    <o-tabs v-model="activeTab" :data-test="`tab_${activeTab}`" :animated="false" class="is-modal">
       <LockTab />
       <UnlockTab />
       <DelegateTab />
       <UndelegateTab />
       <RewardTab />
-    </b-tabs>
+    </o-tabs>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapActions } from 'vuex'
 import { BigNumber as BN } from 'bignumber.js'
 
-import { LockTab, UnlockTab, DelegateTab, UndelegateTab, RewardTab } from './tabs'
+import { LockTab, UnlockTab, DelegateTab, UndelegateTab, RewardTab } from './tabs/index.js'
 
 export default {
   components: {
@@ -31,6 +30,7 @@ export default {
       formatNumber: this.formatNumber
     }
   },
+  emits: ['close'],
   data() {
     return {
       activeTab: 0

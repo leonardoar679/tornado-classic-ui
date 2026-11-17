@@ -17,40 +17,36 @@
         <div class="proposal--blocks">
           <div v-if="data.status === 'active'" class="proposal-block">
             <div class="title">{{ $t('castYourVote') }}</div>
-            <b-tooltip
+            <o-tooltip
               class="fit-content"
               :label="tooltipMessage"
-              position="is-top"
+              position="top"
               :active="readyForAction"
-              multilined
+              multiline
             >
               <div class="buttons buttons__halfwidth">
-                <b-button
+                <o-button
                   :disabled="readyForAction"
-                  type="is-primary"
+                  variant="primary"
                   :icon-left="isFetchingBalances || isCastingVote ? '' : 'check'"
                   outlined
                   :loading="isFetchingBalances || isCastingVote"
                   @click="onCastVote(true)"
-                  >{{ $t('for') }}</b-button
+                  >{{ $t('for') }}</o-button
                 >
-                <b-button
+                <o-button
                   :disabled="readyForAction"
-                  type="is-danger"
+                  variant="danger"
                   :icon-left="isFetchingBalances || isCastingVote ? '' : 'close'"
                   outlined
                   :loading="isFetchingBalances || isCastingVote"
                   @click="onCastVote(false)"
-                  >{{ $t('against') }}</b-button
+                  >{{ $t('against') }}</o-button
                 >
               </div>
-            </b-tooltip>
-            <i18n
-              v-if="voterReceipts[data.id] && voterReceipts[data.id].hasVoted"
-              tag="div"
-              path="yourCurrentVote"
-            >
-              <template v-slot:vote>
+            </o-tooltip>
+            <i18n-t keypath="yourCurrentVote">
+              <template #vote>
                 <span
                   :class="{
                     'has-text-primary': voterReceipts[data.id].support,
@@ -59,27 +55,27 @@
                   >{{ $n(fromWeiToTorn(voterReceipts[data.id].balance)) }} TORN</span
                 >
               </template>
-            </i18n>
+            </i18n-t>
           </div>
           <div v-else-if="data.status === 'awaitingExecution'" class="proposal-block">
             <div class="title">{{ $t('executeProposal') }}</div>
-            <b-tooltip
+            <o-tooltip
               class="fit-content"
               :label="$t('connectYourWalletFirst')"
-              position="is-top"
+              position="top"
               :active="!ethAccount"
-              multilined
+              multiline
             >
-              <b-button
-                type="is-primary"
+              <o-button
+                variant="primary"
                 icon-left="check"
                 outlined
                 :disabled="!ethAccount"
                 expanded
                 @click="onExecute"
-                >{{ $t('execute') }}</b-button
+                >{{ $t('execute') }}</o-button
               >
-            </b-tooltip>
+            </o-tooltip>
           </div>
 
           <div class="proposal-block">
@@ -90,7 +86,7 @@
                 ><number-format :value="data.results.for" /> TORN / {{ calculatePercent('for') }}%</span
               >
             </div>
-            <b-progress :value="calculatePercent('for')" type="is-primary"></b-progress>
+            <progress class="progress is-primary" :value="calculatePercent('for')" max="100"></progress>
             <div class="label">
               {{ $t('against') }}
               <span class="percent"
@@ -98,30 +94,30 @@
                 {{ calculatePercent('against') }}%</span
               >
             </div>
-            <b-progress :value="calculatePercent('against')" type="is-danger"></b-progress>
+            <progress class="progress is-danger" :value="calculatePercent('against')" max="100"></progress>
             <div class="label">
               {{ $t('quorum') }}
-              <b-tooltip
+              <o-tooltip
                 :label="
                   $t('quorumTooltip', {
                     days: $tc('dayPlural', votingPeriod),
                     votes: $n(quorumVotes, 'compact')
                   })
                 "
-                size="is-medium"
-                position="is-top"
-                multilined
+                size="medium"
+                position="top"
+                multiline
               >
                 <button class="button is-primary has-icon">
                   <span class="icon icon-info"></span>
                 </button>
-              </b-tooltip>
+              </o-tooltip>
               <span class="percent"
                 ><number-format :value="isQuorumCompleted ? quorumVotes : quorumResult" class="value" /> TORN
                 / {{ quorumPercent }}%</span
               >
             </div>
-            <b-progress :value="quorumPercent" type="is-violet"></b-progress>
+            <progress class="progress is-violet" :value="quorumPercent" max="100"></progress>
           </div>
           <div class="proposal-block">
             <div class="title">{{ $t('information') }}</div>
@@ -141,7 +137,7 @@
               <div class="column is-half-small">
                 <strong>{{ $t('status') }}</strong>
                 <div class="value">
-                  <b-tag :type="getStatusType(data.status)">{{ $t(data.status) }}</b-tag>
+                  <o-tag :type="getStatusType(data.status)">{{ $t(data.status) }}</o-tag>
                 </div>
               </div>
               <div class="column is-half-small">
@@ -168,12 +164,12 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
-import quorum from './mixins/quorum'
+import quorum from './mixins/quorum.js'
 import ProposalComments from './ProposalComments.vue'
-import NumberFormat from '@/components/NumberFormat'
+import NumberFormat from '@/components/NumberFormat.vue'
 import ProposalCommentFormModal from '@/components/ProposalCommentFormModal.vue'
-
-const { toBN, fromWei, toWei } = require('web3-utils')
+import { fromWei, toWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
 export default {
   components: {
@@ -274,7 +270,7 @@ export default {
       immediate: true
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timeId)
   },
   methods: {
@@ -306,10 +302,7 @@ export default {
     calculatePercent(result) {
       return this.results.isZero()
         ? 0
-        : toBN(toWei(this.data.results[result]))
-            .mul(toBN(100))
-            .divRound(this.results)
-            .toNumber()
+        : toBN(toWei(this.data.results[result], 'ether')).mul(toBN(100)).divRound(this.results).toNumber()
     },
     onCastVote(support) {
       const { id } = this.data
@@ -335,35 +328,31 @@ export default {
       this.executeProposal({ id: this.data.id })
     },
     fromWeiToTorn(v) {
-      return fromWei(v)
+      return fromWei(v, 'ether')
     },
     accurateHumanize(duration, accuracy = 4) {
-      const units = [
-        { unit: 'y', key: 'yy' },
-        { unit: 'M', key: 'MM' },
-        { unit: 'd', key: 'dd' },
-        { unit: 'h', key: 'hh' },
-        { unit: 'm', key: 'mm' },
-        { unit: 's', key: 'ss' }
-      ]
+      const units = ['y', 'M', 'd', 'h', 'm', 's']
       let beginFilter = false
       let componentCount = 0
 
-      return units
-        .map(({ unit, key }) => ({ value: duration.get(unit), key }))
-        .filter(({ value, key }) => {
-          if (beginFilter === false) {
-            if (value === 0) {
-              return false
+      return (
+        units
+          .map((unit) => ({ value: duration.get(unit), unit }))
+          .filter(({ value }) => {
+            if (beginFilter === false) {
+              if (value === 0) {
+                return false
+              }
+              beginFilter = true
             }
-            beginFilter = true
-          }
-          componentCount++
-          return value !== 0 && componentCount <= accuracy
-        })
-        .map(({ value, key }) => ({ value, key: value === 1 ? key[0] : key }))
-        .map(({ value, key }) => this.$moment.localeData().relativeTime(value, true, key, true))
-        .join(' ')
+            componentCount++
+            return value !== 0 && componentCount <= accuracy
+          })
+          // dayjs duration.humanize() reproduces moment's per-locale
+          // relativeTime(value, withoutSuffix, key, isFuture) output
+          .map(({ value, unit }) => this.$moment.duration(value, unit).humanize())
+          .join(' ')
+      )
     },
     startTimer(time) {
       this.timeId = setTimeout(() => {

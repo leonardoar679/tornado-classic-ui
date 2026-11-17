@@ -1,12 +1,10 @@
-/* eslint-disable no-console */
-import Web3 from 'web3'
-import { toBN } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 import tornABI from '../abis/ERC20.abi.json'
 
-import { isWalletRejection } from '@/utils'
-
-const { toWei, toHex, numberToHex } = require('web3-utils')
-const { PermitSigner } = require('../lib/Permit')
+import { isWalletRejection } from '@/utils/index.js'
+import { toWei, toHex, numberToHex } from 'web3-utils'
+import { PermitSigner } from '../lib/Permit'
+import { createWeb3 } from '@/utils/web3.js'
 
 const state = () => {
   return {
@@ -27,7 +25,7 @@ const getters = {
   tokenContract: (state, getters, rootState, rootGetters) => {
     const tornContract = rootGetters['metamask/networkConfig']['torn.contract.tornadocash.eth']
     const { url } = rootGetters['settings/currentRpc']
-    const web3 = new Web3(url)
+    const web3 = createWeb3(url)
     return new web3.eth.Contract(tornABI, tornContract)
   }
 }
@@ -37,16 +35,16 @@ const mutations = {
     state.approvalAmount = approvalAmount
   },
   SAVE_ALLOWANCE(state, { allowance }) {
-    this._vm.$set(state, 'allowance', allowance)
+    state['allowance'] = allowance
   },
   SAVE_BALANCE(state, { balance }) {
-    this._vm.$set(state, 'balance', balance)
+    state['balance'] = balance
   },
   SAVE_SIGNATURE(state, { v, r, s, amount, deadline }) {
-    this._vm.$set(state, 'signature', { v, r, s, amount, deadline })
+    state['signature'] = { v, r, s, amount, deadline }
   },
   REMOVE_SIGNATURE(state) {
-    this._vm.$set(state, 'signature', { v: '', r: '', s: '', amount: '', deadline: 0 })
+    state['signature'] = { v: '', r: '', s: '', amount: '', deadline: 0 }
   }
 }
 
@@ -58,7 +56,7 @@ const actions = {
       const govInstance = rootGetters['governance/gov/govContract']({ netId })
       const amountToApprove = toHex(toWei(amount.toString()))
       const data = getters.tokenContract.methods
-        .approve(govInstance._address, amountToApprove.toString())
+        .approve(govInstance.options.address, amountToApprove.toString())
         .encodeABI()
       const gas = 100000
 
@@ -67,7 +65,7 @@ const actions = {
         params: {
           data,
           gas: numberToHex(gas + 100000),
-          to: getters.tokenContract._address
+          to: getters.tokenContract.options.address
         },
         watcherParams: {
           title: 'approve',
@@ -94,7 +92,9 @@ const actions = {
 
     const govInstance = rootGetters['governance/gov/govContract']({ netId })
     try {
-      const allowance = await getters.tokenContract.methods.allowance(ethAccount, govInstance._address).call()
+      const allowance = await getters.tokenContract.methods
+        .allowance(ethAccount, govInstance.options.address)
+        .call()
       commit('SAVE_ALLOWANCE', { allowance })
 
       return allowance
@@ -141,7 +141,7 @@ const actions = {
         name: 'TornadoCash',
         version: '1',
         chainId: netId,
-        verifyingContract: getters.tokenContract._address
+        verifyingContract: getters.tokenContract.options.address
       }
       const oneDayFromNow = Math.ceil(Date.now() / 1000) + 86400
       // fetch nonces
@@ -161,7 +161,7 @@ const actions = {
 
       const args = {
         owner: ethAccount,
-        spender: govInstance._address,
+        spender: govInstance.options.address,
         value, // 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         nonce,
         deadline: oneDayFromNow

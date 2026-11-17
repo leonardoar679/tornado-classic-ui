@@ -4,22 +4,28 @@
       <div class="box-modal-title">{{ $t('withdrawalSettings') }}</div>
       <button type="button" class="delete" @click="$parent.cancel('escape')" />
     </header>
-    <b-tabs v-model="withdrawType" :animated="false" class="is-modal">
+    <o-tabs v-model="withdrawType" :animated="false" class="is-modal">
       <RelayerTab />
       <WalletTab />
-    </b-tabs>
+    </o-tabs>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapState, mapMutations } from 'vuex'
 
-import { RelayerTab, WalletTab } from '@/components/settings/tabs'
+import { RelayerTab, WalletTab } from '@/components/settings/tabs/index.js'
 
 export default {
   components: {
     RelayerTab,
     WalletTab
+  },
+  provide() {
+    return {
+      currency: this.currency,
+      save: this.save,
+      reset: this.reset
+    }
   },
   props: {
     currency: {
@@ -31,13 +37,7 @@ export default {
       default: 'withdrawalSettings'
     }
   },
-  provide() {
-    return {
-      currency: this.currency,
-      save: this.save,
-      reset: this.reset
-    }
-  },
+  emits: ['close'],
   data() {
     return {
       withdrawType: 'relayer'

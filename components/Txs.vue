@@ -2,68 +2,68 @@
   <div v-show="Object.keys(allTxs).length > 0 || Object.keys(jobs('tornado')).length > 0" class="txs">
     <div class="tx-filters buttons">
       <div class="tx-filters-title">{{ $t('filterBy') }}</div>
-      <b-button
+      <o-button
         v-for="(token, key) in tokens"
         :key="key"
-        type="is-primary"
-        size="is-small"
+        variant="primary"
+        size="small"
         :class="{ 'is-hovered': filters.currency === key }"
         outlined
         :disabled="!activeTokensFilters.has(key) && filters.currency !== key"
         @click="setFilter('currency', key)"
       >
         {{ token.symbol }}
-      </b-button>
+      </o-button>
       <div class="break"></div>
-      <b-field>
+      <o-field>
         <p class="control">
-          <b-button
-            type="is-primary"
-            size="is-small"
+          <o-button
+            variant="primary"
+            size="small"
             :class="{ 'is-hovered': filters.isSpent === true }"
             outlined
             @click="setSpent(true)"
           >
             {{ $t('spent') }}
-          </b-button>
+          </o-button>
         </p>
         <p class="control">
-          <b-button
-            type="is-primary"
-            size="is-small"
+          <o-button
+            variant="primary"
+            size="small"
             :class="{ 'is-hovered': filters.isSpent === false }"
             outlined
             @click="setSpent(false)"
           >
             {{ $t('unspent') }}
-          </b-button>
+          </o-button>
         </p>
-      </b-field>
+      </o-field>
       <div class="break"></div>
-      <b-field>
+      <o-field>
         <p class="control">
-          <b-button
-            type="is-primary"
-            size="is-small"
+          <o-button
+            variant="primary"
+            size="small"
             :class="{ 'is-hovered': transactions === 'regular' }"
             outlined
             @click="setTransactionFilter('regular')"
           >
             {{ $t('regular') }}
-          </b-button>
+          </o-button>
         </p>
         <p class="control">
-          <b-button
-            type="is-primary"
-            size="is-small"
+          <o-button
+            variant="primary"
+            size="small"
             :class="{ 'is-hovered': transactions === 'encrypted' }"
             outlined
             @click="setTransactionFilter('encrypted')"
           >
             {{ $t('encrypted') }}
-          </b-button>
+          </o-button>
         </p>
-      </b-field>
+      </o-field>
     </div>
     <div class="tx-head">
       <div class="columns">
@@ -99,26 +99,28 @@
     </div>
     <div class="tx-head-mobile field is-grouped">
       <div class="control is-expanded">
-        <b-dropdown v-model="mobileSort" expanded aria-role="list">
-          <div slot="trigger" class="control">
-            <div class="input">
-              <span>{{
-                mobileSort === 'timestamp'
-                  ? $t('timePassed')
-                  : mobileSort === 'amount'
-                  ? $t('amount')
-                  : $t('subsequentDeposits')
-              }}</span>
+        <o-dropdown v-model="mobileSort" expanded aria-role="list">
+          <template #trigger>
+            <div class="control">
+              <div class="input">
+                <span>{{
+                  mobileSort === 'timestamp'
+                    ? $t('timePassed')
+                    : mobileSort === 'amount'
+                      ? $t('amount')
+                      : $t('subsequentDeposits')
+                }}</span>
+              </div>
             </div>
-          </div>
-          <b-dropdown-item value="timestamp" aria-role="listitem">
+          </template>
+          <o-dropdown-item value="timestamp" aria-role="listitem">
             {{ $t('timePassed') }}
-          </b-dropdown-item>
-          <b-dropdown-item value="amount" aria-role="listitem">{{ $t('amount') }}</b-dropdown-item>
-          <b-dropdown-item value="deposits" aria-role="listitem">
+          </o-dropdown-item>
+          <o-dropdown-item value="amount" aria-role="listitem">{{ $t('amount') }}</o-dropdown-item>
+          <o-dropdown-item value="deposits" aria-role="listitem">
             {{ $t('subsequentDeposits') }}
-          </b-dropdown-item>
-        </b-dropdown>
+          </o-dropdown-item>
+        </o-dropdown>
       </div>
       <div class="control">
         <button class="button is-primary" @click="setSort(mobileSort)">
@@ -131,7 +133,7 @@
       </div>
     </div>
     <Job v-for="job in jobs('tornado')" :key="job.id" :job="job" />
-    <template v-for="tx in filteredTxs">
+    <template v-for="tx in filteredTxs" :key="tx.txHash">
       <EncryptedTx v-if="tx.isEncrypted" :key="tx.txHash" :tx="tx" />
       <Tx v-else :key="tx.txHash" :tx="tx" />
     </template>
@@ -144,12 +146,12 @@
 </template>
 
 <script>
-/* eslint-disable no-console */
 import { mapActions, mapGetters, mapState } from 'vuex'
-import Tx from '@/components/Tx'
-import EncryptedTx from '@/components/EncryptedTx'
-import Job from '@/components/Job'
-const { toWei, toBN } = require('web3-utils')
+import Tx from '@/components/Tx.vue'
+import EncryptedTx from '@/components/EncryptedTx.vue'
+import Job from '@/components/Job.vue'
+import { toWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
 export default {
   components: {
@@ -216,7 +218,7 @@ export default {
       this.checkPendingEncryptedTransaction()
     }, 2500)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer)
   },
   methods: {
@@ -270,13 +272,13 @@ export default {
       return a1 - b1
     },
     compareAmounts(a, b) {
-      let amountA = toBN(toWei(a.amount))
+      let amountA = toBN(toWei(a.amount, 'ether'))
       if (a.currency !== this.nativeCurrency) {
         const priceA = toBN(this.getTokenPrice(a.currency))
         amountA = amountA.mul(priceA)
       }
 
-      let amountB = toBN(toWei(b.amount))
+      let amountB = toBN(toWei(b.amount, 'ether'))
       if (b.currency !== this.nativeCurrency) {
         const priceB = toBN(this.getTokenPrice(b.currency))
         amountB = amountB.mul(priceB)

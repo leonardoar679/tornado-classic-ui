@@ -1,9 +1,9 @@
-import Web3 from 'web3'
 import { numberToHex, fromWei } from 'web3-utils'
 
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 
 import TornadoStakingRewardsABI from '@/abis/TornadoStakingRewards.abi.json'
+import { createWeb3 } from '@/utils/web3.js'
 
 export const state = () => {
   return {
@@ -13,20 +13,22 @@ export const state = () => {
 }
 
 export const getters = {
-  stakingRewardsContract: (state, getters, rootState) => ({ netId }) => {
-    const config = networkConfig[`netId${netId}`]
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const address = config['staking-rewards.contract.tornadocash.eth']
+  stakingRewardsContract:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const config = networkConfig[`netId${netId}`]
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const address = config['staking-rewards.contract.tornadocash.eth']
 
-    if (address) {
-      const web3 = new Web3(url)
-      return new web3.eth.Contract(TornadoStakingRewardsABI, address)
-    }
+      if (address) {
+        const web3 = createWeb3(url)
+        return new web3.eth.Contract(TornadoStakingRewardsABI, address)
+      }
 
-    return null
-  },
+      return null
+    },
   reward: (state) => {
-    return fromWei(state.accumulatedReward)
+    return fromWei(state.accumulatedReward, 'ether')
   },
   isCheckingReward: (state) => {
     return state.isCheckingReward
@@ -38,7 +40,7 @@ export const mutations = {
     state.accumulatedReward = payload
   },
   SAVE_CHECKING_REWARD(state, payload) {
-    this._vm.$set(state, 'isCheckingReward', payload)
+    state['isCheckingReward'] = payload
   }
 }
 
@@ -83,7 +85,7 @@ export const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: stakingRewardsInstance._address,
+          to: stakingRewardsInstance.options.address,
           gas: numberToHex(gas + 100000),
           data
         },

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { ROUNDING_PRECISION } from '@/constants'
+import { ROUNDING_PRECISION } from '@/constants/index.js'
 
 export default {
   props: {

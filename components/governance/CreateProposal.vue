@@ -4,56 +4,55 @@
 
     <div class="columns is-multiline">
       <div class="column is-6">
-        <b-field
+        <o-field
           :label="$t('proposalTitle')"
           :message="isValidTitle ? '' : $t('proposal.error.title')"
           :type="{ 'is-warning': !isValidTitle }"
         >
-          <b-input v-model="validTitle" :placeholder="$t('title')"></b-input>
-        </b-field>
+          <o-input v-model="validTitle" :placeholder="$t('title')"></o-input>
+        </o-field>
       </div>
       <div class="column is-6">
-        <b-field
+        <o-field
           :label="$t('proposalAddress')"
           :type="{ 'is-warning': !hasValidAddress }"
           :message="hasValidAddress ? '' : addressErrorMessage"
         >
-          <b-input
+          <o-input
             v-model="address"
             :placeholder="$t('proposalAddress')"
             :size="!address ? '' : hasValidAddress ? '' : 'is-warning'"
-          ></b-input>
-        </b-field>
+          ></o-input>
+        </o-field>
       </div>
       <div class="column is-12">
-        <b-field
+        <o-field
           :message="isValidDescription ? '' : $t('proposal.error.description')"
           :type="{ 'is-warning': !isValidDescription }"
           :label="$t('proposalDescription')"
         >
-          <b-input v-model="validDescription" maxlength="2000" type="textarea"></b-input>
-        </b-field>
+          <o-input v-model="validDescription" maxlength="2000" type="textarea"></o-input>
+        </o-field>
       </div>
     </div>
-    <b-tooltip :label="`${$t('onlyOneProposalErr')}`" position="is-top" :active="cannotCreate" multilined>
-      <b-button
+    <o-tooltip :label="`${$t('onlyOneProposalErr')}`" position="top" :active="cannotCreate" multiline>
+      <o-button
         :disabled="cannotCreate"
-        type="is-primary"
+        variant="primary"
         :icon-left="isFetchingBalances ? '' : 'plus'"
         outlined
         :loading="isFetchingBalances"
         @click="onCreateProposal"
       >
         {{ $t('createProposal') }}
-      </b-button>
-    </b-tooltip>
+      </o-button>
+    </o-tooltip>
   </div>
 </template>
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex'
-import { debounce } from '@/utils'
-
-const { isAddress } = require('web3-utils')
+import { debounce } from '@/utils/index.js'
+import { isAddress } from 'web3-utils'
 
 export default {
   data() {

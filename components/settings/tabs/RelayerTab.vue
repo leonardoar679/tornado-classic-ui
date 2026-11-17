@@ -1,14 +1,16 @@
 <template>
-  <b-tab-item :label="$t('relayer')" value="relayer" header-class="withdrawal_settings_relayer_tab">
+  <o-tab-item :label="$t('relayer')" value="relayer" header-class="withdrawal_settings_relayer_tab">
     <div class="field">
-      <b-field :label="$t('relayer')" data-test="withdrawal_settings_relayer_dropdown">
-        <b-dropdown v-model="selectedRelayer" expanded aria-role="list" @change="onChangeRelayer">
-          <div slot="trigger" class="control" :class="{ 'is-loading': checkingRelayer || isLoadingRelayers }">
-            <div class="input">
-              <span>{{ dropdownValue }}</span>
+      <o-field :label="$t('relayer')" data-test="withdrawal_settings_relayer_dropdown">
+        <o-dropdown v-model="selectedRelayer" expanded aria-role="list" @change="onChangeRelayer">
+          <template #trigger>
+            <div class="control" :class="{ 'is-loading': checkingRelayer || isLoadingRelayers }">
+              <div class="input">
+                <span>{{ dropdownValue }}</span>
+              </div>
             </div>
-          </div>
-          <b-dropdown-item
+          </template>
+          <o-dropdown-item
             v-for="{ name, tornadoServiceFee } in relayers"
             v-show="!isLoadingRelayers"
             :key="name"
@@ -16,14 +18,14 @@
             aria-role="listitem"
           >
             {{ getRelayerName({ name, tornadoServiceFee }) }}
-          </b-dropdown-item>
-          <b-dropdown-item value="custom" aria-role="listitem">
+          </o-dropdown-item>
+          <o-dropdown-item value="custom" aria-role="listitem">
             {{ $t('custom') }}
-          </b-dropdown-item>
-        </b-dropdown>
-      </b-field>
+          </o-dropdown-item>
+        </o-dropdown>
+      </o-field>
       <div v-if="isCustomRelayer" class="field has-custom-field">
-        <b-input
+        <o-input
           ref="customInput"
           v-model="customRelayerUrl"
           type="url"
@@ -32,7 +34,7 @@
           :custom-class="hasErrorRelayer.type"
           :use-html5-validation="false"
           @input="onInputCustomRelayer"
-        ></b-input>
+        ></o-input>
       </div>
       <div class="withdraw-data is-spaced">
         <div class="withdraw-data-item">
@@ -48,7 +50,7 @@
       v-if="isEnabledEthPurchase"
       v-model="ethToReceive"
       :default-eth-to-receive="defaultEthToReceive"
-      @isValidEthToReceive="ethToReceiveErrorHandler"
+      @is-valid-eth-to-receive="ethToReceiveErrorHandler"
     />
     <WithdrawTotal
       :currency="currency"
@@ -57,34 +59,34 @@
       :service-fee="relayer.tornadoServiceFee"
     />
     <div class="buttons buttons__halfwidth mt-5">
-      <b-button
-        type="is-primary"
+      <o-button
+        variant="primary"
         outlined
         data-test="withdrawal_settings_reset_button"
         @mousedown.prevent
         @click="onReset"
       >
         {{ $t('reset') }}
-      </b-button>
-      <b-button
-        type="is-primary"
+      </o-button>
+      <o-button
+        variant="primary"
         :disabled="isDisabledSave"
         :loading="checkingRelayer || isLoadingRelayers"
         data-test="withdrawal_settings_save_button"
         @click="onSave"
       >
         {{ $t('save') }}
-      </b-button>
+      </o-button>
     </div>
-  </b-tab-item>
+  </o-tab-item>
 </template>
 
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex'
-import EthPurchase from '@/components/settings/EthPurchase'
-import WithdrawTotal from '@/components/withdraw/WithdrawTotal'
-import { debounce } from '@/utils'
-const { fromWei, toWei } = require('web3-utils')
+import EthPurchase from '@/components/settings/EthPurchase.vue'
+import WithdrawTotal from '@/components/withdraw/WithdrawTotal.vue'
+import { debounce } from '@/utils/index.js'
+import { fromWei, toWei } from 'web3-utils'
 
 export default {
   components: {
@@ -124,8 +126,8 @@ export default {
       relayers: (state) => state.validRelayers
     }),
     ...mapState('application', {
-      ethToReceiveFromStore: (state) => Number(fromWei(state.ethToReceive)),
-      defaultEthToReceive: (state) => Number(fromWei(state.defaultEthToReceive))
+      ethToReceiveFromStore: (state) => Number(fromWei(state.ethToReceive, 'ether')),
+      defaultEthToReceive: (state) => Number(fromWei(state.defaultEthToReceive, 'ether'))
     }),
     isEnabledEthPurchase() {
       return this.currency.toLowerCase() !== this.nativeCurrency
@@ -163,7 +165,7 @@ export default {
   mounted() {
     this.$root.$on('resetSettings', this.onReset)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.$root.$off('resetSettings', this.onReset)
   },
   methods: {

@@ -14,7 +14,7 @@
         {{ currency }}
       </div>
       <div class="column is-deposit" :data-label="$t('subsequentDeposits')">
-        <b-skeleton v-if="mixingPower === 'loading'" width="80" />
+        <o-skeleton v-if="mixingPower === 'loading'" width="80" />
         <template v-else>
           {{ mixingPower }}
         </template>
@@ -37,23 +37,24 @@
       <div class="column is-status" :data-label="$t('status')">{{ status }}</div>
 
       <div class="column column-buttons">
-        <b-tooltip :active="!!tx.note" :label="tooltipShareUrl" position="is-left">
-          <b-button
+        <o-tooltip :active="!!tx.note" :label="tooltipShareUrl" position="left">
+          <o-button
             v-clipboard:copy="`${tx.prefix}-${tx.note}`"
             v-clipboard:success="onCopyLink"
-            type="is-primary hide-text-touch"
-            size="is-small"
+            variant="primary"
+            class="hide-text-touch"
+            size="small"
             :disabled="!tx.note"
             icon-left="copy"
             data-test="copy_note_button"
           >
             {{ $t('note') }}
-          </b-button>
-        </b-tooltip>
-        <b-button
+          </o-button>
+        </o-tooltip>
+        <o-button
           data-test="remove_note_button"
-          type="is-dark"
-          size="is-small"
+          variant="dark"
+          size="small"
           icon-right="remove"
           @click="onClose"
         />
@@ -62,10 +63,9 @@
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapGetters, mapState } from 'vuex'
-import txStatus from '../store/txStatus'
-import NumberFormat from '@/components/NumberFormat'
+import txStatus from '../store/txStatus.js'
+import NumberFormat from '@/components/NumberFormat.vue'
 export default {
   components: {
     NumberFormat
@@ -145,7 +145,7 @@ export default {
   mounted() {
     this.update()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer)
     clearTimeout(this.copyTimer)
   },

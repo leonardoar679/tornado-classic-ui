@@ -1,15 +1,15 @@
-import Web3 from 'web3'
-
-import { graph } from '@/services'
-import { download } from '@/store/snark'
-import networkConfig from '@/networkConfig'
+import { graph } from '@/services/index.js'
+import { download } from '@/store/snark.js'
+import networkConfig from '@/networkConfig.js'
 import InstanceABI from '@/abis/Instance.abi.json'
-import { CONTRACT_INSTANCES, eventsType } from '@/constants'
-import { sleep, formatEvents, capitalizeFirstLetter } from '@/utils'
+import { CONTRACT_INSTANCES, eventsType } from '@/constants/index.js'
+import { sleep, formatEvents, capitalizeFirstLetter } from '@/utils/index.js'
+import { getIndexedDB } from '@/services/idb.js'
+import { createWeb3 } from '@/utils/web3.js'
 
 class EventService {
   constructor({ netId, amount, currency, factoryMethods }) {
-    this.idb = window.$nuxt.$indexedDB(netId)
+    this.idb = getIndexedDB(netId)
 
     const { nativeCurrency } = networkConfig[`netId${netId}`]
 
@@ -43,7 +43,7 @@ class EventService {
 
     let fromBlock = deployedBlock
     if (savedEvents) {
-      fromBlock = savedEvents.lastBlock + 1
+      fromBlock = Number(savedEvents.lastBlock) + 1
     }
 
     const newEvents = await this.getEventsFromBlock({
@@ -54,9 +54,9 @@ class EventService {
 
     const allEvents = [].concat(savedEvents?.events || [], newEvents?.events || []).sort((a, b) => {
       if (a.leafIndex && b.leafIndex) {
-        return a.leafIndex - b.leafIndex
+        return Number(a.leafIndex) - Number(b.leafIndex)
       }
-      return a.blockNumber - b.blockNumber
+      return Number(a.blockNumber) - Number(b.blockNumber)
     })
 
     const lastBlock = allEvents[allEvents.length - 1].blockNumber
@@ -228,7 +228,7 @@ class EventService {
 
     return {
       currentBlockNumber,
-      blockDifference: Math.ceil(currentBlockNumber - fromBlock)
+      blockDifference: Math.ceil(Number(currentBlockNumber) - Number(fromBlock))
     }
   }
 
@@ -272,10 +272,10 @@ class EventService {
       const part = Math.ceil(blockDifference / numberParts)
 
       let events = []
-      let toBlock = fromBlock + part
+      let toBlock = Number(fromBlock) + part
 
       if (fromBlock < currentBlockNumber) {
-        if (toBlock >= currentBlockNumber) {
+        if (Number(toBlock) >= Number(currentBlockNumber)) {
           toBlock = 'latest'
           numberParts = 1
         }
@@ -373,7 +373,7 @@ class EventsFactory {
   instances = new Map()
 
   constructor(rpcUrl) {
-    this.provider = new Web3(rpcUrl).eth
+    this.provider = createWeb3(rpcUrl).eth
   }
 
   getBlockNumber = () => {

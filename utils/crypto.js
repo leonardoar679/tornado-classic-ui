@@ -1,7 +1,9 @@
-import crypto from 'crypto'
-import { BN, toBN } from 'web3-utils'
+import { BN, toBN } from '@/utils/bn.js'
 
-import { pedersen } from '@/services'
+import { pedersen } from '@/services/index.js'
+import { i18n } from '@/services/i18n.js'
+
+const { t } = i18n.global
 
 const CUT_LENGTH = 31
 
@@ -43,7 +45,10 @@ export function leInt2Buff(value) {
 }
 
 export function randomBN(nbytes = 31) {
-  return toBN(leInt2Buff(crypto.randomBytes(nbytes)).toString())
+  // Web Crypto replaces the removed `crypto` npm polyfill (same CSPRNG source in browsers)
+  const bytes = new Uint8Array(nbytes)
+  globalThis.crypto.getRandomValues(bytes)
+  return toBN(leInt2Buff(bytes).toString())
 }
 
 export function buffPedersenHash(buffer) {
@@ -95,7 +100,7 @@ export function checkCommitments(events = []) {
     // TODO reload events, need for if infura provider missing events
     if (leafIndex !== i) {
       console.error(`Missing deposit event for deposit #${i}`)
-      throw new Error(window.$nuxt.$t('failedToFetchAllDepositEvents'))
+      throw new Error(t('failedToFetchAllDepositEvents'))
     }
   })
 }

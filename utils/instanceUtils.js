@@ -1,4 +1,4 @@
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 
 export function getInstanceByAddress({ netId, address }) {
   const { tokens } = networkConfig[`netId${netId}`]

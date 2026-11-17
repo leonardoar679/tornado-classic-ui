@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client/core'
+import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client/core'
 
 import {
   _META,
@@ -8,13 +8,14 @@ import {
   GET_WITHDRAWALS,
   GET_NOTE_ACCOUNTS,
   GET_ENCRYPTED_NOTES
-} from './queries'
+} from './queries.js'
 
 const isEmptyArray = (arr) => !Array.isArray(arr) || !arr.length
 
 const first = 1000
 
-const link = ({ getContext }) => {
+// Apollo v4 removed the `uri` option on ApolloClient — routes go through an explicit HttpLink
+const dynamicUri = ({ getContext }) => {
   const { chainId } = getContext()
   return CHAIN_GRAPH_URLS[chainId]
 }
@@ -38,13 +39,15 @@ const defaultOptions = {
 }
 
 const client = new ApolloClient({
-  uri: link,
+  link: new HttpLink({ uri: dynamicUri }),
   cache: new InMemoryCache(),
   defaultOptions
 })
 
 const registryClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/tornadocash/tornado-relayer-registry',
+  link: new HttpLink({
+    uri: 'https://api.thegraph.com/subgraphs/name/tornadocash/tornado-relayer-registry'
+  }),
   cache: new InMemoryCache(),
   defaultOptions
 })

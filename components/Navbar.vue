@@ -1,63 +1,64 @@
 <template>
-  <b-navbar wrapper-class="container" class="header">
-    <template slot="brand">
-      <b-navbar-item tag="router-link" to="/" data-test="tornado_main_page" active-class="">
-        <Logo />
-      </b-navbar-item>
-    </template>
-    <template slot="start">
-      <b-navbar-item
-        v-if="isEnabledGovernance"
-        tag="router-link"
-        to="/governance"
-        data-test="voting_link"
-        :active="$route.path.includes('governance')"
-        class="has-tag"
-      >
-        {{ $t('governance') }} <span v-if="hasActiveProposals" class="navbar-item--tag"></span>
-      </b-navbar-item>
-      <b-navbar-item tag="router-link" to="/compliance" data-test="compliance_link">
-        {{ $t('compliance') }}
-      </b-navbar-item>
-      <b-navbar-item
-        href="https://docs.tornado.cash"
-        target="_blank"
-        data-test="docs_link"
-        rel="noopener noreferrer"
-        class="has-tag"
-      >
-        <b-icon icon="open-book" size="is-small" class="mr-1" />
-        <span>{{ $t('docs') }}</span>
-      </b-navbar-item>
-    </template>
-    <template slot="end">
-      <b-navbar-item tag="div">
-        <div class="buttons">
-          <network-navbar-icon />
-          <metamask-navbar-icon data-test="metamask_connection_state" />
-          <indicator data-test="note_account_connection_state" />
-          <b-button
-            icon-left="settings"
-            type="is-primary"
-            outlined
-            data-test="button_settings"
-            @mousedown.prevent
-            @click="onAccount"
-          >
-            {{ $t('settings') }}
-          </b-button>
+  <nav class="navbar header" role="navigation" aria-label="main navigation">
+    <div class="container navbar-wrapper">
+      <div class="navbar-brand">
+        <RouterLink to="/" class="navbar-item" data-test="tornado_main_page">
+          <Logo />
+        </RouterLink>
+      </div>
+      <div class="navbar-start">
+        <RouterLink
+          v-if="isEnabledGovernance"
+          to="/governance"
+          data-test="voting_link"
+          :class="{ 'is-active': $route.path.includes('governance') }"
+          class="navbar-item has-tag"
+        >
+          {{ $t('governance') }} <span v-if="hasActiveProposals" class="navbar-item--tag"></span>
+        </RouterLink>
+        <RouterLink to="/compliance" class="navbar-item" data-test="compliance_link">
+          {{ $t('compliance') }}
+        </RouterLink>
+        <a
+          href="https://docs.tornado.cash"
+          target="_blank"
+          data-test="docs_link"
+          rel="noopener noreferrer"
+          class="navbar-item has-tag"
+        >
+          <o-icon icon="open-book" size="small" class="mr-1" />
+          <span>{{ $t('docs') }}</span>
+        </a>
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="buttons">
+            <network-navbar-icon />
+            <metamask-navbar-icon data-test="metamask_connection_state" />
+            <indicator data-test="note_account_connection_state" />
+            <o-button
+              icon-left="settings"
+              variant="primary"
+              outlined
+              data-test="button_settings"
+              @mousedown.prevent
+              @click="onAccount"
+            >
+              {{ $t('settings') }}
+            </o-button>
+          </div>
         </div>
-      </b-navbar-item>
-    </template>
-  </b-navbar>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import Logo from '@/components/Logo'
-import { Indicator } from '@/modules/account'
-import MetamaskNavbarIcon from '@/components/MetamaskNavbarIcon'
-import NetworkNavbarIcon from '@/components/NetworkNavbarIcon'
+import Logo from '@/components/Logo.vue'
+import { Indicator } from '@/account/index.js'
+import MetamaskNavbarIcon from '@/components/MetamaskNavbarIcon.vue'
+import NetworkNavbarIcon from '@/components/NetworkNavbarIcon.vue'
 
 export default {
   components: {

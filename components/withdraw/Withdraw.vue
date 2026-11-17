@@ -1,20 +1,20 @@
 <template>
-  <b-tab-item :label="$t('withdraw')" header-class="button_tab_withdraw">
+  <o-tab-item :label="$t('withdraw')" header-class="button_tab_withdraw">
     <div class="field">
       <div class="label-with-buttons">
         <div class="label">
           {{ $t('note') }}
-          <b-tooltip
+          <o-tooltip
             :label="$t('noteTooltip')"
-            size="is-small"
-            position="is-right"
-            multilined
+            size="small"
+            position="right"
+            multiline
             data-test="enter_note_info"
           >
             <button class="button is-primary has-icon">
               <span class="icon icon-info"></span>
             </button>
-          </b-tooltip>
+          </o-tooltip>
         </div>
         <a
           v-show="!hasErrorNote && depositTxHash"
@@ -23,14 +23,9 @@
           rel="noopener noreferrer"
           class="button is-icon"
         >
-          <b-tooltip
-            :label="$t('depositTransactionOnEtherscan')"
-            size="is-small"
-            position="is-left"
-            multilined
-          >
+          <o-tooltip :label="$t('depositTransactionOnEtherscan')" size="small" position="left" multiline>
             <LinkIcon />
-          </b-tooltip>
+          </o-tooltip>
         </a>
         <button
           v-show="shouldSettingsShow"
@@ -38,18 +33,18 @@
           data-test="withdrawal_settings_button"
           @click="onSettings"
         >
-          <b-tooltip :label="$t('withdrawalSettings')" size="is-small" position="is-right" multilined>
+          <o-tooltip :label="$t('withdrawalSettings')" size="small" position="right" multiline>
             <SettingsIcon />
-          </b-tooltip>
+          </o-tooltip>
         </button>
       </div>
 
-      <b-input
+      <o-input
         v-model="withdrawNote"
         :placeholder="$t('pleaseEnterYourNote')"
         :custom-class="hasErrorNote ? hasErrorNote.type : 'is-primary'"
         data-test="enter_note_field"
-      ></b-input>
+      ></o-input>
       <div v-if="hasErrorNote" class="help" :class="hasErrorNote.type">
         <!-- eslint-disable vue/no-v-html -->
         <p v-html="hasErrorNote.msg"></p>
@@ -63,29 +58,29 @@
         </div>
         <div class="withdraw-data-item">
           {{ $t('timePassed') }}
-          <b-tooltip
+          <o-tooltip
             :active="notEnoughPassedTime"
             :label="$t('timePassedTooltip')"
-            position="is-left"
-            multilined
-            size="is-large"
+            position="left"
+            multiline
+            size="large"
             :class="{ 'has-low-anonymity': notEnoughPassedTime }"
           >
             <span>{{ timePassed }}</span>
-          </b-tooltip>
+          </o-tooltip>
         </div>
         <div class="withdraw-data-item">
           {{ $t('subsequentDeposits') }}
-          <b-tooltip
+          <o-tooltip
             :active="notEnoughDeposits"
             :label="$t('subsequentDepositsTooltip')"
-            position="is-left"
-            multilined
-            size="is-large"
+            position="left"
+            multiline
+            size="large"
             :class="{ 'has-low-anonymity': notEnoughDeposits }"
           >
-            <span>{{ this.$tc('userDeposit', depositsPast) }}</span>
-          </b-tooltip>
+            <span>{{ $tc('userDeposit', depositsPast) }}</span>
+          </o-tooltip>
         </div>
       </div>
     </div>
@@ -101,12 +96,12 @@
             {{ $t('donate') }}
           </button>
         </div>
-        <b-input
+        <o-input
           v-model="withdrawAddress"
           :placeholder="$t('pleasePasteAddressHere')"
           :size="!withdrawAddress ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
           data-test="recipient_address_field"
-        ></b-input>
+        ></o-input>
         <p class="help">
           <span class="has-text-warning">{{ error.type }}</span> {{ error.message }}
         </p>
@@ -118,15 +113,15 @@
         :withdraw-type="withdrawType"
         :eth-to-receive="ethToReceive"
       />
-      <b-tooltip
+      <o-tooltip
         class="is-block"
         :label="`${$t(tooltipText)}`"
-        position="is-top"
+        position="top"
         :active="shouldTooltipShow"
-        multilined
+        multiline
       >
-        <b-button
-          type="is-primary is-fullwidth"
+        <o-button
+          variant="primary"
           class="slide-animation"
           :outlined="isLoading"
           :expanded="isLoading"
@@ -137,26 +132,24 @@
           @click="onWithdraw"
         >
           {{ $t('withdrawButton') }}
-        </b-button>
-      </b-tooltip>
+        </o-button>
+      </o-tooltip>
     </fieldset>
-  </b-tab-item>
+  </o-tab-item>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapState, mapGetters } from 'vuex'
-import { getTornadoKeys } from '@/store/snark'
+import { getTornadoKeys } from '@/store/snark.js'
 
-import { parseNote } from '@/utils'
-import { DONATIONS_ADDRESS } from '@/constants'
+import { parseNote } from '@/utils/index.js'
+import { DONATIONS_ADDRESS } from '@/constants/index.js'
 
-import { LinkIcon, SettingsIcon } from '@/components/icons'
-import RelayerTotal from '@/components/withdraw/RelayerTotal'
-import WithdrawTotal from '@/components/withdraw/WithdrawTotal'
-import WithdrawModalBox from '@/components/withdraw/WithdrawModalBox'
-import SettingsModalBox from '@/components/settings/SettingsModalBox'
-
-const { toChecksumAddress, isHexStrict, isAddress } = require('web3-utils')
+import { LinkIcon, SettingsIcon } from '@/components/icons/index.js'
+import RelayerTotal from '@/components/withdraw/RelayerTotal.vue'
+import WithdrawTotal from '@/components/withdraw/WithdrawTotal.vue'
+import WithdrawModalBox from '@/components/withdraw/WithdrawModalBox.vue'
+import SettingsModalBox from '@/components/settings/SettingsModalBox.vue'
+import { toChecksumAddress, isHexStrict, isAddress } from 'web3-utils'
 
 export default {
   components: {

@@ -7,14 +7,14 @@
       'is-spent': tx.isSpent
     }"
   >
-    <b-tooltip
+    <o-tooltip
       :label="$t('lockTooltip', { address: getOwner })"
-      position="is-right"
+      position="right"
       class="lock-tooltip"
-      multilined
+      multiline
     >
       <div class="lock"></div>
-    </b-tooltip>
+    </o-tooltip>
     <div class="columns is-vcentered">
       <div class="column is-time" :data-label="$t('timePassed')">{{ time }}</div>
       <div class="column is-amount" :data-label="$t('amount')">
@@ -22,7 +22,7 @@
         {{ currency }}
       </div>
       <div class="column is-deposit" :data-label="$t('subsequentDeposits')">
-        <b-skeleton v-if="mixingPower === 'loading'" width="80" />
+        <o-skeleton v-if="mixingPower === 'loading'" width="80" />
         <template v-else>
           {{ mixingPower }}
         </template>
@@ -45,22 +45,23 @@
       <div class="column is-status" :data-label="$t('status')">{{ status }}</div>
 
       <div class="column column-buttons">
-        <b-tooltip :active="activeCopyTooltip" :label="tooltipCopy" position="is-left" multilined>
-          <b-button
-            type="is-primary hide-icon-desktop"
+        <o-tooltip :active="activeCopyTooltip" :label="tooltipCopy" position="left" multiline>
+          <o-button
+            variant="primary"
+            class="hide-icon-desktop"
             data-test="decrypt_note_button"
-            size="is-small"
+            size="small"
             icon-left="decrypt"
             :disabled="disableCopyButton"
             @click="onCopyAndDecrypt"
           >
             {{ $t('decrypt') }}
-          </b-button>
-        </b-tooltip>
-        <b-button
-          type="is-dark"
+          </o-button>
+        </o-tooltip>
+        <o-button
+          variant="dark"
           data-test="remove_note_button"
-          size="is-small"
+          size="small"
           icon-right="remove"
           @click="onClose"
         />
@@ -69,14 +70,13 @@
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
-import { decrypt } from 'eth-sig-util'
+import { decrypt } from '@metamask/eth-sig-util'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { toChecksumAddress, isAddress } from 'web3-utils'
 
-import txStatus from '@/store/txStatus'
-import NumberFormat from '@/components/NumberFormat'
-import { sliceAddress, unpackEncryptedMessage } from '@/utils'
+import txStatus from '@/store/txStatus.js'
+import NumberFormat from '@/components/NumberFormat.vue'
+import { sliceAddress, unpackEncryptedMessage } from '@/utils/index.js'
 
 export default {
   components: {
@@ -205,7 +205,7 @@ export default {
   mounted() {
     this.update()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer)
   },
   methods: {

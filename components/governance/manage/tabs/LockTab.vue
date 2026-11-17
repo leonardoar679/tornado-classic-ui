@@ -1,11 +1,11 @@
 <template>
-  <b-tab-item :label="$t('lock')" header-class="lock_torn_tab">
+  <o-tab-item :label="$t('lock')" header-class="lock_torn_tab">
     <div class="p">
       {{ $t('lockTabDesc') }}
     </div>
-    <b-field :label="$t('amountToLock')" expanded>
-      <b-field :class="hasErrorAmount ? 'is-warning' : ''">
-        <b-input
+    <o-field :label="$t('amountToLock')" expanded>
+      <o-field :class="hasErrorAmount ? 'is-warning' : ''">
+        <o-input
           v-model="computedAmountToLock"
           data-test="input_torn_amount_to_lock"
           step="0.01"
@@ -15,7 +15,7 @@
           :use-html5-validation="false"
           :placeholder="$t('amount')"
           expanded
-        ></b-input>
+        ></o-input>
         <div class="control has-button">
           <button
             class="button is-primary is-small is-outlined"
@@ -26,33 +26,35 @@
             {{ $t('max') }}
           </button>
         </div>
-      </b-field>
-    </b-field>
+      </o-field>
+    </o-field>
     <div class="label-with-value">
       {{ $t('availableBalance') }}:
       <span><number-format data-test="info_available_balance" :value="maxAmountToLock" /> TORN</span>
     </div>
     <div class="buttons buttons__halfwidth">
-      <b-button
-        type="is-primary is-fullwidth"
+      <o-button
+        variant="primary"
+        expanded
         outlined
         data-test="button_approve_torn"
         :disabled="disabledApprove"
         @click="onApprove"
       >
         {{ $t('approve') }}
-      </b-button>
-      <b-button
-        type="is-primary is-fullwidth"
+      </o-button>
+      <o-button
+        variant="primary"
+        expanded
         outlined
         data-test="button_lock_torn"
         :disabled="disabledLock"
         @click="onLock"
       >
         {{ $t('lock') }}
-      </b-button>
+      </o-button>
     </div>
-  </b-tab-item>
+  </o-tab-item>
 </template>
 
 <script>
@@ -60,13 +62,14 @@ import { mapActions, mapState } from 'vuex'
 import { toWei, fromWei } from 'web3-utils'
 import { BigNumber as BN } from 'bignumber.js'
 
-import { debounce } from '@/utils'
-import NumberFormat from '@/components/NumberFormat'
+import { debounce } from '@/utils/index.js'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {
     NumberFormat
   },
+  inject: ['close', 'formatNumber'],
   data() {
     return {
       amountToLock: '',
@@ -74,14 +77,16 @@ export default {
       hasErrorAmount: false
     }
   },
-  inject: ['close', 'formatNumber'],
   computed: {
     ...mapState('torn', ['signature', 'balance', 'allowance']),
     maxAmountToLock() {
-      return fromWei(this.balance)
+      return fromWei(this.balance, 'ether')
     },
     hasEnoughApproval() {
-      if (Number(this.amountToLock) && new BN(this.allowance).gte(new BN(toWei(this.amountToLock)))) {
+      if (
+        Number(this.amountToLock) &&
+        new BN(this.allowance).gte(new BN(toWei(this.amountToLock, 'ether')))
+      ) {
         return true
       }
 
@@ -93,7 +98,7 @@ export default {
       }
 
       const allowance = new BN(String(this.allowance))
-      const amount = new BN(toWei(this.amountToLock))
+      const amount = new BN(toWei(this.amountToLock, 'ether'))
 
       if (allowance.isZero()) {
         return false

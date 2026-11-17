@@ -1,11 +1,14 @@
-import { toBN } from 'web3-utils'
+import Ajv from 'ajv'
 
-import relayerSchemas from './relayer'
+import { toBN } from '@/utils/bn.js'
 
-const Ajv = require('ajv')
+import relayerSchemas from './relayer/index.js'
+
 const ajv = new Ajv({ allErrors: true, schemas: relayerSchemas })
 
-ajv.addKeyword('BN', {
+// custom "BN" keyword: value must be a valid big number (ajv v8 definition form)
+ajv.addKeyword({
+  keyword: 'BN',
   validate: (schema, data) => {
     try {
       toBN(data)
@@ -13,8 +16,7 @@ ajv.addKeyword('BN', {
     } catch (e) {
       return false
     }
-  },
-  errors: true
+  }
 })
 
 function getRelayerValidateFunction(netId) {

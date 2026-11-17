@@ -1,7 +1,7 @@
 import { uniqBy } from 'lodash'
 
-import networkConfig from '../networkConfig'
-import { loadCachedEvents, save } from './helpers'
+import networkConfig from '../networkConfig.js'
+import { loadCachedEvents, save } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'
 const EVENTS = ['Deposit', 'Withdrawal']
@@ -11,7 +11,9 @@ function updateEncrypted(netId) {
     const file = `${EVENTS_PATH}encrypted_notes_${netId}.json`
 
     save(file)
-  } catch {}
+  } catch {
+    // ignore: missing cached file is not fatal
+  }
 }
 async function updateCommon(netId) {
   const { nativeCurrency, tokens } = networkConfig[`netId${netId}`]

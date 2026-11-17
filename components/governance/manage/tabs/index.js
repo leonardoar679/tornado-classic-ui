@@ -1,7 +1,7 @@
-import LockTab from './LockTab'
-import RewardTab from './RewardTab'
-import UnlockTab from './UnlockTab'
-import DelegateTab from './DelegateTab'
-import UndelegateTab from './UndelegateTab'
+import LockTab from './LockTab.vue'
+import RewardTab from './RewardTab.vue'
+import UnlockTab from './UnlockTab.vue'
+import DelegateTab from './DelegateTab.vue'
+import UndelegateTab from './UndelegateTab.vue'
 
 export { LockTab, RewardTab, UndelegateTab, UnlockTab, DelegateTab }

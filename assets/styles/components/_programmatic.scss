@@ -1,0 +1,144 @@
+/**
+ * Base styles for the programmatic UI layer (services/ui).
+ * Adapted from Buefy (MIT) — snackbar / toast / dialog / animation-content —
+ * since the app no longer imports Buefy's SCSS.
+ */
+
+.modal {
+  .animation-content {
+    margin: 0 20px;
+    width: 100%;
+
+    .modal-card {
+      margin: 0;
+    }
+  }
+
+  &.is-pinned {
+    align-items: flex-start;
+  }
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 150ms ease-out;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.dialog {
+  .modal-card {
+    &-head {
+      border-bottom: 1px solid $black;
+    }
+
+    &-foot {
+      justify-content: flex-end;
+
+      .button {
+        display: inline;
+      }
+    }
+  }
+}
+
+.snackbar {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  z-index: 40;
+  right: 1.5em;
+  bottom: 1.5em;
+  background-color: $dark;
+  border-radius: $radius;
+  padding: 1em 1.5em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: $text;
+  font-size: 0.875em;
+  max-width: 90vw;
+  pointer-events: auto;
+
+  .text {
+    flex-grow: 1;
+  }
+
+  .action {
+    margin-left: 1.5em;
+    flex-shrink: 0;
+
+    .button {
+      min-width: 5em;
+    }
+  }
+
+  &.is-top {
+    top: 1.5em;
+    bottom: auto;
+  }
+
+  &.is-bottom {
+    bottom: 1.5em;
+  }
+
+  &.is-top-right {
+    top: 1.5em;
+    right: 1.5em;
+    bottom: auto;
+  }
+
+  &.is-top-left {
+    top: 1.5em;
+    left: 1.5em;
+    right: auto;
+    bottom: auto;
+  }
+
+  &.is-bottom-left {
+    bottom: 1.5em;
+    left: 1.5em;
+    right: auto;
+  }
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  position: fixed;
+  z-index: 40;
+  top: 1.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba($scheme-invert, 0.9);
+  border-radius: $radius;
+  padding: 0.75em 1.25em;
+  color: $text;
+  font-size: 0.875em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  max-width: 90vw;
+
+  &.is-bottom {
+    top: auto;
+    bottom: 1.5em;
+  }
+
+  &.is-top {
+    top: 1.5em;
+  }
+
+  &.is-top-right,
+  &.is-bottom-right {
+    left: auto;
+    right: 1.5em;
+    transform: none;
+  }
+
+  &.is-top-left,
+  &.is-bottom-left {
+    left: 1.5em;
+    transform: none;
+  }
+}

@@ -5,14 +5,16 @@
       <button type="button" class="delete" @click="$parent.cancel('escape')" />
     </header>
     <div class="field">
-      <b-field :label="$t('rpc')" class="has-custom-field" data-test="rpc_endpoint_dropdown">
-        <b-dropdown v-model="selectedRpc" expanded aria-role="list">
-          <div slot="trigger" class="control" :class="{ 'is-loading': checkingRpc && !isCustomRpc }">
-            <div class="input">
-              <span>{{ isCustomRpc ? $t('customRpc') : selectedRpc }}</span>
+      <o-field :label="$t('rpc')" class="has-custom-field" data-test="rpc_endpoint_dropdown">
+        <o-dropdown v-model="selectedRpc" expanded aria-role="list">
+          <template #trigger>
+            <div class="control" :class="{ 'is-loading': checkingRpc && !isCustomRpc }">
+              <div class="input">
+                <span>{{ isCustomRpc ? $t('customRpc') : selectedRpc }}</span>
+              </div>
             </div>
-          </div>
-          <b-dropdown-item
+          </template>
+          <o-dropdown-item
             v-for="{ name, url } in Object.values(networkConfig.rpcUrls)"
             :key="name"
             :value="name"
@@ -21,19 +23,19 @@
             @click="checkRpc({ name, url })"
           >
             {{ name }}
-          </b-dropdown-item>
-          <b-dropdown-item
+          </o-dropdown-item>
+          <o-dropdown-item
             value="custom"
             aria-role="listitem"
             data-test="rpc_endpoint_custom"
             @click="checkRpc({ name: 'custom' })"
           >
             {{ $t('customRpc') }}
-          </b-dropdown-item>
-        </b-dropdown>
-      </b-field>
+          </o-dropdown-item>
+        </o-dropdown>
+      </o-field>
       <div v-if="isCustomRpc" class="field has-custom-field">
-        <b-input
+        <o-input
           ref="customInput"
           v-model="customRpcUrl"
           type="url"
@@ -41,28 +43,27 @@
           :custom-class="hasErrorRpc.type"
           :use-html5-validation="false"
           @input="checkCustomRpc"
-        ></b-input>
+        ></o-input>
       </div>
       <p v-if="hasErrorRpc.msg" class="help" :class="hasErrorRpc.type">
         {{ hasErrorRpc.msg }}
       </p>
     </div>
     <div class="buttons buttons__halfwidth">
-      <b-button type="is-primary" outlined data-test="button_reset_rpc" @mousedown.prevent @click="onReset">
+      <o-button variant="primary" outlined data-test="button_reset_rpc" @mousedown.prevent @click="onReset">
         {{ $t('reset') }}
-      </b-button>
-      <b-button type="is-primary" :disabled="isDisabledSave" data-test="save_rpc_button" @click="onSave">
+      </o-button>
+      <o-button variant="primary" :disabled="isDisabledSave" data-test="save_rpc_button" @click="onSave">
         {{ $t('save') }}
-      </b-button>
+      </o-button>
     </div>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapGetters, mapMutations } from 'vuex'
 
-import { debounce } from '@/utils'
-import networkConfig from '@/networkConfig'
+import { debounce } from '@/utils/index.js'
+import networkConfig from '@/networkConfig.js'
 
 export default {
   props: {
@@ -71,6 +72,7 @@ export default {
       required: true
     }
   },
+  emits: ['close', 'cancel'],
   data() {
     return {
       checkingRpc: false,

@@ -7,14 +7,12 @@
     <div class="note" data-test="withdrawal_confirmation_text">
       {{ $t('yourZkSnarkProofHasBeenSuccesfullyGenerated') }}
     </div>
-    <b-button type="is-primary is-fullwidth" data-test="withdrawal_confirm_button" @click="_sendWithdraw">
+    <o-button variant="primary" expanded data-test="withdrawal_confirm_button" @click="_sendWithdraw">
       {{ $t('confirm') }}
-    </b-button>
+    </o-button>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
-
 export default {
   props: {
     note: {
@@ -26,6 +24,7 @@ export default {
       required: true
     }
   },
+  emits: ['close'],
   computed: {
     withdrawalMethod() {
       if (this.withdrawType === 'wallet') {

@@ -1,14 +1,14 @@
 <template>
   <div v-if="isReconnectButtonShow" class="loading-alert">
     {{ $t('mobileWallet.loading.alert') }}
-    <b-button type="is-primary" size="small" class="max-content is-outlined" @click="onReconnect">
+    <o-button variant="primary" size="small" class="max-content is-outlined" @click="onReconnect">
       {{ $t('mobileWallet.loading.action') }}
-    </b-button>
+    </o-button>
   </div>
 </template>
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
-import { SECOND } from '@/constants'
+import { SECOND } from '@/constants/index.js'
 
 export default {
   data() {
@@ -29,7 +29,7 @@ export default {
       }, SECOND * 20)
     }
   },
-  destroyed() {
+  unmounted() {
     this.onClearData()
   },
   methods: {

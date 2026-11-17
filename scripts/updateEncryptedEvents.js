@@ -3,9 +3,9 @@ import 'dotenv/config'
 import fs from 'fs'
 import { uniqBy } from 'lodash'
 
-import networkConfig from '../networkConfig'
+import networkConfig from '../networkConfig.js'
 import ABI from '../abis/TornadoProxy.abi.json'
-import { getPastEvents, loadCachedEvents } from './helpers'
+import { getPastEvents, loadCachedEvents } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'
 const enabledChains = ['1', '5', '56']
@@ -35,7 +35,7 @@ async function saveEncryptedNote(netId) {
     netId,
     type: 'EncryptedNote',
     events: encryptedEvents,
-    fromBlock: cachedEvents.lastBlock + 1,
+    fromBlock: Number(cachedEvents.lastBlock) + 1,
     contractAttrs: [ABI, contractAddress]
   })
 
@@ -54,7 +54,9 @@ async function saveEncryptedNote(netId) {
 
   let freshEvents = cachedEvents.events.concat(encryptedEvents)
 
-  freshEvents = uniqBy(freshEvents, 'encryptedNote').sort((a, b) => b.blockNumber - a.blockNumber)
+  freshEvents = uniqBy(freshEvents, 'encryptedNote').sort(
+    (a, b) => Number(b.blockNumber) - Number(a.blockNumber)
+  )
 
   const eventsJson = JSON.stringify(freshEvents, null, 2) + '\n'
   fs.writeFileSync(`${EVENTS_PATH}${name}`, eventsJson)

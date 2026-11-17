@@ -2,27 +2,27 @@
   <div class="proposals-list">
     <div class="proposals-list--header">
       <div class="title">{{ $t('proposals') }}</div>
-      <b-field class="field-tabs">
-        <b-radio-button v-model="proposalStatusFilter" native-value="" type="is-primary">
+      <o-field class="field-tabs">
+        <o-radio v-model="proposalStatusFilter" native-value="" variant="primary">
           <span>{{ $t('all') }}</span>
-        </b-radio-button>
+        </o-radio>
 
-        <b-radio-button v-model="proposalStatusFilter" native-value="active" type="is-primary">
+        <o-radio v-model="proposalStatusFilter" native-value="active" variant="primary">
           <span>{{ $t('active') }}</span>
-        </b-radio-button>
-      </b-field>
-      <b-field class="field-btn">
-        <b-tooltip
+        </o-radio>
+      </o-field>
+      <o-field class="field-btn">
+        <o-tooltip
           :label="
             $t('proposalThresholdError', {
               PROPOSAL_THRESHOLD: $n(proposalThreshold)
             })
           "
           :active="!hasProposalThreshold"
-          multilined
+          multiline
         >
-          <b-button
-            type="is-primary"
+          <o-button
+            variant="primary"
             :icon-left="isFetchingBalances ? '' : 'plus'"
             outlined
             :disabled="!hasProposalThreshold"
@@ -30,9 +30,9 @@
             @click="onCreateProposal"
           >
             {{ $t('createProposal') }}
-          </b-button>
-        </b-tooltip>
-      </b-field>
+          </o-button>
+        </o-tooltip>
+      </o-field>
     </div>
     <div class="proposals-list--container">
       <ProposalsListSkeleton v-if="isFetchingProposals" />
@@ -43,15 +43,16 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex'
-import ProposalsListItem from '@/components/governance/ProposalsListItem'
-import ProposalsListSkeleton from '@/components/governance/ProposalsListSkeleton'
+import ProposalsListItem from '@/components/governance/ProposalsListItem.vue'
+import ProposalsListSkeleton from '@/components/governance/ProposalsListSkeleton.vue'
+import { toBN } from '@/utils/bn.js'
 
-const { toBN } = require('web3-utils')
 export default {
   components: {
     ProposalsListItem,
     ProposalsListSkeleton
   },
+  emits: ['onCreateProposal'],
   data() {
     return {
       proposalStatusFilter: '',

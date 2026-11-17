@@ -1,23 +1,43 @@
 // from https://github.com/ChainSafe/web3.js/issues/2683#issuecomment-547348416
+// ported to web3 v4 BatchRequest (raw JSON-RPC eth_call batch)
 
 import namehash from 'eth-ens-namehash'
-import { BigNumber, utils } from 'ethers'
-import ABI from 'web3-eth-ens/lib/resources/ABI/Resolver'
+import { isAddress } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 import uniq from 'lodash/uniq'
 import chunk from 'lodash/chunk'
-import { CHUNK_COUNT_PER_BATCH_REQUEST } from '@/constants'
-
-export const createBatchRequestCallback = (resolve, reject) => (error, data) => {
-  if (error) {
-    reject(error)
-  } else {
-    resolve(data)
-  }
-}
+import { CHUNK_COUNT_PER_BATCH_REQUEST } from '@/constants/index.js'
 
 const CACHE = {}
 
-const createFetchNodeAddresses = (registryContract, batch) => async (address) => {
+// ENS registry (mainnet) — web3 v4 removed the built-in ENS module
+const ENS_REGISTRY = '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e'
+const RESOLVER_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'node', type: 'bytes32' }],
+    name: 'resolver',
+    outputs: [{ name: '', type: 'address' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function'
+  }
+]
+const NAME_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'node', type: 'bytes32' }],
+    name: 'name',
+    outputs: [{ name: '', type: 'string' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function'
+  }
+]
+
+let batchId = 0
+
+const createFetchNodeAddresses = (web3, registryContract, batch) => async (address) => {
   const addressLower = address.toLowerCase()
 
   const node = addressLower.substr(2) + '.addr.reverse'
@@ -26,13 +46,17 @@ const createFetchNodeAddresses = (registryContract, batch) => async (address) =>
 
   if (!CACHE[addressLower]) {
     try {
-      nodeAddress = await new Promise((resolve, reject) => {
-        const callback = createBatchRequestCallback(resolve, reject)
-        const requestData = registryContract.methods.resolver(nodeHash).call.request(callback)
-        batch.add(requestData)
+      const data = registryContract.methods.resolver(nodeHash).encodeABI()
+      const response = await batch.add({
+        id: ++batchId,
+        method: 'eth_call',
+        params: [{ to: ENS_REGISTRY, data }, 'latest']
       })
 
-      if (+nodeAddress === 0) nodeAddress = null
+      if (response) {
+        nodeAddress = web3.eth.abi.decodeParameter('address', response)
+        if (+nodeAddress === 0) nodeAddress = null
+      }
     } catch (error) {
       console.error(`Error resolve ens for "${address}"`, error.message)
       // do nothing
@@ -56,22 +80,25 @@ const createFetchEnsNames = (web3, batch, results) => async (data) => {
     return results
   }
 
-  const nodeContract = new web3.eth.Contract(ABI, nodeAddress)
+  const nameData = web3.eth.abi.encodeFunctionCall(NAME_ABI[0], [nodeHash])
 
   try {
-    const ensName = await new Promise((resolve, reject) => {
-      const callback = createBatchRequestCallback(resolve, reject)
-      const requestData = nodeContract.methods.name(nodeHash).call.request(callback)
-      batch.add(requestData)
+    const response = await batch.add({
+      id: ++batchId,
+      method: 'eth_call',
+      params: [{ to: nodeAddress, data: nameData }, 'latest']
     })
 
-    const isZeroAddress =
-      ensName.trim().length && utils.isAddress(ensName) && BigNumber.from(ensName).isZero()
+    if (response) {
+      const ensName = web3.eth.abi.decodeParameter('string', response)
 
-    if (isZeroAddress) return results
+      const isZeroAddress = ensName.trim().length && isAddress(ensName) && toBN(ensName).isZero()
 
-    CACHE[addressLower] = ensName
-    results[address] = ensName
+      if (!isZeroAddress) {
+        CACHE[addressLower] = ensName
+        results[address] = ensName
+      }
+    }
 
     return results
   } catch (error) {
@@ -82,7 +109,7 @@ const createFetchEnsNames = (web3, batch, results) => async (data) => {
 
 export const lookupAddressesRequest = async (addressList, web3, registryContract) => {
   const fetchNodeAddressesBatch = new web3.BatchRequest()
-  const fetchNodeAddresses = createFetchNodeAddresses(registryContract, fetchNodeAddressesBatch)
+  const fetchNodeAddresses = createFetchNodeAddresses(web3, registryContract, fetchNodeAddressesBatch)
   const fetchNodeAddressesPromises = uniq(addressList).map(fetchNodeAddresses)
   fetchNodeAddressesBatch.execute()
 
@@ -99,8 +126,7 @@ export const lookupAddressesRequest = async (addressList, web3, registryContract
 }
 
 export const lookupAddresses = async (addressList, web3) => {
-  const registryContract = await web3.eth.ens.registry.contract
-  // web3.eth.ens._lastSyncCheck = Date.now() // - need for test in fork
+  const registryContract = new web3.eth.Contract(RESOLVER_ABI, ENS_REGISTRY)
 
   const addressListChunks = chunk(addressList, CHUNK_COUNT_PER_BATCH_REQUEST)
   let results = {}

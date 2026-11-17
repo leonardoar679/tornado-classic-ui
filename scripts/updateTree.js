@@ -5,9 +5,9 @@ import BloomFilter from 'bloomfilter.js'
 import { MerkleTree } from 'fixed-merkle-tree'
 import { buildMimcSponge } from 'circomlibjs'
 
-import networkConfig from '../networkConfig'
+import networkConfig from '../networkConfig.js'
 
-import { loadCachedEvents, save } from './helpers'
+import { loadCachedEvents, save } from './helpers/index.js'
 
 const TREES_FOLDER = 'static/trees'
 const TREES_PATH = './static/trees/'
@@ -53,7 +53,9 @@ function createTreeZip(netId) {
         })
       }
     }
-  } catch {}
+  } catch {
+    // ignore: missing cached file is not fatal
+  }
 }
 
 async function createTree(netId) {

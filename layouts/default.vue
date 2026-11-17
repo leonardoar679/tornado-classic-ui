@@ -3,47 +3,41 @@
     <Navbar />
     <div v-show="mismatchNetwork" class="network has-background-warning">
       {{ $t('pleaseChangeNetwork', { network: netId }) }}
-      <b-button type="is-warning is-dark" class="ml-3" @click="changeNetwork">{{
+      <o-button variant="warning" class="is-dark ml-3" @click="changeNetwork">{{
         $t('changeNetwork')
-      }}</b-button>
+      }}</o-button>
     </div>
     <section class="main-content section">
       <div class="container">
-        <nuxt />
+        <slot />
       </div>
     </section>
     <Footer />
     <Loader />
     <Notices />
-    <v-idle
-      v-if="isSetupAccount && !isOpen"
-      v-show="false"
-      :loop="true"
-      :duration="300"
-      @idle="handleOpenModal"
-    />
+    <idle-tracker v-if="isSetupAccount && !isOpen" :loop="true" :duration="300" @idle="handleOpenModal" />
   </div>
 </template>
 
 <script>
-/* eslint-disable no-console */
 import { mapGetters, mapActions } from 'vuex'
 
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import Loader from '@/components/Loaders/Loader'
-import Settings from '@/components/Settings'
-import Notices from '@/components/Notices'
-import { openConfirmModal } from '@/modules/account'
-import NetworkModal from '@/components/NetworkModal'
+import Navbar from '@/components/Navbar.vue'
+import Footer from '@/components/Footer.vue'
+import Loader from '@/components/Loaders/Loader.vue'
+import Settings from '@/components/Settings.vue'
+import Notices from '@/components/Notices.vue'
+import IdleTracker from '@/components/IdleTracker.vue'
+import { openConfirmModal } from '@/account/index.js'
+import NetworkModal from '@/components/NetworkModal.vue'
 
 export default {
-  middleware: 'provider',
   components: {
     Navbar,
     Footer,
     Loader,
-    Notices
+    Notices,
+    IdleTracker
   },
   data() {
     return {
@@ -51,9 +45,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('encryptedNote', ['isSetupAccount']),
-    ...mapGetters('metamask', ['netId', 'mismatchNetwork']),
-    ...mapGetters('encryptedNote', ['accounts'])
+    ...mapGetters('encryptedNote', ['isSetupAccount', 'accounts']),
+    ...mapGetters('metamask', ['netId', 'mismatchNetwork'])
   },
   watch: {
     netId(value, oldValue) {
@@ -71,45 +64,26 @@ export default {
     this.$preventMultitabs()
     window.addEventListener('focus', this.$preventMultitabs)
 
-    if (process.browser) {
-      window.onNuxtReady(() => {
-        setTimeout(async () => {
-          await this.selectRpc({ netId: this.netId, action: this.checkCurrentRpc })
+    // replaces the old window.onNuxtReady (removed in Nuxt 3+); SPA is mounted client-side
+    setTimeout(async () => {
+      await this.selectRpc({ netId: this.netId, action: this.checkCurrentRpc })
 
-          if (this.netId !== 1) {
-            await this.selectRpc({ netId: 1, action: this.preselectRpc })
-          }
+      if (this.netId !== 1) {
+        await this.selectRpc({ netId: 1, action: this.preselectRpc })
+      }
 
-          this.$store.dispatch('gasPrices/fetchGasPrice')
-          this.$store.dispatch('price/fetchTokenPrice', {}, { root: true })
-          try {
-            this.$store.dispatch('application/loadAllNotesData')
-
-            this.$nextTick(() => {
-              this.$nuxt.$loading.start()
-              let progress = 0
-              const increase = () => {
-                progress++
-                setTimeout(() => {
-                  this.$nuxt.$loading.increase(5)
-                  if (progress < 15) {
-                    increase()
-                  }
-                }, 500)
-              }
-              increase()
-              this.$nuxt.$loading.finish()
-            })
-          } catch (e) {
-            console.error('default', e)
-          }
-          this.$store.dispatch('relayer/runAllJobs')
-          this.$store.dispatch('governance/gov/checkActiveProposals')
-        }, 500)
-      })
-    }
+      this.$store.dispatch('gasPrices/fetchGasPrice')
+      this.$store.dispatch('price/fetchTokenPrice', {}, { root: true })
+      try {
+        this.$store.dispatch('application/loadAllNotesData')
+      } catch (e) {
+        console.error('default', e)
+      }
+      this.$store.dispatch('relayer/runAllJobs')
+      this.$store.dispatch('governance/gov/checkActiveProposals')
+    }, 500)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('focus', this.$preventMultitabs)
   },
   methods: {
@@ -204,7 +178,7 @@ export default {
   padding: 5px;
   margin-top: 1rem;
 
-  ::v-deep .is-dark {
+  :deep(.is-dark) {
     background-color: darken(#ff8a00, 15);
     font-size: 0.9rem;
 

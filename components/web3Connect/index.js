@@ -1,1 +1,1 @@
-export { default as ConnectButton } from './Button'
+export { default as ConnectButton } from './Button.vue'

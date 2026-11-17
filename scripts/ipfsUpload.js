@@ -1,12 +1,12 @@
 // debug
 // date +%s > dist/index.html & node ipfsUpload.js
 
-require('dotenv').config()
-const fs = require('fs')
-const axios = require('axios')
-const FormData = require('form-data')
-const recursive = require('recursive-fs')
-const basePathConverter = require('base-path-converter')
+import 'dotenv/config'
+import fs from 'node:fs'
+import axios from 'axios'
+import FormData from 'form-data'
+import recursive from 'recursive-fs'
+import basePathConverter from 'base-path-converter'
 
 // it's dangerous to set MAX_PINS to 1
 const MAX_PINS = 5
@@ -51,7 +51,7 @@ async function pinBuild() {
   const res = await axios.post(`${baseUrl}/pinning/pinFileToIPFS`, data, {
     maxContentLength: 'Infinity', // this is needed to prevent axios from erroring out with large directories
     headers: {
-      'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
+      'Content-Type': `multipart/form-data; boundary=${data.getBoundary()}`,
       ...headers
     }
   })

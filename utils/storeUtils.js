@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash'
-import { CHAIN_IDS } from '@/constants'
+import { CHAIN_IDS } from '@/constants/index.js'
 
 const netIdWrapper = (initialState) => (acc, netId) => ({
   ...acc,

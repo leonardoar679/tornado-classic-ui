@@ -1,9 +1,10 @@
 import { MerkleTree, PartialMerkleTree } from 'fixed-merkle-tree'
 
-import { trees } from '@/constants'
-import { download } from '@/store/snark'
-import networkConfig from '@/networkConfig'
-import { mimc, bloomService } from '@/services'
+import { trees } from '@/constants/index.js'
+import { download } from '@/store/snark.js'
+import networkConfig from '@/networkConfig.js'
+import { mimc, bloomService } from '@/services/index.js'
+import { getIndexedDB } from '@/services/idb.js'
 
 class MerkleTreeService {
   constructor({ netId, amount, currency, commitment, instanceName }) {
@@ -13,7 +14,7 @@ class MerkleTreeService {
     this.commitment = commitment
     this.instanceName = instanceName
 
-    this.idb = window.$nuxt.$indexedDB(netId)
+    this.idb = getIndexedDB(netId)
     this.bloomService = bloomService({
       netId,
       amount,

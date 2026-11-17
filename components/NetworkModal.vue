@@ -13,7 +13,7 @@
         :data-test="dataTest"
         @click="setNetwork(chainId)"
       >
-        <b-icon class="network-icon" :icon="`${name}`.replace(/\)?\s\(?/g, '-').toLowerCase()" />
+        <o-icon class="network-icon" :icon="`${name}`.replace(/\)?\s\(?/g, '-').toLowerCase()" />
         <b>{{ name }}</b>
         <span class="network-checkbox"></span>
       </div>
@@ -23,10 +23,11 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-import { sleep } from '@/utils'
-import config from '@/networkConfig'
+import { sleep } from '@/utils/index.js'
+import config from '@/networkConfig.js'
 
 export default {
+  emits: ['close'],
   data() {
     return {
       isLoading: false,

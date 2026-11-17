@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
-import { toBN, toChecksumAddress } from 'web3-utils'
+import { toChecksumAddress } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 import offchainOracleABI from '@/abis/OffchainOracle.abi.json'
 
 const offchainOracleAddress = '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb'
@@ -42,11 +42,7 @@ export const getters = {
     Object.entries(tokens).map(([currency, data]) => {
       if (currency !== 'eth') {
         tokenAddresses.push(data.tokenAddress)
-        oneUintAmount.push(
-          toBN('10')
-            .pow(toBN(data.decimals.toString()))
-            .toString()
-        )
+        oneUintAmount.push(toBN('10').pow(toBN(data.decimals.toString())).toString())
         currencyLookup[data.tokenAddress] = currency
       }
     })
@@ -92,9 +88,7 @@ export const actions = {
           const price = await offchainOracle.methods.getRateToEth(tokenAddresses[i], isWrap).call()
           const numerator = toBN(oneUintAmount[i])
           const denominator = toBN(10).pow(toBN(18)) // eth decimals
-          const priceFormatted = toBN(price)
-            .mul(numerator)
-            .div(denominator)
+          const priceFormatted = toBN(price).mul(numerator).div(denominator)
 
           prices[currencyLookup[tokenAddresses[i]]] = priceFormatted.toString()
         } catch (e) {

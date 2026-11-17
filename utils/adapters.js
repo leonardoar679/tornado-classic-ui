@@ -1,4 +1,4 @@
-import { eventsType } from '@/constants'
+import { eventsType } from '@/constants/index.js'
 
 export function formatEvents(events, type) {
   if (type === eventsType.DEPOSIT) {

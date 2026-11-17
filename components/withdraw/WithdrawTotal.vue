@@ -45,8 +45,9 @@
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
-import { decimalPlaces } from '@/utils'
-const { fromWei, toBN } = require('web3-utils')
+import { decimalPlaces } from '@/utils/index.js'
+import { fromWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
 export default {
   props: {
@@ -114,7 +115,7 @@ export default {
         .div(toBN(price))
     },
     ethToReceiveFromWei() {
-      return fromWei(this.ethToReceive)
+      return fromWei(this.ethToReceive, 'ether')
     },
     total() {
       const { amount, currency } = this.selectedStatistic

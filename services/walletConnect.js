@@ -1,13 +1,8 @@
 import BN from 'bignumber.js'
-import WalletConnectProvider from '@walletconnect/web3-provider'
+import EthereumProvider from '@walletconnect/ethereum-provider'
 
-import { NETWORKS } from '@/constants'
-import networkConfig from '@/networkConfig'
-
-const { WC_BRIDGE } = process.env
-
-const WALLET_CONNECT_INTERVAL = 1000
-const SUPPORTED_WALLETS = ['metamask', 'trust', 'imtoken', 'genericWeb3']
+import { NETWORKS } from '@/constants/index.js'
+import networkConfig from '@/networkConfig.js'
 
 const RECONNECT_TIME = 3600000 // 1 hour
 
@@ -15,12 +10,18 @@ const getFirstRpcUrls = (acc, netId) => {
   const { rpcUrls } = networkConfig[`netId${netId}`]
   const [{ url }] = Object.values(rpcUrls)
 
-  return { ...acc, [netId]: url }
+  return { ...acc, [Number(netId)]: url }
 }
 
 const RPC = NETWORKS.reduce(getFirstRpcUrls, {})
 
-const walletConnectConnector = (chainId) => {
+/**
+ * WalletConnect v2 provider factory (replaces the deprecated
+ * @walletconnect/web3-provider v1). The v2 protocol uses a projectId —
+ * set WALLET_CONNECT_PROJECT_ID in the environment. If not set, WalletConnect
+ * login is unavailable and other wallets still work.
+ */
+const walletConnectConnector = async (chainId) => {
   try {
     const prevConnection = localStorage.getItem('walletconnectTimeStamp')
 
@@ -28,23 +29,31 @@ const walletConnectConnector = (chainId) => {
       localStorage.removeItem('walletconnect')
     }
 
-    const provider = new WalletConnectProvider({
-      chainId,
-      rpc: RPC,
-      pollingInterval: WALLET_CONNECT_INTERVAL,
-      qrcodeModalOptions: {
-        mobileLinks: SUPPORTED_WALLETS
-      },
-      bridge: WC_BRIDGE
+    const provider = await EthereumProvider.init({
+      projectId: process.env.WALLET_CONNECT_PROJECT_ID,
+      chains: [Number(chainId)],
+      optionalChains: Object.keys(RPC).map(Number),
+      rpcMap: RPC,
+      showQrModal: true,
+      metadata: {
+        name: 'Tornado Cash Classic',
+        description: 'Private ethereum transactions',
+        url: 'https://tornado.cash',
+        icons: ['https://tornado.cash/tw.png']
+      }
     })
 
-    provider.injectedRequest = provider.enable
+    await provider.connect()
+
+    provider.injectedRequest = async () => {
+      await provider.enable()
+    }
 
     localStorage.setItem('walletconnectTimeStamp', Date.now())
     return provider
   } catch (err) {
     console.log(err)
-    throw new Error('WalletConnect error: ', err)
+    throw new Error(`WalletConnect error: ${err.message}`)
   }
 }
 

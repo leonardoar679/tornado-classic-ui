@@ -3,9 +3,9 @@ import 'dotenv/config'
 import fs from 'fs'
 import { uniqBy } from 'lodash'
 
-import networkConfig from '../networkConfig'
+import networkConfig from '../networkConfig.js'
 import ABI from '../abis/Instance.abi.json'
-import { loadCachedEvents, getPastEvents } from './helpers'
+import { loadCachedEvents, getPastEvents } from './helpers/index.js'
 
 const EVENTS_PATH = './static/events/'
 const EVENTS = ['Deposit', 'Withdrawal']
@@ -32,7 +32,7 @@ async function main(type, netId) {
       netId,
       events,
       contractAttrs: [ABI, _contract],
-      fromBlock: cachedEvents.lastBlock + 1
+      fromBlock: Number(cachedEvents.lastBlock) + 1
     })
 
     if (type === 'Deposit') {
@@ -64,7 +64,9 @@ async function main(type, netId) {
     let freshEvents = cachedEvents.events.concat(events)
 
     if (type === 'Withdrawal') {
-      freshEvents = uniqBy(freshEvents, 'nullifierHash').sort((a, b) => b.blockNumber - a.blockNumber)
+      freshEvents = uniqBy(freshEvents, 'nullifierHash').sort(
+        (a, b) => Number(b.blockNumber) - Number(a.blockNumber)
+      )
     } else {
       freshEvents = freshEvents.filter((e, index) => Number(e.leafIndex) === index)
     }

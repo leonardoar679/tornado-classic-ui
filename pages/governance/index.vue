@@ -1,10 +1,9 @@
 <template>
-  <ProposalsList @onCreateProposal="onCreateProposal" />
+  <ProposalsList @on-create-proposal="onCreateProposal" />
 </template>
 
 <script>
-/* eslint-disable no-console */
-import ProposalsList from '@/components/governance/ProposalsList'
+import ProposalsList from '@/components/governance/ProposalsList.vue'
 
 export default {
   components: {

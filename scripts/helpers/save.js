@@ -3,10 +3,7 @@ import zipper from 'zip-local'
 
 export function save(fileName) {
   try {
-    zipper.sync
-      .zip(`${fileName}`)
-      .compress()
-      .save(`${fileName}.zip`)
+    zipper.sync.zip(`${fileName}`).compress().save(`${fileName}.zip`)
 
     fs.unlinkSync(fileName)
     return true

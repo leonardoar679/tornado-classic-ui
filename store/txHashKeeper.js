@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 import { hexToNumber } from 'web3-utils'
 
-import txStatus from './txStatus'
+import txStatus from './txStatus.js'
 
-import { eventsType } from '@/constants'
-import { createChainIdState, parseNote } from '@/utils'
+import { eventsType } from '@/constants/index.js'
+import { createChainIdState, parseNote } from '@/utils/index.js'
 
 const initialState = createChainIdState({
   txs: {},
@@ -88,29 +87,29 @@ export const getters = {
 
 export const mutations = {
   SAVE_TX_HASH(state, { storeType = 'txs', amount = '0', note = null, netId, txHash, status, ...rest }) {
-    this._vm.$set(state[`netId${netId}`][storeType], [txHash], {
+    state[`netId${netId}`][storeType][[txHash]] = {
       ...rest,
       status: status || txStatus.waitingForReciept,
       note,
       amount
-    })
+    }
   },
   CHANGE_TX_STATUS(state, { storeType = 'txs', txHash, status, blockNumber, netId }) {
-    this._vm.$set(state[`netId${netId}`][storeType][txHash], 'status', status)
-    this._vm.$set(state[`netId${netId}`][storeType][txHash], 'blockNumber', blockNumber)
+    state[`netId${netId}`][storeType][txHash]['status'] = status
+    state[`netId${netId}`][storeType][txHash]['blockNumber'] = blockNumber
   },
   SET_SPENT(state, { netId, storeType = 'txs', txHash }) {
-    this._vm.$set(state[`netId${netId}`][storeType][txHash], 'isSpent', true)
+    state[`netId${netId}`][storeType][txHash]['isSpent'] = true
   },
   DELETE_TX(state, { storeType = 'txs', txHash }) {
-    const netId = this._vm['metamask/netId']
-    this._vm.$delete(state[`netId${netId}`][storeType], txHash)
+    const netId = this.state.metamask.netId
+    delete state[`netId${netId}`][storeType][txHash]
   },
   UPDATE_DEPOSIT(state, { storeType = 'txs', txHash, netId, withdrawTxHash, timestamp, status, ...rest }) {
     const tx = state[`netId${netId}`][storeType][txHash]
-    this._vm.$delete(state[`netId${netId}`][storeType], txHash)
+    delete state[`netId${netId}`][storeType][txHash]
 
-    this._vm.$set(state[`netId${netId}`][storeType], withdrawTxHash, {
+    state[`netId${netId}`][storeType][withdrawTxHash] = {
       ...tx,
       timestamp,
       depositTxHash: txHash,
@@ -118,7 +117,7 @@ export const mutations = {
       depositBlock: tx.blockNumber,
       status: status || txStatus.waitingForReciept,
       ...rest
-    })
+    }
   }
 }
 
@@ -177,7 +176,7 @@ export const actions = {
           txHash,
           status,
           storeType: 'encryptedTxs',
-          blockNumber: hexToNumber(result.blockNumber)
+          blockNumber: Number(result.blockNumber)
         })
       } else {
         const foundEvent = await service.findEvent({ eventName: 'commitment', eventToFind: commitment, type })
@@ -246,7 +245,7 @@ export const actions = {
         commit('CHANGE_TX_STATUS', {
           storeType: 'txs',
           txHash,
-          blockNumber: hexToNumber(result.blockNumber),
+          blockNumber: Number(result.blockNumber),
           status,
           netId
         })
@@ -276,7 +275,6 @@ export const actions = {
   async runTxWatcher({ commit, dispatch }, { storeType = 'txs', txHash, netId, isSaving = true }) {
     console.log('runTxWatcher storeType txHash, netId', storeType, txHash, netId)
     try {
-      // eslint-disable-next-line prefer-const
       let { status, blockNumber } = await this.$provider.waitForTxReceipt({ txHash })
       status = status === '0x0' ? txStatus.fail : txStatus.success
 

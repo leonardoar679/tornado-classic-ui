@@ -7,16 +7,16 @@
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex'
-import Metrics from '@/components/governance/Metrics'
+import Metrics from '@/components/governance/Metrics.vue'
 
 export default {
+  components: {
+    Metrics
+  },
   middleware({ store, error }) {
     if (!store.getters['governance/gov/isEnabledGovernance']) {
       return error({ statusCode: 204, pageName: 'governance' })
     }
-  },
-  components: {
-    Metrics
   },
   computed: {
     ...mapState('metamask', ['isInitialized']),
@@ -34,7 +34,7 @@ export default {
     },
     isEnabledGovernance(isEnabled) {
       if (!isEnabled) {
-        this.$nuxt.error({ statusCode: 204, pageName: 'governance' })
+        showError({ statusCode: 204, pageName: 'governance' })
       }
     }
   },

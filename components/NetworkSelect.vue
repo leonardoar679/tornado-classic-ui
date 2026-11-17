@@ -1,20 +1,13 @@
 <template>
-  <b-select
-    v-model="selectedNetwork"
-    class="network-select"
-    placeholder="Select a network"
-    size="is-small"
-    expanded
-    @input="updateNetwork()"
-  >
+  <o-select v-model="selectedNetwork" expanded @change="updateNetwork()">
     <option v-for="network in networks" :key="network.networkName" :value="network.networkName.toLowerCase()">
       {{ network.networkName }}
     </option>
-  </b-select>
+  </o-select>
 </template>
 
 <script>
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 
 export default {
   props: {
@@ -23,6 +16,7 @@ export default {
       required: true
     }
   },
+  emits: ['input'],
   data() {
     return {
       selectedNetwork: this.value,

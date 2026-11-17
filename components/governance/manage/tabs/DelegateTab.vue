@@ -1,15 +1,15 @@
 <template>
-  <b-tab-item :label="$t('delegate')" header-class="delegate_tab">
+  <o-tab-item :label="$t('delegate')" header-class="delegate_tab">
     <div class="p">
       {{ $t('delegateTabDesc') }}
     </div>
-    <b-field :label="$t('recipient')">
-      <b-input
+    <o-field :label="$t('recipient')">
+      <o-input
         v-model="delegatee"
         :placeholder="$t('address')"
         :size="!delegatee ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
-      ></b-input>
-    </b-field>
+      ></o-input>
+    </o-field>
     <div class="label-with-value">
       {{ $t('currentDelegate') }}:
       <a target="_blank" :href="addressExplorerUrl(currentDelegate)" rel="noopener noreferrer">{{
@@ -17,24 +17,25 @@
       }}</a>
     </div>
     <div>
-      <b-tooltip
+      <o-tooltip
         class="is-block"
         :label="`${$t('pleaseLockBalance')}`"
-        position="is-top"
+        position="top"
         :active="!canDelegate"
-        multilined
+        multiline
       >
-        <b-button
+        <o-button
           :disabled="!canDelegate || !isValidAddress"
-          type="is-primary is-fullwidth"
+          variant="primary"
+          expanded
           outlined
           @click="onDelegate"
         >
           {{ $t('delegate') }}
-        </b-button>
-      </b-tooltip>
+        </o-button>
+      </o-tooltip>
     </div>
-  </b-tab-item>
+  </o-tab-item>
 </template>
 
 <script>
@@ -43,12 +44,12 @@ import { BigNumber as BN } from 'bignumber.js'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
 export default {
+  inject: ['close'],
   data() {
     return {
       delegatee: ''
     }
   },
-  inject: ['close'],
   computed: {
     ...mapState('torn', ['signature', 'balance', 'allowance']),
     ...mapState('governance/gov', ['lockedBalance', 'timestamp', 'currentDelegate']),

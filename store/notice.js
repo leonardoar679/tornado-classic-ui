@@ -12,16 +12,16 @@ export const mutations = {
     state.notices.push(notice)
   },
   UPDATE_NOTICE(state, { index, notice }) {
-    this._vm.$set(state.notices, index, notice)
+    state.notices[index] = notice
   },
   DELETE_NOTICE(state, index) {
-    this._vm.$delete(state.notices, index)
+    state.notices.splice(index, 1)
   },
   ADD_NOTICE_TIMER(state, { id, timerId }) {
-    this._vm.$set(state.timers, id, { timerId })
+    state.timers[id] = { timerId }
   },
   DELETE_NOTICE_TIMER(state, id) {
-    this._vm.$delete(state.timers, id)
+    delete state.timers[id]
   }
 }
 

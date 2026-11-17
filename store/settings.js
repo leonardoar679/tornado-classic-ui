@@ -1,7 +1,5 @@
-/* eslint-disable no-console */
-import Web3 from 'web3'
-
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
+import { createWeb3 } from '@/utils/web3.js'
 
 const getFirstRpcs = (acc, [netId, { rpcUrls }]) => {
   const [rpc] = Object.values(rpcUrls)
@@ -38,10 +36,10 @@ export const getters = {
 
 export const mutations = {
   SAVE_RPC(state, { netId, name, url }) {
-    this._vm.$set(state[`netId${netId}`], 'rpc', { name, url })
+    state[`netId${netId}`]['rpc'] = { name, url }
   },
   DISABLE_NOTIFICATION(state, { key }) {
-    this._vm.$set(state, 'isActiveNotification', { ...state.isActiveNotification, [key]: false })
+    state['isActiveNotification'] = { ...state.isActiveNotification, [key]: false }
   }
 }
 
@@ -76,7 +74,7 @@ export const actions = {
   },
   async checkRpc(_, { url, netId }) {
     try {
-      const web3 = new Web3(url)
+      const web3 = createWeb3(url)
 
       const chainId = await web3.eth.getChainId()
 

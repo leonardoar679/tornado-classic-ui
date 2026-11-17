@@ -1,6 +1,6 @@
 <template>
-  <b-tooltip position="is-bottom" type="is-dark-tooltip" :triggers="[]">
-    <template v-slot:content>
+  <o-tooltip position="bottom" class="is-dark-tooltip" :triggers="[]">
+    <template #content>
       <template v-if="isLoggedIn">
         <p>{{ $t('web3connected') }}</p>
         <a :href="addressExplorerUrl(ethAccount)" target="_blank" rel="noopener noreferrer">{{
@@ -13,16 +13,16 @@
         <connect-button type="is-primary-link mb-0" />
       </template>
     </template>
-    <b-button type="is-nav-icon" :icon-left="wallet" :class="{ [wallet]: isLoggedIn }"></b-button>
-  </b-tooltip>
+    <o-button class="is-nav-icon" :icon-left="wallet" :class="{ [wallet]: isLoggedIn }"></o-button>
+  </o-tooltip>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
 
-import { sliceAddress } from '@/utils'
-import NumberFormat from '@/components/NumberFormat'
-import { ConnectButton } from '@/components/web3Connect'
+import { sliceAddress } from '@/utils/index.js'
+import NumberFormat from '@/components/NumberFormat.vue'
+import { ConnectButton } from '@/components/web3Connect/index.js'
 
 export default {
   components: {

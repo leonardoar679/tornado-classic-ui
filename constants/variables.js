@@ -1,4 +1,4 @@
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 
 export const CHAIN_IDS = Object.keys(networkConfig)
 

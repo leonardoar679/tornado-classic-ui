@@ -1,13 +1,13 @@
 <template>
-  <b-button :type="type" v-bind="$attrs" @click="onLogIn">{{ $t(actionText) }}</b-button>
+  <o-button :type="type" v-bind="$attrs" @click="onLogIn">{{ $t(actionText) }}</o-button>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
 
-import Web3Connect from './Modal'
+import Web3Connect from './Modal.vue'
 
-import { detectMob } from '@/utils'
+import { detectMob } from '@/utils/index.js'
 
 export default {
   inheritAttrs: false,

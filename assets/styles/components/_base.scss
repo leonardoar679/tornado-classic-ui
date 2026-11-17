@@ -37,7 +37,16 @@ $custom-colors: (
   )
 );
 
-@import '~bulma/sass/utilities/_all';
+@import 'bulma/sass/utilities/index';
+@import 'bulma/sass/utilities/mixins';
+
+// Buefy-era variables (Buefy SCSS is no longer imported; same default values)
+$tooltip-arrow-size: 5px;
+$tooltip-arrow-margin: 2px;
+$speed-normal: 100ms;
+$speed-slow: 150ms;
+$speed-slower: 250ms;
+$easing-in-out: ease-in-out;
 
 $body-family: 'PT Mono', monospace;
 $body-background-color: $primary-invert;
@@ -216,14 +225,13 @@ $icon-dimensions-large: 3.429rem;
   }
 }
 
-@import '~bulma/sass/base/_all';
-@import '~bulma/sass/helpers/_all';
-@import '~bulma/sass/elements/_all';
-@import '~bulma/sass/components/_all';
-@import '~bulma/sass/form/_all';
-@import '~bulma/sass/grid/_all';
-@import '~bulma/sass/layout/_all';
-@import '~buefy/src/scss/buefy';
+@import 'bulma/sass/base/index';
+@import 'bulma/sass/helpers/index';
+@import 'bulma/sass/elements/index';
+@import 'bulma/sass/components/index';
+@import 'bulma/sass/form/index';
+@import 'bulma/sass/grid/index';
+@import 'bulma/sass/layout/index';
 
 @mixin noWrap {
   white-space: nowrap;

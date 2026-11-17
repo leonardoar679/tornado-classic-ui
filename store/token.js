@@ -1,10 +1,10 @@
-/* eslint-disable no-console */
-/* eslint-disable import/order */
-import Web3 from 'web3'
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 import ERC20ABI from '@/abis/ERC20.abi.json'
-const { numberToHex, toBN, toWei } = require('web3-utils')
-const BN = require('bn.js')
+import { numberToHex, toWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
+import { createWeb3 } from '@/utils/web3.js'
+import BN from 'bn.js'
+
 const zero = new BN(0)
 const negative1 = new BN(-1)
 
@@ -17,13 +17,15 @@ export const state = () => {
 }
 
 export const getters = {
-  tokenContract: (state, getters, rootState, rootGetters) => ({ currency, netId }) => {
-    const config = networkConfig[`netId${netId}`]
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const address = config.tokens[currency].tokenAddress
-    const web3 = new Web3(url)
-    return new web3.eth.Contract(ERC20ABI, address)
-  },
+  tokenContract:
+    (state, getters, rootState, rootGetters) =>
+    ({ currency, netId }) => {
+      const config = networkConfig[`netId${netId}`]
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const address = config.tokens[currency].tokenAddress
+      const web3 = createWeb3(url)
+      return new web3.eth.Contract(ERC20ABI, address)
+    },
   // similar to fromWei from web3
   toDecimals: (state, getters, rootState, rootGetters) => (value, decimals, fixed) => {
     const { currency } = rootState.application.selectedStatistic
@@ -138,10 +140,10 @@ export const mutations = {
     state.approvalAmount = approvalAmount
   },
   SAVE_ALLOWANCE(state, { allowance }) {
-    this._vm.$set(state, 'allowance', allowance)
+    state['allowance'] = allowance
   },
   SAVE_BALANCE(state, { balance }) {
-    this._vm.$set(state, 'balance', balance)
+    state['balance'] = balance
   }
 }
 
@@ -160,10 +162,10 @@ export const actions = {
           ? toBN('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
           : toBN(getters.fromDecimals(state.approvalAmount, decimals))
       const data = tokenInstance.methods
-        .approve(tornadoProxy._address, amountToApprove.toString())
+        .approve(tornadoProxy.options.address, amountToApprove.toString())
         .encodeABI()
       const gas = await tokenInstance.methods
-        .approve(tornadoProxy._address, amountToApprove.toString())
+        .approve(tornadoProxy.options.address, amountToApprove.toString())
         .estimateGas({
           from: ethAccount
         })
@@ -171,7 +173,7 @@ export const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: tokenInstance._address,
+          to: tokenInstance.options.address,
           gas: numberToHex(gas + 30000),
           data
         },
@@ -197,7 +199,9 @@ export const actions = {
       const nativeCurrency = rootGetters['metamask/nativeCurrency']
       if (currency !== nativeCurrency && ethAccount) {
         const tokenInstance = getters.tokenContract({ currency, netId })
-        const allowance = await tokenInstance.methods.allowance(ethAccount, tornadoInstance._address).call()
+        const allowance = await tokenInstance.methods
+          .allowance(ethAccount, tornadoInstance.options.address)
+          .call()
         commit('SAVE_ALLOWANCE', { allowance })
       }
     } catch (e) {

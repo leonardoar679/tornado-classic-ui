@@ -26,75 +26,77 @@
           <div class="level-item is-column">
             <div class="level-subitem">
               <div class="buttons">
-                <b-button
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   :href="duneLink"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="stats"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://torn.community"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="discourse"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://discord.com/invite/TFDrM8K42j"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="discord"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://tornado-cash.medium.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="medium"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://twitter.com/TornadoCash"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="twitter"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://t.me/TornadoCashOfficial"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="telegram"
-                ></b-button>
-                <b-button
+                ></o-button>
+                <o-button
                   tag="a"
-                  type="is-icon"
+                  class="is-icon"
                   href="https://github.com/tornadocash"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="github"
-                ></b-button>
+                ></o-button>
                 <div class="break"></div>
-                <b-dropdown
+                <o-dropdown
                   v-model="$i18n.locale"
                   class="dropdown-langs"
-                  position="is-top-left"
+                  position="top-left"
                   aria-role="list"
                   @change="langChange"
                 >
-                  <b-button slot="trigger" type="is-icon">
-                    <FlagIcon :code="$i18n.locale" :class="'is-active-locale-' + $i18n.locale" />
-                  </b-button>
+                  <template #trigger>
+                    <o-button class="is-icon">
+                      <FlagIcon :code="$i18n.locale" :class="'is-active-locale-' + $i18n.locale" />
+                    </o-button>
+                  </template>
 
-                  <b-dropdown-item
+                  <o-dropdown-item
                     v-for="locale in locales"
                     :key="locale"
                     :value="locale"
@@ -102,8 +104,8 @@
                   >
                     <FlagIcon :code="locale" />
                     {{ printLang(locale) }}
-                  </b-dropdown-item>
-                </b-dropdown>
+                  </o-dropdown-item>
+                </o-dropdown>
               </div>
             </div>
           </div>
@@ -116,8 +118,8 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import { FlagIcon } from '@/components/icons'
-import { LOCALES_NAMES, DONATIONS_ADDRESS } from '@/constants'
+import { FlagIcon } from '@/components/icons/index.js'
+import { LOCALES_NAMES, DONATIONS_ADDRESS } from '@/constants/index.js'
 
 export default {
   components: {

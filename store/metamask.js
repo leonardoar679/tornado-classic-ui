@@ -1,15 +1,13 @@
-/* eslint-disable no-console */
 import BN from 'bignumber.js'
-import { hexToNumber, numberToHex } from 'web3-utils'
-import { SnackbarProgrammatic as Snackbar, DialogProgrammatic as Dialog } from 'buefy'
+import { hexToNumber, numberToHex, toChecksumAddress } from 'web3-utils'
+import { Snackbar, Dialog } from '@/services/ui/index.js'
 
-import { PROVIDERS } from '@/constants'
-import networkConfig from '@/networkConfig'
-import { walletConnectConnector } from '@/services'
+import { PROVIDERS } from '@/constants/index.js'
+import networkConfig from '@/networkConfig.js'
+import { walletConnectConnector } from '@/services/index.js'
+import { i18n } from '@/services/i18n.js'
 
-import SanctionsListAbi from '@/abis/SanctionsList.abi'
-
-const { toChecksumAddress } = require('web3-utils')
+import SanctionsListAbi from '@/abis/SanctionsList.abi.json'
 
 const state = () => {
   return {
@@ -63,12 +61,14 @@ const getters = {
       case 'imtoken':
       case 'alphawallet':
       case 'generic':
-      default:
+      default: {
         if (window.ethereum) {
           return window.ethereum
         } else {
-          throw new Error(this.app.i18n.t('networkDoesNotHaveEthereumProperty'))
+          // arrow getters are not bound to the store — use the i18n module directly
+          throw new Error(i18n.global.t('networkDoesNotHaveEthereumProperty'))
         }
+      }
     }
   },
   isLoggedIn: (state, getters) => {
@@ -439,8 +439,9 @@ const actions = {
       await dispatch('updateAccountBalance', address)
 
       if (getters.isWalletConnect) {
-        if (provider.wc.peerMeta) {
-          commit('SET_WALLET_NAME', provider.wc.peerMeta.name)
+        const peerMetadata = provider.session?.peer?.metadata
+        if (peerMetadata) {
+          commit('SET_WALLET_NAME', peerMetadata.name)
         }
       }
 
@@ -475,9 +476,9 @@ const actions = {
     const { enabled } = rootState.loading
 
     try {
-      provider.wc.on('disconnect', (error, payload) => {
+      provider.on('disconnect', (error) => {
         if (state.isReconnecting) {
-          console.warn('Provider reconnect payload', { payload, error, isReconnecting: state.isReconnecting })
+          console.warn('Provider reconnect', { error, isReconnecting: state.isReconnecting })
 
           if (enabled) {
             dispatch('loading/disable', {}, { root: true })
@@ -491,8 +492,7 @@ const actions = {
         const isPrevConnection = new BN(Date.now()).minus(prevConnection).isGreaterThanOrEqualTo(5000)
 
         if (isPrevConnection) {
-          console.warn('Provider disconnect payload', {
-            payload,
+          console.warn('Provider disconnect', {
             error,
             isReconnecting: state.isReconnecting
           })

@@ -1,14 +1,14 @@
 <template>
   <div>
-    <b-button type="is-back" icon-left="arrow-left" @click="onBack">
+    <o-button class="is-back" icon-left="arrow-left" @click="onBack">
       {{ $t('back') }}
-    </b-button>
-    <CreateProposal @onBack="onBack" />
+    </o-button>
+    <CreateProposal @on-back="onBack" />
   </div>
 </template>
 
 <script>
-import CreateProposal from '@/components/governance/CreateProposal'
+import CreateProposal from '@/components/governance/CreateProposal.vue'
 
 export default {
   components: {

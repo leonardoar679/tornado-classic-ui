@@ -1,5 +1,5 @@
 <template>
-  <b-tab-item :label="$t('wallet')" value="wallet" header-class="withdrawal_settings_wallet_tab">
+  <o-tab-item :label="$t('wallet')" value="wallet" header-class="withdrawal_settings_wallet_tab">
     <fieldset :disabled="isNotLoggedIn">
       <div class="notice is-warning">
         <div class="notice__p">{{ $t('withdrawWalletWarning', { currency: networkCurrency }) }}</div>
@@ -8,22 +8,22 @@
       <WithdrawTotal :currency="currency" withdraw-type="wallet" />
     </fieldset>
     <div class="buttons buttons__halfwidth mt-5">
-      <b-button type="is-primary" outlined @mousedown.prevent @click="onReset">
+      <o-button variant="primary" outlined @mousedown.prevent @click="onReset">
         {{ $t('reset') }}
-      </b-button>
+      </o-button>
       <connect-button v-if="isNotLoggedIn" />
-      <b-button v-else type="is-primary" @click="onSave">
+      <o-button v-else variant="primary" @click="onSave">
         {{ $t('save') }}
-      </b-button>
+      </o-button>
     </div>
-  </b-tab-item>
+  </o-tab-item>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 
-import { ConnectButton } from '@/components/web3Connect'
-import WithdrawTotal from '@/components/withdraw/WithdrawTotal'
+import { ConnectButton } from '@/components/web3Connect/index.js'
+import WithdrawTotal from '@/components/withdraw/WithdrawTotal.vue'
 
 export default {
   components: {

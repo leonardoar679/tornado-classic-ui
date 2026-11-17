@@ -9,36 +9,36 @@
 
     <div class="columns is-multiline">
       <div class="column is-12">
-        <b-field>
+        <o-field>
           <template #label>
             {{ $t('proposalComment.form-contact') }}
-            <b-tooltip
+            <o-tooltip
               :label="$t('proposalComment.form-contact-tooltip')"
-              size="is-medium"
-              position="is-top"
-              multilined
+              size="medium"
+              position="top"
+              multiline
             >
               <button class="button is-primary has-icon">
                 <span class="icon icon-info"></span>
               </button>
-            </b-tooltip>
+            </o-tooltip>
           </template>
 
-          <b-input
+          <o-input
             v-model.trim="form.contact"
             :maxlength="limit / 2"
             :has-counter="false"
             :placeholder="$t('proposalComment.form-contact-placeholder')"
           />
-        </b-field>
+        </o-field>
       </div>
       <div class="column is-12">
-        <b-field
+        <o-field
           :message="fields.message ? '' : $t('proposalComment.form-message-required')"
           :type="{ 'is-warning': !fields.message && !support }"
           :label="$t('proposalComment.form-message')"
         >
-          <b-input
+          <o-input
             v-model="form.message"
             :maxlength="limit"
             type="textarea"
@@ -48,31 +48,31 @@
                 : $t('proposalComment.form-message-placeholder')
             "
           />
-        </b-field>
+        </o-field>
       </div>
     </div>
 
-    <b-button
+    <o-button
       v-if="support"
       :disabled="!isValid"
-      type="is-primary"
+      variant="primary"
       icon-left="check"
       outlined
       @click="onCastVote(true)"
     >
       {{ $t('for') }}
-    </b-button>
+    </o-button>
 
-    <b-button
+    <o-button
       v-else
       :disabled="!isValid"
-      type="is-danger"
+      variant="danger"
       icon-left="close"
       outlined
       @click="onCastVote(false)"
     >
       {{ $t('against') }}
-    </b-button>
+    </o-button>
   </div>
 </template>
 
@@ -91,6 +91,7 @@ export default {
       validator: (prop) => 'id' in prop
     }
   },
+  emits: ['close', 'castVote'],
   data: () => ({
     limit: MESSAGE_LIMIT,
     fields: {

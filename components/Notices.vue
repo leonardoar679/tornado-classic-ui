@@ -1,23 +1,22 @@
 <template>
   <div class="notices is-top">
-    <b-notification
+    <o-notification
       v-for="notice in notices"
       v-show="notice.isShowed"
       :key="notice.id"
       class="is-top-right"
-      has-icon
       :icon="notice.type"
       :aria-close-label="$t('closeNotification')"
       role="alert"
       @close="close(notice.id)"
     >
       <span v-if="notice.untranslatedTitle">{{ notice.untranslatedTitle }}</span>
-      <i18n v-else :path="notice.title.path || notice.title" tag="span">
-        <template v-slot:value>
+      <i18n-t v-else :path="notice.title.path || notice.title" tag="span">
+        <template #value>
           <b><number-format :value="notice.title.amount" /> {{ getSymbol(notice.title.currency) }}</b>
         </template>
-        <template v-slot:description>{{ notice.description }}</template>
-      </i18n>
+        <template #description>{{ notice.description }}</template>
+      </i18n-t>
       <a
         v-if="notice.nova"
         href="https://nova.tornadocash.eth.link"
@@ -35,16 +34,16 @@
       >
         {{ $t('viewOnEtherscan') }}
       </a>
-      <n-link v-else-if="notice.routerLink" v-bind="notice.routerLink.params" @onClick="$forceUpdate()">
+      <n-link v-else-if="notice.routerLink" v-bind="notice.routerLink.params" @on-click="$forceUpdate()">
         {{ $t(notice.routerLink.title) }}
       </n-link>
-    </b-notification>
+    </o-notification>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
-import NumberFormat from '@/components/NumberFormat'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {

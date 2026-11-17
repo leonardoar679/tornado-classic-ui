@@ -5,22 +5,22 @@
         <div class="column">
           <div class="proposals-box--title">
             <div class="proposals-box--skeleton">
-              <b-skeleton height="30" width="110" />
+              <o-skeleton height="30" width="110" />
             </div>
             <div class="proposals-box--skeleton">
-              <b-skeleton height="30" width="110" />
+              <o-skeleton height="30" width="110" />
             </div>
 
             <div class="proposals-box--skeleton is-percentage">
-              <b-skeleton height="30" width="36" />
+              <o-skeleton height="30" width="36" />
             </div>
           </div>
           <div class="proposals-box--comment">
             <div class="proposals-box--skeleton">
-              <b-skeleton height="21" width="21" />
+              <o-skeleton height="21" width="21" />
             </div>
             <div class="proposals-box--skeleton">
-              <b-skeleton height="21" width="260" />
+              <o-skeleton height="21" width="260" />
             </div>
           </div>
         </div>

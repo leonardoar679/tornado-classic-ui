@@ -13,33 +13,31 @@
         <div class="info-name">{{ $t('votingPower') }}</div>
         <div class="info-value has-tooltip">
           <span><number-format :value="votingPower" /> TORN</span>
-          <b-tooltip
-            :label="
-              `${$n(toDecimals(lockedBalance, 18))} ${$t('locked')} TORN + ${$n(
-                toDecimals(delegatedBalance, 18)
-              )} ${$t('delegated')} TORN`
-            "
-            size="is-medium"
-            position="is-top"
-            multilined
+          <o-tooltip
+            :label="`${$n(toDecimals(lockedBalance, 18))} ${$t('locked')} TORN + ${$n(
+              toDecimals(delegatedBalance, 18)
+            )} ${$t('delegated')} TORN`"
+            size="medium"
+            position="top"
+            multiline
           >
             <button class="button is-primary has-icon">
               <span class="icon icon-info"></span>
             </button>
-          </b-tooltip>
+          </o-tooltip>
         </div>
       </div>
       <div class="column is-12-mobile is-6-tablet is-3-desktop">
         <div class="info-value without-label has-text-right-desktop">
-          <b-button
-            type="is-text"
+          <o-button
+            variant="text"
             :icon-left="isDataLoading ? '' : 'settings'"
             :loading="isDataLoading"
             data-test="button_manage_torn"
-            @click.native="onManage"
+            @click="onManage"
           >
             {{ $t('manage') }}
-          </b-button>
+          </o-button>
         </div>
       </div>
     </div>
@@ -48,9 +46,9 @@
 
 <script>
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex'
-import ManageBox from './manage/ManageBox'
-import NumberFormat from '@/components/NumberFormat'
-const { fromWei } = require('web3-utils')
+import ManageBox from './manage/ManageBox.vue'
+import NumberFormat from '@/components/NumberFormat.vue'
+import { fromWei } from 'web3-utils'
 
 export default {
   components: {
@@ -58,7 +56,7 @@ export default {
   },
   computed: {
     ...mapState('torn', {
-      balance: (state) => fromWei(state.balance)
+      balance: (state) => fromWei(state.balance, 'ether')
     }),
     ...mapState('governance/gov', ['lockedBalance', 'delegatedBalance']),
     ...mapGetters('governance/gov', ['isFetchingBalances', 'isEnabledGovernance']),
@@ -66,7 +64,7 @@ export default {
     ...mapGetters('token', ['toDecimals']),
     ...mapState('metamask', ['isInitialized']),
     votingPower() {
-      return fromWei(this.$store.getters['governance/gov/votingPower'])
+      return fromWei(this.$store.getters['governance/gov/votingPower'], 'ether')
     },
     isDataLoading() {
       return this.isCheckingReward || this.isFetchingBalances

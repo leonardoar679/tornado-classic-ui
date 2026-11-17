@@ -1,12 +1,12 @@
 import FileSaver from 'file-saver'
 
-export * from './crypto'
-export * from './debounce'
-export * from './adapters'
-export * from './storeUtils'
-export * from './stringUtils'
-export * from './numberUtils'
-export * from './instanceUtils'
+export * from './crypto.js'
+export * from './debounce.js'
+export * from './adapters.js'
+export * from './storeUtils.js'
+export * from './stringUtils.js'
+export * from './numberUtils.js'
+export * from './instanceUtils.js'
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))

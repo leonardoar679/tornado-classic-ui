@@ -10,19 +10,25 @@
       <div class="box">
         <div class="label">
           {{ $t('anonymitySet') }}
-          <b-tooltip :label="$t('anonymitySetTooltip')" size="is-medium" position="is-top" multilined>
+          <o-tooltip :label="$t('anonymitySetTooltip')" size="medium" position="top" multiline>
             <button class="button is-primary has-icon">
               <span class="icon icon-info"></span>
             </button>
-          </b-tooltip>
+          </o-tooltip>
         </div>
         <div class="field">
-          <i18n v-if="anonimitySet" path="equalUserDeposit">
-            <span v-if="anonimitySet > 1 && anonimitySet < 5" slot="only">{{ $t('only') }}</span>
-            <b v-if="anonimitySet > 1" slot="n">{{ Number(anonimitySet) }}</b>
-            <span slot="equalUserDepositText">{{ $tc('equalUserDepositPlural', Number(anonimitySet)) }}</span>
-          </i18n>
-          <b-skeleton size="is-large" :active="!anonimitySet" width="200"></b-skeleton>
+          <i18n-t keypath="equalUserDeposit">
+            <template #only>
+              <span v-if="anonimitySet > 1 && anonimitySet < 5">{{ $t('only') }}</span>
+            </template>
+            <template #n>
+              <b v-if="anonimitySet > 1">{{ Number(anonimitySet) }}</b>
+            </template>
+            <template #equalUserDepositText>
+              <span>{{ $tc('equalUserDepositPlural', Number(anonimitySet)) }}</span>
+            </template>
+          </i18n-t>
+          <o-skeleton size="large" :active="!anonimitySet" width="200"></o-skeleton>
         </div>
         <template v-if="anonimitySet != 0">
           <div class="label">{{ $t('latestDeposits') }}</div>
@@ -47,20 +53,20 @@
           <div v-else class="columns is-small is-multiline">
             <div class="column is-half-small">
               <div class="deposits">
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
               </div>
             </div>
             <div class="column is-half-small">
               <div class="deposits">
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
-                <b-skeleton size="is-large"></b-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
+                <o-skeleton size="large"></o-skeleton>
               </div>
             </div>
           </div>
@@ -70,9 +76,8 @@
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapState, mapGetters } from 'vuex'
-import NumberFormat from '@/components/NumberFormat'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {
@@ -97,7 +102,7 @@ export default {
       this.updateEvents()
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer)
   },
   methods: {

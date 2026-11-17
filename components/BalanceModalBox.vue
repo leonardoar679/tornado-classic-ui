@@ -4,22 +4,22 @@
       <div class="box-modal-title">{{ $t('insufficientBalance') }}</div>
       <button type="button" class="delete" @click="$emit('close')" />
     </header>
-    <i18n path="youDontHaveEnoughTokens" tag="div" class="note">
-      <template v-slot:currency>{{ selectedCurrency }}</template>
-      <template v-slot:balance><number-format :value="currentBalance"/></template>
-    </i18n>
-    <b-button type="is-primary is-fullwidth" @click="close">{{ $t('close') }}</b-button>
+    <i18n-t keypath="youDontHaveEnoughTokens" tag="div" class="note">
+      <template #currency>{{ selectedCurrency }}</template>
+      <template #balance><number-format :value="currentBalance" /></template>
+    </i18n-t>
+    <o-button variant="primary" expanded @click="close">{{ $t('close') }}</o-button>
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapState, mapGetters } from 'vuex'
-import NumberFormat from '@/components/NumberFormat'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {
     NumberFormat
   },
+  emits: ['close'],
   computed: {
     ...mapState('application', ['selectedInstance']),
     ...mapState('token', ['balance']),

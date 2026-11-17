@@ -1,13 +1,12 @@
-/* eslint-disable no-console */
-import Web3 from 'web3'
 import BN from 'bignumber.js'
 import namehash from 'eth-ens-namehash'
 
-import { schema, relayerRegisterService } from '@/services'
-import { createChainIdState, parseNote, parseSemanticVersion } from '@/utils'
+import { schema, relayerRegisterService } from '@/services/index.js'
+import { createChainIdState, parseNote, parseSemanticVersion } from '@/utils/index.js'
 
 import ENSABI from '@/abis/ENS.abi.json'
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
+import { createWeb3 } from '@/utils/web3.js'
 
 const getAxios = () => {
   return import('axios')
@@ -46,9 +45,7 @@ const pickWeightedRandomRelayer = (items, netId) => {
   }
 
   const weightsScores = items.map((el) => calculateScore(el, minFee, maxFee))
-  const totalWeight = weightsScores.reduce((acc, curr) => {
-    return (acc = acc.plus(curr))
-  }, new BN('0'))
+  const totalWeight = weightsScores.reduce((acc, curr) => acc.plus(curr), new BN('0'))
 
   const random = totalWeight.multipliedBy(Math.random())
   const weightRandomIndex = getWeightRandom(weightsScores, random)
@@ -86,7 +83,7 @@ export const getters = {
   ethProvider: (state, getters, rootState) => {
     const { url } = rootState.settings.netId1.rpc
 
-    return new Web3(url)
+    return createWeb3(url)
   },
   jobs: (state, getters, rootState, rootGetters) => (type) => {
     const netId = rootGetters['metamask/netId']
@@ -129,7 +126,7 @@ export const getters = {
 
 export const mutations = {
   SET_SELECTED_RELAYER(state, payload) {
-    this._vm.$set(state, 'selectedRelayer', payload)
+    state['selectedRelayer'] = payload
   },
   SAVE_VALIDATED_RELAYERS(state, relayers) {
     state.validRelayers = relayers
@@ -152,7 +149,7 @@ export const mutations = {
       account
     }
   ) {
-    this._vm.$set(state.jobs[`netId${netId}`][type], id, {
+    state.jobs[`netId${netId}`][type][id] = {
       action,
       relayerUrl,
       amount,
@@ -163,28 +160,28 @@ export const mutations = {
       note,
       accountAfter,
       account
-    })
+    }
   },
   UPDATE_JOB(state, { id, netId, type, txHash, confirmations, status, failedReason }) {
     const job = state.jobs[`netId${netId}`][type][id]
-    this._vm.$set(state.jobs[`netId${netId}`][type], id, {
+    state.jobs[`netId${netId}`][type][id] = {
       ...job,
       txHash,
       confirmations,
       status,
       failedReason
-    })
+    }
   },
   DELETE_JOB(state, { id, netId, type }) {
-    this._vm.$delete(state.jobs[`netId${netId}`][type], id)
+    delete state.jobs[`netId${netId}`][type][id]
   },
   ADD_JOB_WATCHER(state, { id, timerId }) {
-    this._vm.$set(state.jobWatchers, id, {
+    state.jobWatchers[id] = {
       timerId
-    })
+    }
   },
   DELETE_JOB_WATCHER(state, { id }) {
-    this._vm.$delete(state.jobWatchers, id)
+    delete state.jobWatchers[id]
   },
   SET_IS_LOADING_RELAYERS(state, isLoadingRelayers) {
     state.isLoadingRelayers = isLoadingRelayers
@@ -302,14 +299,8 @@ export const actions = {
     console.log('filtered statuses ', statuses)
 
     try {
-      const {
-        name,
-        realUrl,
-        address,
-        ethPrices,
-        stakeBalance,
-        tornadoServiceFee
-      } = pickWeightedRandomRelayer(statuses, netId)
+      const { name, realUrl, address, ethPrices, stakeBalance, tornadoServiceFee } =
+        pickWeightedRandomRelayer(statuses, netId)
 
       console.log('Selected relayer', name, tornadoServiceFee)
       commit('SET_SELECTED_RELAYER', {
@@ -356,10 +347,10 @@ export const actions = {
       ensName = urlParser.hostname
       let resolverInstance = await provider.ens.getResolver(ensName)
 
-      if (new BN(resolverInstance._address).isZero()) {
+      if (new BN(resolverInstance.options.address).isZero()) {
         throw new Error('missingENSSubdomain')
       }
-      resolverInstance = new provider.Contract(ENSABI, resolverInstance._address)
+      resolverInstance = new provider.Contract(ENSABI, resolverInstance.options.address)
 
       const ensNameHash = namehash.hash(ensName)
       const hostname = await resolverInstance.methods.text(ensNameHash, 'url').call()
@@ -648,19 +639,22 @@ export const actions = {
     }
   },
   finishJobWatcher({ state, rootGetters, commit, dispatch, getters, rootState }, { id, netId, type }) {
-    const timerId = setTimeout(() => {
-      const { txHash, confirmations } = state.jobs[`netId${netId}`][type][id]
-      commit('UPDATE_JOB', {
-        id,
-        netId,
-        type,
-        txHash,
-        confirmations,
-        status: 'FAILED',
-        failedReason: this.app.i18n.t('relayerIsNotResponding')
-      })
-      commit('DELETE_JOB_WATCHER', { id })
-    }, 15 * 60 * 1000)
+    const timerId = setTimeout(
+      () => {
+        const { txHash, confirmations } = state.jobs[`netId${netId}`][type][id]
+        commit('UPDATE_JOB', {
+          id,
+          netId,
+          type,
+          txHash,
+          confirmations,
+          status: 'FAILED',
+          failedReason: this.app.i18n.t('relayerIsNotResponding')
+        })
+        commit('DELETE_JOB_WATCHER', { id })
+      },
+      15 * 60 * 1000
+    )
     commit('ADD_JOB_WATCHER', { id, timerId })
   },
   stopFinishJobWatcher({ state, rootGetters, commit, dispatch, getters, rootState }, { id }) {

@@ -1,5 +1,5 @@
 <template>
-  <b-tab-item :label="$t('undelegate')">
+  <o-tab-item :label="$t('undelegate')">
     <div class="p">
       {{ $t('undelegateTabDesc') }}
     </div>
@@ -9,18 +9,18 @@
         delegateMsg
       }}</a>
     </div>
-    <b-tooltip
+    <o-tooltip
       class="is-block"
       :label="`${$t('pleaseDelegate')}`"
-      position="is-top"
+      position="top"
       :active="!canUndelegate"
-      multilined
+      multiline
     >
-      <b-button :disabled="!canUndelegate" type="is-primary is-fullwidth" outlined @click="onUndelegate">
+      <o-button :disabled="!canUndelegate" variant="primary" expanded outlined @click="onUndelegate">
         {{ $t('undelegate') }}
-      </b-button>
-    </b-tooltip>
-  </b-tab-item>
+      </o-button>
+    </o-tooltip>
+  </o-tab-item>
 </template>
 
 <script>

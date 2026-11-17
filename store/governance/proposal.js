@@ -1,14 +1,11 @@
-/* eslint-disable no-console */
-/* eslint-disable import/order */
-
-import { utils } from 'ethers'
+import { AbiCoder, dataSlice, dataLength } from 'ethers'
 import uniqBy from 'lodash/uniqBy'
 import chunk from 'lodash/chunk'
 
-import { lookupAddresses, createBatchRequestCallback } from '@/services'
-import { CHUNK_COUNT_PER_BATCH_REQUEST } from '@/constants'
-
-const { toWei, fromWei, toBN } = require('web3-utils')
+import { lookupAddresses } from '@/services/index.js'
+import { CHUNK_COUNT_PER_BATCH_REQUEST } from '@/constants/index.js'
+import { toWei, fromWei } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
 
 const CACHE_TX = {}
 const CACHE_BLOCK = {}
@@ -18,15 +15,15 @@ const parseComment = (calldata, govInstance) => {
   if (!calldata || !govInstance) return empty
 
   const methodLength = 4 // length of castDelegatedVote method
-  const result = utils.defaultAbiCoder.decode(
+  const result = AbiCoder.defaultAbiCoder().decode(
     ['address[]', 'uint256', 'bool'],
-    utils.hexDataSlice(calldata, methodLength)
+    dataSlice(calldata, methodLength)
   )
   const data = govInstance.methods.castDelegatedVote(...result).encodeABI()
-  const dataLength = utils.hexDataLength(data)
+  const calldataLength = dataLength(data)
 
   try {
-    const str = utils.defaultAbiCoder.decode(['string'], utils.hexDataSlice(calldata, dataLength))
+    const str = AbiCoder.defaultAbiCoder().decode(['string'], dataSlice(calldata, calldataLength))
     const [contact, message] = JSON.parse(str)
     return { contact, message }
   } catch {
@@ -40,17 +37,13 @@ const createProposalComment = (resultAll, votedEvent) => {
 
   const comment = parseComment()
 
-  const percentage =
-    toBN(votedEvent.returnValues.votes)
-      .mul(toBN(10000))
-      .divRound(resultAll)
-      .toNumber() / 100
+  const percentage = toBN(votedEvent.returnValues.votes).mul(toBN(10000)).divRound(resultAll).toNumber() / 100
 
   return {
     id: `${transactionHash}-${voter}`,
     percentage,
     ...returnValues,
-    votes: fromWei(returnValues.votes),
+    votes: fromWei(returnValues.votes, 'ether'),
     transactionHash,
     blockNumber,
 
@@ -69,16 +62,19 @@ const createFetchCommentWithMessage = (web3, batch, govInstance) => async (propo
   const { transactionHash, voter, blockNumber } = proposalComment
 
   if (!CACHE_TX[transactionHash]) {
-    CACHE_TX[transactionHash] = new Promise((resolve, reject) => {
-      const callback = createBatchRequestCallback(resolve, reject)
-      batch.add(web3.eth.getTransaction.request(transactionHash, callback))
+    // web3 v4: batch.add returns a deferred promise
+    CACHE_TX[transactionHash] = batch.add({
+      id: batch.requests.length + 1,
+      method: 'eth_getTransactionByHash',
+      params: [transactionHash]
     })
   }
 
   if (!CACHE_BLOCK[blockNumber]) {
-    CACHE_BLOCK[blockNumber] = new Promise((resolve, reject) => {
-      const callback = createBatchRequestCallback(resolve, reject)
-      batch.add(web3.eth.getBlock.request(blockNumber, callback))
+    CACHE_BLOCK[blockNumber] = batch.add({
+      id: batch.requests.length + 1,
+      method: 'eth_getBlockByNumber',
+      params: [web3.utils.toHex(blockNumber), false]
     })
   }
 
@@ -116,7 +112,7 @@ const getters = {
     const { ensNames } = state
     let comments = state.comments.slice()
 
-    comments.sort((a, b) => b.blockNumber - a.blockNumber)
+    comments.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber))
     comments = uniqBy(comments, 'voter')
     comments.sort((a, b) => b.percentage - a.percentage)
 
@@ -151,7 +147,7 @@ const actions = {
   async fetchComments(context, proposal) {
     const { commit, dispatch, state } = context
     let { comments } = state
-    let newComments = []
+    let newComments
 
     if (comments[0]?.id !== proposal.id) {
       commit('SAVE_COMMENTS', [])
@@ -182,7 +178,7 @@ const actions = {
     const govInstance = rootGetters['governance/gov/govContract']({ netId })
 
     if (comments[0]?.id === proposal.id) {
-      fromBlock = comments[0].blockNumber + 1
+      fromBlock = Number(comments[0].blockNumber) + 1
     }
 
     try {
@@ -197,12 +193,14 @@ const actions = {
 
       console.log('fetchVotedEvents', votedEvents.length)
 
-      votedEvents = votedEvents.sort((a, b) => b.blockNumber - a.blockNumber)
+      votedEvents = votedEvents.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber))
       votedEvents = uniqBy(votedEvents, 'returnValues.voter')
 
       console.log('fetchVotedEvents uniq', votedEvents.length)
 
-      const resultAll = toBN(toWei(proposal.results.for)).add(toBN(toWei(proposal.results.against)))
+      const resultAll = toBN(toWei(proposal.results.for, 'ether')).add(
+        toBN(toWei(proposal.results.against, 'ether'))
+      )
       let newComments = votedEvents.map((votedEvent) => createProposalComment(resultAll, votedEvent))
       newComments = newComments.concat(comments)
       return newComments

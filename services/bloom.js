@@ -1,6 +1,7 @@
 import BloomFilter from 'bloomfilter.js'
 
-import { download } from '@/store/snark'
+import { download } from '@/store/snark.js'
+import { getIndexedDB } from '@/services/idb.js'
 
 class BloomService {
   constructor({ netId, amount, commitment, instanceName, fileName, fileFolder }) {
@@ -10,7 +11,7 @@ class BloomService {
     this.instanceName = instanceName
     this.fileName = `${fileFolder}/${fileName}`
 
-    this.idb = window.$nuxt.$indexedDB(netId)
+    this.idb = getIndexedDB(netId)
   }
 
   async downloadBloom() {

@@ -1,16 +1,13 @@
-/* eslint-disable no-console */
-/* eslint-disable import/order */
+import { AbiCoder, concat } from 'ethers'
+import { Toast } from '@/services/ui/index.js'
 
-import Web3 from 'web3'
-import { utils } from 'ethers'
-import { ToastProgrammatic as Toast } from 'buefy'
-
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 
 import GovernanceABI from '@/abis/Governance.abi.json'
 import AggregatorABI from '@/abis/Aggregator.abi.json'
-
-const { numberToHex, toWei, fromWei, toBN, hexToNumber, hexToNumberString } = require('web3-utils')
+import { numberToHex, toWei, fromWei, hexToNumber, hexToNumberString } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
+import { createWeb3 } from '@/utils/web3.js'
 
 const state = () => {
   return {
@@ -42,28 +39,34 @@ const state = () => {
 }
 
 const getters = {
-  getConfig: (state, getters, rootState) => ({ netId }) => {
-    return networkConfig[`netId${netId}`]
-  },
-  getWeb3: (state, getters, rootState) => ({ netId }) => {
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    return new Web3(url)
-  },
-  govContract: (state, getters, rootState) => ({ netId }) => {
-    const config = getters.getConfig({ netId })
-    const address = config['governance.contract.tornadocash.eth']
-    if (address) {
-      const web3 = getters.getWeb3({ netId })
-      const contract = new web3.eth.Contract(GovernanceABI, address)
-      return contract
-    }
+  getConfig:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      return networkConfig[`netId${netId}`]
+    },
+  getWeb3:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      return createWeb3(url)
+    },
+  govContract:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const config = getters.getConfig({ netId })
+      const address = config['governance.contract.tornadocash.eth']
+      if (address) {
+        const web3 = getters.getWeb3({ netId })
+        const contract = new web3.eth.Contract(GovernanceABI, address)
+        return contract
+      }
 
-    return null
-  },
+      return null
+    },
   aggregatorContract: (state, getters, rootState, rootGetters) => {
     const { aggregatorContract } = rootGetters['metamask/networkConfig']
     const { url } = rootGetters['settings/currentRpc']
-    const web3 = new Web3(url)
+    const web3 = createWeb3(url)
     return new web3.eth.Contract(AggregatorABI, aggregatorContract)
   },
   isFetchingProposals: ({ proposals, isFetchingProposals }) => {
@@ -74,9 +77,7 @@ const getters = {
     return isFetchingProposals
   },
   votingPower: (state) => {
-    return toBN(state.lockedBalance)
-      .add(toBN(state.delegatedBalance))
-      .toString(10)
+    return toBN(state.lockedBalance).add(toBN(state.delegatedBalance)).toString(10)
   },
   quorumVotes: (state, getters, rootState, rootGetters) => {
     return rootGetters['token/toDecimals'](state.constants.QUORUM_VOTES, 18)
@@ -102,46 +103,46 @@ const mutations = {
     state.approvalAmount = approvalAmount
   },
   SAVE_FETCHING_PROPOSALS(state, status) {
-    this._vm.$set(state, 'isFetchingProposals', status)
+    state['isFetchingProposals'] = status
   },
   SAVE_CASTING_VOTE(state, status) {
-    this._vm.$set(state, 'isCastingVote', status)
+    state['isCastingVote'] = status
   },
   SAVE_LOCKED_BALANCE(state, { balance }) {
-    this._vm.$set(state, 'lockedBalance', balance)
+    state['lockedBalance'] = balance
   },
   SAVE_FETCHING_LOCKED_BALANCE(state, status) {
-    this._vm.$set(state, 'isFetchingLockedBalance', status)
+    state['isFetchingLockedBalance'] = status
   },
   SAVE_LOCKED_TIMESTAMP(state, { timestamp }) {
-    this._vm.$set(state, 'timestamp', timestamp)
+    state['timestamp'] = timestamp
   },
   SAVE_LATEST_PROPOSAL_ID(state, { id, status }) {
-    this._vm.$set(state, 'latestProposalId', { value: id, status })
+    state['latestProposalId'] = { value: id, status }
   },
   SAVE_DELEGATEE(state, { currentDelegate }) {
-    this._vm.$set(state, 'currentDelegate', currentDelegate)
+    state['currentDelegate'] = currentDelegate
   },
   SAVE_PROPOSALS(state, proposals) {
-    this._vm.$set(state, 'proposals', proposals)
+    state['proposals'] = proposals
   },
   SAVE_VOTER_RECEIPT(state, { hasVoted, support, balance, id }) {
-    this._vm.$set(state.voterReceipts, id, { hasVoted, support, balance })
+    state.voterReceipts[id] = { hasVoted, support, balance }
   },
   SAVE_DELEGATED_BALANCE(state, balance) {
-    this._vm.$set(state, 'delegatedBalance', balance)
+    state['delegatedBalance'] = balance
   },
   SAVE_FETCHING_DELEGATED_BALANCE(state, status) {
-    this._vm.$set(state, 'isFetchingDelegatedBalance', status)
+    state['isFetchingDelegatedBalance'] = status
   },
   SAVE_DELEGATORS(state, uniq) {
-    this._vm.$set(state, 'delegators', uniq)
+    state['delegators'] = uniq
   },
   SET_HAS_ACTIVE_PROPOSALS(state, condition) {
-    this._vm.$set(state, 'hasActiveProposals', condition)
+    state['hasActiveProposals'] = condition
   },
   SAVE_CONSTANTS(state, constants) {
-    this._vm.$set(state, 'constants', constants)
+    state['constants'] = constants
   }
 }
 
@@ -188,8 +189,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -249,8 +250,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 30000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 30000),
           data
         },
         watcherParams: {
@@ -307,8 +308,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -367,13 +368,13 @@ const actions = {
 
       if (contact || message) {
         const value = JSON.stringify([contact, message])
-        const tail = utils.defaultAbiCoder.encode(['string'], [value])
-        dataWithTail = utils.hexConcat([data, tail])
+        const tail = AbiCoder.defaultAbiCoder().encode(['string'], [value])
+        dataWithTail = concat([data, tail])
       }
 
       const gas = await web3.eth.estimateGas({
         from: ethAccount,
-        to: govInstance._address,
+        to: govInstance.options.address,
         value: 0,
         data: dataWithTail
       })
@@ -381,8 +382,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 30000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 30000),
           data: dataWithTail
         },
         watcherParams: {
@@ -437,8 +438,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -491,8 +492,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -547,8 +548,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -601,8 +602,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: govInstance._address,
-          gas: numberToHex(gas + 100000),
+          to: govInstance.options.address,
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {
@@ -662,7 +663,7 @@ const actions = {
           fromBlock: config.constants.GOVERNANCE_BLOCK,
           toBlock: 'latest'
         }),
-        aggregatorContract.methods.getAllProposals(govInstance._address).call()
+        aggregatorContract.methods.getAllProposals(govInstance.options.address).call()
       ])
 
       const parseDescription = ({ id, text }) => {
@@ -712,8 +713,8 @@ const actions = {
             status: ProposalState[Number(state)],
             blockNumber,
             results: {
-              for: fromWei(forVotes),
-              against: fromWei(againstVotes)
+              for: fromWei(forVotes, 'ether'),
+              against: fromWei(againstVotes, 'ether')
             }
           }
         })
@@ -829,7 +830,9 @@ const actions = {
         }
         return true
       })
-      let balances = await aggregatorContract.methods.getGovernanceBalances(govInstance._address, uniq).call()
+      let balances = await aggregatorContract.methods
+        .getGovernanceBalances(govInstance.options.address, uniq)
+        .call()
       balances = balances.reduce((acc, balance, i) => {
         acc = acc.add(toBN(balance))
         return acc
@@ -885,13 +888,9 @@ const actions = {
       const netId = rootGetters['metamask/netId']
       const govInstance = getters.govContract({ netId })
       const aggregatorContract = getters.aggregatorContract
-      const {
-        balance,
-        latestProposalId,
-        timelock,
-        delegatee,
-        ...userdata
-      } = await aggregatorContract.methods.getUserData(govInstance._address, ethAccount).call()
+      const { balance, latestProposalId, timelock, delegatee, ...userdata } = await aggregatorContract.methods
+        .getUserData(govInstance.options.address, ethAccount)
+        .call()
       commit('SAVE_DELEGATEE', { currentDelegate: delegatee })
 
       const latestProposalIdState = ProposalState[Number(userdata.latestProposalIdState)]
@@ -927,7 +926,7 @@ const actions = {
 
     const params = constants.map((name) => {
       return {
-        target: govInstance._address,
+        target: govInstance.options.address,
         callData: govInstance.methods[name]().encodeABI()
       }
     })

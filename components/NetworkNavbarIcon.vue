@@ -1,12 +1,12 @@
 <template>
-  <b-button :icon-left="iconName" class="network-button" data-test="button_network" @click="onClick">{{
+  <o-button :icon-left="iconName" class="network-button" data-test="button_network" @click="onClick">{{
     shortNetworkName
-  }}</b-button>
+  }}</o-button>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import NetworkModal from '@/components/NetworkModal'
+import NetworkModal from '@/components/NetworkModal.vue'
 export default {
   computed: {
     ...mapGetters('metamask', ['networkName', 'netId']),

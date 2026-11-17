@@ -7,11 +7,11 @@
         {{ currency }}
       </div>
       <div class="column is-deposit" :data-label="$t('subsequentDeposits')">
-        <b-skeleton v-if="!isFailed" width="80" />
+        <o-skeleton v-if="!isFailed" width="80" />
         <template v-else>-</template>
       </div>
       <div class="column is-hash" :data-label="$t('txHash')">
-        <b-skeleton v-if="!job.txHash && job.status !== 'FAILED'" />
+        <o-skeleton v-if="!job.txHash && job.status !== 'FAILED'" />
         <div v-else class="details">
           <p class="detail">
             <a
@@ -27,25 +27,19 @@
         </div>
       </div>
       <div class="column is-status" :data-label="$t('status')">
-        <b-skeleton v-if="!job.status" width="60" />
+        <o-skeleton v-if="!job.status" width="60" />
         <template v-else>
           <div class="status-with-loading">
             {{ status }}
-            <b-icon v-show="!isFailed" icon="loading" size="is-small" />
+            <o-icon v-show="!isFailed" icon="loading" size="small" />
           </div>
         </template>
       </div>
       <div class="column column-buttons">
-        <b-button type="is-primary" size="is-small" icon-left="copy" disabled>
+        <o-button variant="primary" size="small" icon-left="copy" disabled>
           {{ $t('note') }}
-        </b-button>
-        <b-button
-          type="is-dark"
-          size="is-small"
-          icon-right="remove"
-          :disabled="!isFailed"
-          @click="onDelete"
-        />
+        </o-button>
+        <o-button variant="dark" size="small" icon-right="remove" :disabled="!isFailed" @click="onDelete" />
       </div>
     </div>
   </div>
@@ -97,7 +91,7 @@ export default {
   mounted() {
     this.update()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.timer)
   },
   methods: {

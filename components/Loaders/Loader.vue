@@ -1,16 +1,16 @@
 <template>
-  <b-loading v-model="enabled">
+  <o-loading v-model="enabled">
     <div class="loading-container">
       <div class="loading-tornado" data-test="tornado_loader"></div>
       <div class="loading-message">{{ message }}...</div>
       <approve-loader v-if="isApprove" />
     </div>
-  </b-loading>
+  </o-loading>
 </template>
 <script>
 import { mapState, mapGetters } from 'vuex'
 
-import ApproveLoader from './ApproveLoader'
+import ApproveLoader from './ApproveLoader.vue'
 
 export default {
   components: {

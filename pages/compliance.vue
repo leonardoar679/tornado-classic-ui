@@ -5,33 +5,32 @@
       <span class="print">{{ $t('complianceReport') }}</span>
     </h1>
     <p class="p is-size-6">
-      <i18n path="complianceSubtitle">
-        <template v-slot:newline><br /></template>
-      </i18n>
+      <i18n-t keypath="complianceSubtitle">
+        <template #newline><br /></template>
+      </i18n-t>
     </p>
     <div class="field">
       <div class="label">{{ $t('note') }}</div>
-      <b-input
+      <o-input
         v-model="withdrawNote"
         data-test="input_enter_note_for_compliance"
         :placeholder="$t('pleaseEnterYourNote')"
         :custom-class="error ? error.type : 'is-primary'"
-      ></b-input>
+      ></o-input>
       <div class="print-help">{{ withdrawNote }}</div>
       <p v-show="error.msg !== ''" class="help" :class="error.type">{{ error.msg }}</p>
     </div>
 
     <div v-show="withdrawNote && error.msg === ''">
-      <b-notification
+      <o-notification
         :active="!txDepositInfo.isSpent && loaded"
         class="main-notification"
-        type="is-warning"
+        variant="warning"
         icon-pack="icon"
-        has-icon
         :closable="false"
       >
         <strong>{{ $t('warning') }}</strong> {{ $t('doNotShareYouNote') }}
-      </b-notification>
+      </o-notification>
       <div class="columns columns-blocks is-desktop is-gapless">
         <div class="column is-5-desktop">
           <div class="block">
@@ -57,10 +56,7 @@
               <div class="value">
                 {{
                   txDepositInfo.timestamp
-                    ? `${this.$moment
-                        .unix(txDepositInfo.timestamp)
-                        .utc()
-                        .format('lll')} +UTC`
+                    ? `${$moment.unix(txDepositInfo.timestamp).utc().format('lll')} +UTC`
                     : '-'
                 }}
               </div>
@@ -146,10 +142,7 @@
               <div class="value">
                 {{
                   txWithdrawalInfo.timestamp
-                    ? `${this.$moment
-                        .unix(txWithdrawalInfo.timestamp)
-                        .utc()
-                        .format('lll')} +UTC`
+                    ? `${$moment.unix(txWithdrawalInfo.timestamp).utc().format('lll')} +UTC`
                     : '-'
                 }}
               </div>
@@ -200,13 +193,13 @@
       <div class="columns is-desktop is-vcentered is-gapless has-verified">
         <div class="column is-5-desktop"></div>
         <div class="column is-2-desktop generate-container">
-          <b-button
+          <o-button
             v-show="txDepositInfo.txHash && txWithdrawalInfo.txHash"
-            type="is-primary"
+            variant="primary"
             class="generate"
             outlined
             @click="print"
-            >{{ $t('generatePdfReport') }}</b-button
+            >{{ $t('generatePdfReport') }}</o-button
           >
         </div>
         <div class="column is-5-desktop">
@@ -216,23 +209,24 @@
     </div>
     <div class="print print-title">{{ $t('warning') }}</div>
     <div class="print print-p">
-      <i18n path="compliancePrintWarning">
-        <template v-slot:newline><br /></template>
-      </i18n>
+      <i18n-t keypath="compliancePrintWarning">
+        <template #newline><br /></template>
+      </i18n-t>
     </div>
   </div>
 </template>
 
 <script>
-/* eslint-disable no-console */
-import Web3 from 'web3'
 import { mapGetters } from 'vuex'
 
-import networkConfig from '@/networkConfig'
-import { parseNote, hashRender } from '@/utils'
-import Verified from '@/components/icons/Verified'
-
-const { isHexStrict } = require('web3-utils')
+import networkConfig from '@/networkConfig.js'
+import { parseNote, hashRender } from '@/utils/index.js'
+import Verified from '@/components/icons/Verified.vue'
+import { isHexStrict } from 'web3-utils'
+import JsPdf from 'jspdf'
+import logo from '@/assets/img/tornado_black.png'
+import mark from '@/assets/img/tornado_mark.png'
+import { createWeb3 } from '@/utils/web3.js'
 
 export default {
   components: {
@@ -269,7 +263,7 @@ export default {
       return networkConfig[`netId${this.netId}`]
     },
     getEthInstance() {
-      const web3 = new Web3(this.currentRpc.url)
+      const web3 = createWeb3(this.currentRpc.url)
       return web3.eth
     }
   },
@@ -375,18 +369,13 @@ export default {
     print() {
       // window.print()
 
-      if (process.server) {
+      if (import.meta.server) {
         return
       }
 
-      const JsPdf = require('jspdf')
       const doc = new JsPdf()
 
-      doc
-        .setFontSize(9)
-        .setLineHeightFactor(1.5)
-        .setFont('courier')
-        .setFontStyle('normal')
+      doc.setFontSize(9).setLineHeightFactor(1.5).setFont('courier').setFontStyle('normal')
 
       const width = doc.internal.pageSize.getWidth()
       const padding = 10
@@ -409,14 +398,8 @@ export default {
       // save current moment locale
       const locale = this.$moment.locale()
       this.$moment.locale('en')
-      const depositDate = `${this.$moment
-        .unix(this.txDepositInfo.timestamp)
-        .utc()
-        .format('lll')} +UTC`
-      const withdrawDate = `${this.$moment
-        .unix(this.txWithdrawalInfo.timestamp)
-        .utc()
-        .format('lll')} +UTC`
+      const depositDate = `${this.$moment.unix(this.txDepositInfo.timestamp).utc().format('lll')} +UTC`
+      const withdrawDate = `${this.$moment.unix(this.txWithdrawalInfo.timestamp).utc().format('lll')} +UTC`
 
       // return the previous moment locale
       this.$moment.locale(locale)
@@ -498,13 +481,11 @@ export default {
       doc.setFontStyle('bold').text(depositAmount, endFirstColumnX, 75, null, null, 'right')
       doc.text(withdrawalAmount, endX, 75, null, null, 'right')
 
-      const logo = require('@/assets/img/tornado_black.png')
       const imgLogo = new Image()
       imgLogo.src = logo
       doc.addImage(imgLogo, 'PNG', padding, padding, 42.8625, 11.1125)
 
       const markSize = 23.8125
-      const mark = require('@/assets/img/tornado_mark.png')
       const imgMark = new Image()
       imgMark.src = mark
       doc.addImage(imgMark, 'PNG', endX - markSize, 160, markSize, markSize)

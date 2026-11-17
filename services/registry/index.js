@@ -2,12 +2,13 @@ import namehash from 'eth-ens-namehash'
 import { BigNumber as BN } from 'bignumber.js'
 import { toChecksumAddress } from 'web3-utils'
 
-import { graph } from '@/services'
-import networkConfig from '@/networkConfig'
-import { REGISTRY_DEPLOYED_BLOCK } from '@/constants'
+import { graph } from '@/services/index.js'
+import networkConfig from '@/networkConfig.js'
+import { REGISTRY_DEPLOYED_BLOCK } from '@/constants/index.js'
 
 import AggregatorABI from '@/abis/Aggregator.abi.json'
 import RelayerRegistryABI from '@/abis/RelayerRegistry.abi.json'
+import { getIndexedDB } from '@/services/idb.js'
 
 const MIN_STAKE_BALANCE = '0x22B1C8C1227A00000' // 40 TORN
 
@@ -16,7 +17,7 @@ const subdomains = Object.values(networkConfig).map(({ ensSubdomainKey }) => ens
 class RelayerRegister {
   constructor(provider) {
     this.provider = provider
-    this.$indexedDB = window.$nuxt.$indexedDB(1)
+    this.$indexedDB = getIndexedDB(1)
 
     const { registryContract, aggregatorContract } = networkConfig.netId1
 
@@ -34,7 +35,7 @@ class RelayerRegister {
 
         return registeredEventsPart
       } catch (error) {
-        const midBlock = (fromBlock + toBlock) >> 1
+        const midBlock = (Number(fromBlock) + Number(toBlock)) >> 1
 
         if (midBlock - fromBlock < 2) {
           throw new Error(`error fetching events: ${error.message}`)
@@ -87,7 +88,8 @@ class RelayerRegister {
       })
 
       if (lastBlock) {
-        blockFrom = blockTo >= lastBlock.blockNumber ? lastBlock.blockNumber + 1 : blockTo
+        blockFrom =
+          Number(blockTo) >= Number(lastBlock.blockNumber) ? Number(lastBlock.blockNumber) + 1 : blockTo
       }
 
       return { blockFrom, blockTo, cachedEvents }
@@ -97,7 +99,6 @@ class RelayerRegister {
   }
 
   fetchRelayers = async () => {
-    // eslint-disable-next-line prefer-const
     let { blockFrom, blockTo, cachedEvents } = await this.getCachedData()
     let allRelayers = cachedEvents
 

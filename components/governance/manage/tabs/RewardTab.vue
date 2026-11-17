@@ -1,5 +1,5 @@
 <template>
-  <b-tab-item :label="$t('stakingReward.label.tab')">
+  <o-tab-item :label="$t('stakingReward.label.tab')">
     <div class="p">
       {{ $t('stakingReward.description') }}
     </div>
@@ -7,17 +7,17 @@
       {{ $t('stakingReward.label.input') }}:
       <span><number-format :value="reward" /> TORN</span>
     </div>
-    <b-button :disabled="notAvailableClaim" type="is-primary is-fullwidth" outlined @click="onClaim">
+    <o-button :disabled="notAvailableClaim" variant="primary" expanded outlined @click="onClaim">
       {{ $t('stakingReward.action') }}
-    </b-button>
-  </b-tab-item>
+    </o-button>
+  </o-tab-item>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { BigNumber as BN } from 'bignumber.js'
 
-import NumberFormat from '@/components/NumberFormat'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {

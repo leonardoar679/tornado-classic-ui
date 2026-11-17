@@ -9,9 +9,9 @@
         </div>
 
         <div class="proposals-box--tag-item">
-          <b-tooltip
+          <o-tooltip
             :label="ens.voter || voter"
-            position="is-top"
+            position="top"
             :multilined="ens.voter && ens.voter.length > 50"
           >
             <a
@@ -21,13 +21,13 @@
               class="tag proposals-box--id is-link"
               v-text="shortVoter"
             />
-          </b-tooltip>
+          </o-tooltip>
         </div>
 
         <div v-if="delegator" class="proposals-box--tag-item">
-          <b-tooltip
+          <o-tooltip
             :label="ens.delegator || delegator"
-            position="is-top"
+            position="top"
             :multilined="ens.delegator && ens.delegator.length > 50"
           >
             <a
@@ -37,7 +37,7 @@
               class="tag proposals-box--id is-link"
               v-text="$t('delegate')"
             />
-          </b-tooltip>
+          </o-tooltip>
         </div>
 
         <div class="proposals-box--tag-item is-percentage">
@@ -47,13 +47,13 @@
     </div>
 
     <div class="proposals-box--comment">
-      <b-icon
+      <o-icon
         :icon="support ? 'check' : 'close'"
         :type="support ? 'is-primary' : 'is-danger'"
         class="proposals-box--status-icon"
       />
       <span v-if="loading" class="proposals-box--skeleton">
-        <b-skeleton height="21" width="260" style="width: auto;" />
+        <o-skeleton height="21" width="260" style="width: auto" />
       </span>
       <template v-else>
         <span v-if="contact" class="proposals-box--title">{{ contact }}</span>
@@ -66,8 +66,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { sliceAddress, sliceEnsName } from '@/utils'
-import NumberFormat from '@/components/NumberFormat'
+import { sliceAddress, sliceEnsName } from '@/utils/index.js'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {

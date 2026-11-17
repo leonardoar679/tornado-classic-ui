@@ -1,12 +1,11 @@
-/* eslint-disable no-console */
-import Web3 from 'web3'
 import { toHex, fromWei } from 'web3-utils'
 import { GasPriceOracle } from 'gas-price-oracle'
 import { serialize } from '@ethersproject/transactions'
 
-import networkConfig from '@/networkConfig'
+import networkConfig from '@/networkConfig.js'
 import OvmGasPriceOracleABI from '@/abis/OvmGasPriceOracle.abi.json'
-import { DUMMY_NONCE, DUMMY_WITHDRAW_DATA } from '@/constants/variables'
+import { DUMMY_NONCE, DUMMY_WITHDRAW_DATA } from '@/constants/variables.js'
+import { createWeb3 } from '@/utils/web3.js'
 
 export const state = () => {
   return {
@@ -26,17 +25,19 @@ export const getters = {
       defaultFallbackGasPrices: gasPrices
     })
   },
-  ovmGasPriceOracleContract: (state, getters, rootState) => ({ netId }) => {
-    const config = networkConfig[`netId${netId}`]
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const address = config.ovmGasPriceOracleContract
-    if (address) {
-      const web3 = new Web3(url)
-      return new web3.eth.Contract(OvmGasPriceOracleABI, address)
-    }
+  ovmGasPriceOracleContract:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const config = networkConfig[`netId${netId}`]
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const address = config.ovmGasPriceOracleContract
+      if (address) {
+        const web3 = createWeb3(url)
+        return new web3.eth.Contract(OvmGasPriceOracleABI, address)
+      }
 
-    return null
-  },
+      return null
+    },
   l1Fee: (state) => {
     return state.l1Fee
   },
@@ -100,7 +101,7 @@ export const actions = {
           nonce: DUMMY_NONCE,
           data: DUMMY_WITHDRAW_DATA,
           gasPrice: getters.gasPrice,
-          to: tornadoProxyInstance._address
+          to: tornadoProxyInstance.options.address
         })
 
         const l1Fee = await oracleInstance.methods.getL1Fee(tx).call()

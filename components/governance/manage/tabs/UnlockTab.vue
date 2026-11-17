@@ -1,11 +1,11 @@
 <template>
-  <b-tab-item :label="$t('unlock')" header-class="unlock_torn_tab">
+  <o-tab-item :label="$t('unlock')" header-class="unlock_torn_tab">
     <div class="p">
       {{ $t('unlockTabDesc') }}
     </div>
-    <b-field :label="$t('amountToUnlock')" expanded>
-      <b-field :class="hasErrorAmount ? 'is-warning' : ''">
-        <b-input
+    <o-field :label="$t('amountToUnlock')" expanded>
+      <o-field :class="hasErrorAmount ? 'is-warning' : ''">
+        <o-input
           v-model="computedAmountToUnlock"
           data-test="input_torn_amount_to_unlock"
           step="0.01"
@@ -15,7 +15,7 @@
           :placeholder="$t('amount')"
           :use-html5-validation="false"
           expanded
-        ></b-input>
+        ></o-input>
         <div class="control has-button">
           <button
             class="button is-primary is-small is-outlined"
@@ -26,30 +26,31 @@
             {{ $t('max') }}
           </button>
         </div>
-      </b-field>
-    </b-field>
+      </o-field>
+    </o-field>
     <div class="label-with-value">
       {{ $t('lockedBalance') }}:
       <span><number-format data-test="info_locked_balance" :value="maxAmountToUnlock" /> TORN</span>
     </div>
-    <b-tooltip
+    <o-tooltip
       class="is-block"
       :label="unlockMsgErr"
-      position="is-top"
+      position="top"
       :active="!hasLockedBalance || !canWithdraw"
-      multilined
+      multiline
     >
-      <b-button
+      <o-button
         :disabled="disableUnlock"
-        type="is-primary is-fullwidth"
+        variant="primary"
+        expanded
         outlined
         data-test="button_unlock_torn"
         @click="onUnlock"
       >
         {{ $t('unlock') }}
-      </b-button>
-    </b-tooltip>
-  </b-tab-item>
+      </o-button>
+    </o-tooltip>
+  </o-tab-item>
 </template>
 
 <script>
@@ -57,8 +58,8 @@ import { fromWei } from 'web3-utils'
 import { BigNumber as BN } from 'bignumber.js'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import { debounce } from '@/utils'
-import NumberFormat from '@/components/NumberFormat'
+import { debounce } from '@/utils/index.js'
+import NumberFormat from '@/components/NumberFormat.vue'
 
 export default {
   components: {
@@ -87,7 +88,7 @@ export default {
       }
     },
     maxAmountToUnlock() {
-      return fromWei(this.lockedBalance)
+      return fromWei(this.lockedBalance, 'ether')
     },
     hasLockedBalance() {
       return !new BN(this.lockedBalance).isZero()

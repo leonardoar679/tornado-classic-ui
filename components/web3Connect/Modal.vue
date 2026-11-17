@@ -48,6 +48,7 @@ export default {
       required: true
     }
   },
+  emits: ['close'],
   computed: {
     isMetamask() {
       return window.ethereum?.isMetaMask

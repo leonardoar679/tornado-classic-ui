@@ -1,16 +1,12 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-console, import/order */
-import Web3 from 'web3'
-
-import networkConfig from '@/networkConfig'
-import { cachedEventsLength, eventsType } from '@/constants'
+import networkConfig from '@/networkConfig.js'
+import { cachedEventsLength, eventsType } from '@/constants/index.js'
 
 import MulticallABI from '@/abis/Multicall.json'
 import InstanceABI from '@/abis/Instance.abi.json'
 import TornadoProxyABI from '@/abis/TornadoProxy.abi.json'
 
-import { ACTION, ACTION_GAS } from '@/constants/variables'
-import { graph, treesInterface, EventsFactory } from '@/services'
+import { ACTION, ACTION_GAS } from '@/constants/variables.js'
+import { graph, treesInterface, EventsFactory } from '@/services/index.js'
 
 import {
   randomBN,
@@ -22,14 +18,15 @@ import {
   parseHexNote,
   checkCommitments,
   buffPedersenHash
-} from '@/utils'
+} from '@/utils/index.js'
 
-import { buildGroth16, download, getTornadoKeys } from './snark'
+import { buildGroth16, download, getTornadoKeys } from './snark.js'
+import { toWei, numberToHex, isAddress } from 'web3-utils'
+import { toBN } from '@/utils/bn.js'
+import { createWeb3 } from '@/utils/web3.js'
+import websnarkUtils from 'websnark/src/utils'
 
 let groth16
-
-const websnarkUtils = require('websnark/src/utils')
-const { toWei, numberToHex, toBN, isAddress } = require('web3-utils')
 
 const getStatisticStore = (acc, { tokens }) => {
   Object.entries(tokens).forEach(([currency, { instanceAddress }]) => {
@@ -74,18 +71,18 @@ const mutations = {
     state.prefix = prefix
   },
   SAVE_PROOF(state, { proof, args, note }) {
-    this._vm.$set(state.notes, note, { proof, args })
+    state.notes[note] = { proof, args }
   },
   REMOVE_PROOF(state, { note }) {
-    this._vm.$delete(state.notes, note)
+    delete state.notes[note]
   },
   SAVE_LAST_INDEX(state, { nextDepositIndex, anonymitySet, currency, amount }) {
     const currentState = state.statistic[currency][amount]
-    this._vm.$set(state.statistic[currency], `${amount}`, { ...currentState, nextDepositIndex, anonymitySet })
+    state.statistic[currency][`${amount}`] = { ...currentState, nextDepositIndex, anonymitySet }
   },
   SAVE_LAST_EVENTS(state, { latestDeposits, currency, amount }) {
     const currentState = state.statistic[currency][amount]
-    this._vm.$set(state.statistic[currency], `${amount}`, { ...currentState, latestDeposits })
+    state.statistic[currency][`${amount}`] = { ...currentState, latestDeposits }
   },
   SET_SELECTED_INSTANCE(state, selectedInstance) {
     state.selectedInstance = selectedInstance
@@ -94,13 +91,13 @@ const mutations = {
     state.selectedStatistic = selectedStatistic
   },
   SET_WITHDRAW_TYPE(state, { withdrawType }) {
-    this._vm.$set(state, 'withdrawType', withdrawType)
+    state['withdrawType'] = withdrawType
   },
   SAVE_ETH_TO_RECEIVE(state, { ethToReceive }) {
-    this._vm.$set(state, 'ethToReceive', ethToReceive)
+    state['ethToReceive'] = ethToReceive
   },
   SAVE_DEFAULT_ETH_TO_RECEIVE(state, { ethToReceive }) {
-    this._vm.$set(state, 'defaultEthToReceive', ethToReceive)
+    state['defaultEthToReceive'] = ethToReceive
   },
   SET_WITHDRAW_NOTE(state, withdrawNote) {
     state.withdrawNote = withdrawNote
@@ -113,31 +110,37 @@ const getters = {
     const { url } = rootState.settings[`netId${netId}`].rpc
     return new EventsFactory(url)
   },
-  instanceContract: (state, getters, rootState) => ({ currency, amount, netId }) => {
-    const config = networkConfig[`netId${netId}`]
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const address = config.tokens[currency].instanceAddress[amount]
-    const web3 = new Web3(url)
-    return new web3.eth.Contract(InstanceABI, address)
-  },
-  multicallContract: (state, getters, rootState) => ({ netId }) => {
-    const config = networkConfig[`netId${netId}`]
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const web3 = new Web3(url)
-    return new web3.eth.Contract(MulticallABI, config.multicall)
-  },
-  tornadoProxyContract: (state, getters, rootState) => ({ netId }) => {
-    const {
-      'tornado-proxy.contract.tornadocash.eth': tornadoProxy,
-      'tornado-router.contract.tornadocash.eth': tornadoRouter,
-      'tornado-proxy-light.contract.tornadocash.eth': tornadoProxyLight
-    } = networkConfig[`netId${netId}`]
+  instanceContract:
+    (state, getters, rootState) =>
+    ({ currency, amount, netId }) => {
+      const config = networkConfig[`netId${netId}`]
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const address = config.tokens[currency].instanceAddress[amount]
+      const web3 = createWeb3(url)
+      return new web3.eth.Contract(InstanceABI, address)
+    },
+  multicallContract:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const config = networkConfig[`netId${netId}`]
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const web3 = createWeb3(url)
+      return new web3.eth.Contract(MulticallABI, config.multicall)
+    },
+  tornadoProxyContract:
+    (state, getters, rootState) =>
+    ({ netId }) => {
+      const {
+        'tornado-proxy.contract.tornadocash.eth': tornadoProxy,
+        'tornado-router.contract.tornadocash.eth': tornadoRouter,
+        'tornado-proxy-light.contract.tornadocash.eth': tornadoProxyLight
+      } = networkConfig[`netId${netId}`]
 
-    const proxyContract = tornadoRouter || tornadoProxy || tornadoProxyLight
-    const { url } = rootState.settings[`netId${netId}`].rpc
-    const web3 = new Web3(url)
-    return new web3.eth.Contract(TornadoProxyABI, proxyContract)
-  },
+      const proxyContract = tornadoRouter || tornadoProxy || tornadoProxyLight
+      const { url } = rootState.settings[`netId${netId}`].rpc
+      const web3 = createWeb3(url)
+      return new web3.eth.Contract(TornadoProxyABI, proxyContract)
+    },
   currentContract: (state, getters) => (params) => {
     return getters.tornadoProxyContract(params)
   },
@@ -235,9 +238,11 @@ const getters = {
     const tokens = rootGetters['metamask/networkConfig'].tokens
     return tokens[state.selectedStatistic.currency].symbol
   },
-  lastEventIndex: (state) => ({ currency, amount }) => {
-    return state.statistic[currency][amount].anonymitySet
-  },
+  lastEventIndex:
+    (state) =>
+    ({ currency, amount }) => {
+      return state.statistic[currency][amount].anonymitySet
+    },
   latestDeposits: (state) => {
     const { currency, amount } = state.selectedStatistic
     return state.statistic[currency][amount].latestDeposits
@@ -282,7 +287,7 @@ const actions = {
       netId
     })
 
-    statistic = statistic.sort((a, b) => a.leafIndex - b.leafIndex)
+    statistic = statistic.sort((a, b) => Number(a.leafIndex) - Number(b.leafIndex))
 
     const latestDeposits = []
 
@@ -334,7 +339,7 @@ const actions = {
       netId,
       amount,
       currency,
-      fromBlock: lastBlock ? lastBlock.blockNumber + 1 : deployedBlock
+      fromBlock: lastBlock ? Number(lastBlock.blockNumber) + 1 : deployedBlock
     }
 
     const events = await dispatch('updateEvents', params)
@@ -401,7 +406,7 @@ const actions = {
       }
 
       commit('SAVE_DEPOSIT', { note, commitment: commitmentHex, prefix })
-      if (!contractInstance._address) {
+      if (!contractInstance.options.address) {
         throw new Error(this.app.i18n.t('networkIsNotSupported'))
       }
     } catch (e) {
@@ -460,9 +465,11 @@ const actions = {
       const hasCache = Boolean(cachedEvents && cachedEvents.length)
 
       if (hasCache) {
-        const [lastEvent] = cachedEvents.sort((a, b) => a.blockNumber - b.blockNumber).slice(-1)
+        const [lastEvent] = cachedEvents
+          .sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
+          .slice(-1)
 
-        deployedBlock = lastEvent.blockNumber + 1
+        deployedBlock = Number(lastEvent.blockNumber) + 1
       }
 
       const web3 = this.$provider.getWeb3(rpc.url)
@@ -494,7 +501,7 @@ const actions = {
       let fromBlock = deployedBlock
       let toBlock = deployedBlock + part
 
-      if (toBlock >= currentBlockNumber || toBlock === deployedBlock) {
+      if (Number(toBlock) >= Number(currentBlockNumber) || toBlock === deployedBlock) {
         toBlock = 'latest'
         numberParts = 1
       }
@@ -546,7 +553,7 @@ const actions = {
   async sendDeposit({ state, rootState, getters, rootGetters, dispatch, commit }, { isEncrypted }) {
     try {
       const { commitment, note, prefix } = state
-      // eslint-disable-next-line prefer-const
+
       let [, currency, amount, netId] = prefix.split('-')
       const config = networkConfig[`netId${netId}`]
       const contractInstance = getters.tornadoProxyContract({ netId })
@@ -582,8 +589,8 @@ const actions = {
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
-          to: contractInstance._address,
-          gas: numberToHex(gas + 50000),
+          to: contractInstance.options.address,
+          gas: numberToHex(Number(gas) + 50000),
           value: numberToHex(value),
           data
         },
@@ -806,8 +813,8 @@ const actions = {
         params: {
           data,
           value: args[5],
-          to: contractInstance._address,
-          gas: numberToHex(gas + 200000)
+          to: contractInstance.options.address,
+          gas: numberToHex(Number(gas) + 200000)
         },
         watcherParams: {
           title: { path: 'withdrawing', amount, currency },
@@ -881,7 +888,7 @@ const actions = {
 
       if (lastEvent) {
         const { nextDepositIndex } = state.statistic[note.currency][note.amount]
-        const depositsPast = nextDepositIndex - lastEvent.leafIndex - 1
+        const depositsPast = Number(nextDepositIndex) - Number(lastEvent.leafIndex) - 1
 
         const isSpent = await dispatch('checkSpentEventFromNullifier', note)
 
@@ -949,10 +956,7 @@ const actions = {
     const gasLimit = rootGetters['metamask/networkConfig'].tokens[currency].gasLimit
     const gasPrice = toBN(rootGetters['gasPrices/gasPrice'])
 
-    const ethToReceive = gasPrice
-      .mul(toBN(gasLimit))
-      .mul(toBN(2))
-      .toString()
+    const ethToReceive = gasPrice.mul(toBN(gasLimit)).mul(toBN(2)).toString()
     return ethToReceive
   },
   async setDefaultEthToReceive({ dispatch, commit }, { currency }) {

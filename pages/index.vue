@@ -1,45 +1,42 @@
 <template>
   <div>
-    <b-notification
+    <o-notification
       v-if="netId === 56"
       :active="isActiveNotification.binanceInternal"
       class="main-notification"
-      type="is-warning"
+      variant="warning"
       icon-pack="icon"
-      has-icon
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'binanceInternal' })"
     >
-      <i18n path="binanceInternalTxsNotification" />
-    </b-notification>
+      <i18n-t keypath="binanceInternalTxsNotification" />
+    </o-notification>
 
-    <b-notification
+    <o-notification
       :active="isActiveNotification.third"
       class="main-notification"
-      type="is-warning"
+      variant="warning"
       icon-pack="icon"
-      has-icon
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'third' })"
     >
-      <i18n path="trustBanner.trustLess">
-        <template v-slot:link>
+      <i18n-t keypath="trustBanner.trustLess">
+        <template #link>
           <a href="https://tornado.cash/">{{ $t('trustBanner.link') }}</a>
         </template>
-      </i18n>
-    </b-notification>
+      </i18n-t>
+    </o-notification>
 
-    <b-notification
+    <o-notification
       :active="isActiveNotification.first"
       class="main-notification"
-      type="is-info"
+      variant="info"
       icon-pack="icon"
-      has-icon
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'first' })"
     >
-      <i18n path="indexNotification">
-        <template v-slot:link>
+      <i18n-t keypath="indexNotification">
+        <template #link>
           <a
             href="https://twitter.com/TornadoCash/status/1204745639759884289"
             target="_blank"
@@ -47,21 +44,20 @@
             >{{ $t('indexNotificationLinkText') }}</a
           >
         </template>
-      </i18n>
-    </b-notification>
+      </i18n-t>
+    </o-notification>
 
-    <b-notification
+    <o-notification
       v-if="isEthLink"
       :active="isActiveNotification.ethLink"
       class="main-notification"
-      type="is-warning"
+      variant="warning"
       icon-pack="icon"
-      has-icon
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'ethLink' })"
     >
-      <i18n path="ethLinkBanner.notification">
-        <template v-slot:issue>
+      <i18n-t keypath="ethLinkBanner.notification">
+        <template #issue>
           <a
             href="https://discuss.ens.domains/t/eth-link-expiry/13899"
             target="_blank"
@@ -69,18 +65,18 @@
             >{{ $t('ethLinkBanner.issue') }}</a
           >
         </template>
-        <template v-slot:alternative>
+        <template #alternative>
           <a href="https://tornado.cash/">{{ $t('ethLinkBanner.alternative') }}</a>
         </template>
-      </i18n>
-    </b-notification>
+      </i18n-t>
+    </o-notification>
 
     <div class="columns">
       <div class="column is-half">
-        <b-tabs v-model="activeTab" class="is-tornado" :animated="false" @input="tabChanged">
+        <o-tabs v-model="activeTab" class="is-tornado" :animated="false" @change="tabChanged">
           <Deposit />
           <Withdraw :active-tab="activeTab" @get-key="onGetKey" />
-        </b-tabs>
+        </o-tabs>
       </div>
       <Statistics />
     </div>
@@ -88,13 +84,12 @@
   </div>
 </template>
 <script>
-/* eslint-disable no-console */
 import { mapState, mapGetters, mapActions } from 'vuex'
 
-import Txs from '@/components/Txs'
-import Deposit from '@/components/Deposit'
-import Statistics from '@/components/Statistics'
-import Withdraw from '@/components/withdraw/Withdraw'
+import Txs from '@/components/Txs.vue'
+import Deposit from '@/components/Deposit.vue'
+import Statistics from '@/components/Statistics.vue'
+import Withdraw from '@/components/withdraw/Withdraw.vue'
 
 export default {
   name: 'HomePage',

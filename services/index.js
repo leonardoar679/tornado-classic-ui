@@ -1,15 +1,14 @@
-import graph from './graph'
+import graph from './graph.js'
 
-export * from './mimc'
-export * from './bloom'
-export * from './registry'
-export * from './pedersen'
-export * from './merkleTree'
-export * from './events'
-export { default as graph } from './graph'
-export { default as schema } from './schema'
-export { default as walletConnectConnector } from './walletConnect'
-export * from './lookupAddress'
+export * from './mimc.js'
+export * from './bloom.js'
+export * from './registry/index.js'
+export * from './pedersen.js'
+export * from './merkleTree.js'
+export * from './events.js'
+export { default as graph } from './graph.js'
+export { default as schema } from './schema/index.js'
+export { default as walletConnectConnector } from './walletConnect.js'
+export * from './lookupAddress.js'
 
-// eslint-disable-next-line no-undef
 window.graph = graph
