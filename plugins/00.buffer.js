@@ -7,9 +7,9 @@ import { Buffer } from 'buffer'
  * uses Buffer.from/concat/alloc for note and encryption payloads.
  * The `assert` builtin used by websnark is polyfilled via vite resolve alias.
  *
- * Assigned at module scope, not inside the plugin setup: dependencies imported by
- * later plugins (e.g. circomlibjs via the store) read `Buffer` while their modules
- * are evaluated, which happens before any plugin setup function runs.
+ * Bundled dependencies get `Buffer` injected per module (`injectNodeGlobals` in
+ * nuxt.config.js); this global covers app modules served unbundled in dev.
+ * Assigned at module scope so it exists before later plugins import their modules.
  */
 if (typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = Buffer

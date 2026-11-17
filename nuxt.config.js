@@ -29,6 +29,12 @@ for (const key of ENV_KEYS) {
   envDefines[`process.env.${key}`] = JSON.stringify(process.env[key] ?? null)
 }
 
+// Webpack 4 gave every module that referenced the Node `Buffer` global its own
+// import of the polyfill. Dependencies such as circomlibjs read `Buffer` while their
+// module is evaluated, which in the production bundle happens before any app code
+// or Nuxt plugin runs, so a global assignment alone is too late.
+const injectNodeGlobals = { inject: { Buffer: ['buffer', 'Buffer'] } }
+
 export default defineNuxtConfig({
   ssr: false,
   srcDir: '.',
@@ -122,6 +128,9 @@ export default defineNuxtConfig({
 
   vite: {
     define: envDefines,
+    optimizeDeps: {
+      rolldownOptions: { transform: injectNodeGlobals }
+    },
     css: {
       preprocessorOptions: {
         scss: {
@@ -147,6 +156,7 @@ export default defineNuxtConfig({
       // splitting it further is a separate optimization, not a warning to chase
       chunkSizeWarningLimit: 3000,
       rolldownOptions: {
+        transform: injectNodeGlobals,
         onwarn(warning, warn) {
           // Node builtins (worker_threads, crypto, url, http, https, zlib) referenced
           // from Node-only branches in websnark/micro-ftch are externalized for
