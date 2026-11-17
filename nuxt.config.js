@@ -32,14 +32,20 @@ for (const key of ENV_KEYS) {
 export default defineNuxtConfig({
   ssr: false,
   srcDir: '.',
+  // Nuxt 2 served this repo from the classic 'static/' dir; keep that mapping so the
+  // proving keys / event caches / favicon ship in the build output (site root).
+  dir: { public: 'static' },
   devtools: { enabled: false },
   modules: ['@nuxt/eslint'],
 
   css: ['~/assets/styles/app.scss'],
 
   app: {
-    // Relative base so the built SPA works from any sub-path (IPFS gateways, custom roots)
-    baseURL: './',
+    // Relative base so the built SPA works from any sub-path (IPFS gateways, custom roots).
+    // `npm run deploy:cloudflare` overrides this to '/' via NUXT_APP_BASE_URL: the Workers
+    // SPA fallback serves index.html from any path, and a relative base would break
+    // asset URLs on multi-segment routes like /governance/proposal.
+    baseURL: process.env.NUXT_APP_BASE_URL || './',
     head: {
       title: 'Tornado.cash',
       htmlAttrs: { lang: 'en' },

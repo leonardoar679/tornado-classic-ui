@@ -1,0 +1,25 @@
+/**
+ * Cloudflare Workers deployment (static-assets Worker, no server code needed).
+ *
+ * Deploy:  npm run deploy:cloudflare   (requires `npx wrangler login` once,
+ *          or CLOUDFLARE_API_TOKEN in the environment)
+ * Preview: npm run preview:cloudflare  (local wrangler dev on http://localhost:8787)
+ *
+ * - `.output/public` is produced by `npm run build:cloudflare` (nuxt generate
+ *   with an absolute asset base — see scripts/buildCloudflare.mjs).
+ * - `not_found_handling: "single-page-application"` serves index.html for every
+ *   unknown path, so client-side routes (/compliance, /governance/...) survive
+ *   hard refreshes and deep links.
+ * - No `main` entry: this is a pure static-assets Worker. Add a `main` script
+ *   here later if server-side logic (custom headers, routing) is ever needed.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tornado-classic-ui",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./.output/public",
+    "not_found_handling": "single-page-application",
+    "html_handling": "auto-trailing-slash"
+  }
+}

@@ -19,7 +19,10 @@
     "update:encrypted": "node scripts/updateEncryptedEvents.js --network",
     "update:tree": "node scripts/updateTree.js --network",
     "ipfsUpload": "node scripts/ipfsUpload.js",
-    "deploy:ipfs": "npm run generate && npm run ipfsUpload"
+    "deploy:ipfs": "npm run generate && npm run ipfsUpload",
+    "build:cloudflare": "node scripts/buildCloudflare.mjs",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy",
+    "preview:cloudflare": "npm run build:cloudflare && wrangler dev"
   },
   "dependencies": {
     "@apollo/client": "^4.3.8",
@@ -72,6 +75,7 @@
     "recursive-fs": "^2.1.0",
     "sass": "^1.108.2",
     "vitest": "^5.1.0",
+    "wrangler": "^4.163.0",
     "zip-local": "^0.3.4"
   }
 }
