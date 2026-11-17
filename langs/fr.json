@@ -206,6 +206,7 @@
   "back": "Retour en arrière",
   "yourCurrentVote": "Votre vote actuel: {vote}",
   "currentResults": "Résultats actuels",
+  "freezeRisk": "{currency} est un jeton centralisé avec un risque de gel.",
   "information": "Infos",
   "amountToLock": "Montant à verrouiller",
   "amountToUnlock": "Montant à déverrouiller",

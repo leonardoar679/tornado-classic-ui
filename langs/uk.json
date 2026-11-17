@@ -205,6 +205,7 @@
   "back": "Назад",
   "yourCurrentVote": "Ваш голос: {vote}",
   "currentResults": "Поточні результати",
+  "freezeRisk": "{currency} - це централізований токен із ризиком заморожування.",
   "information": "Інфо",
   "amountToLock": "Сума для блокування",
   "amountToUnlock": "Сума для розблокування",

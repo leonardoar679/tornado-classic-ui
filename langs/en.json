@@ -207,6 +207,7 @@
   "yourCurrentVote": "Your current vote: {vote}",
   "currentResults": "Current results",
   "information": "Info",
+  "freezeRisk": "{currency} is a centralized token with the risk of freezing.",
   "amountToLock": "Amount to lock",
   "amountToUnlock": "Amount to unlock",
   "lockedBalance": "Locked balance",

@@ -206,6 +206,7 @@
   "back": "后退",
   "yourCurrentVote": "您当前的投票：{vote}",
   "currentResults": "当前结果",
+  "freezeRisk": "{currency}是中心化代币，存在冻结风险。",
   "information": "信息",
   "amountToLock": "要锁入的余额",
   "amountToUnlock": "要解锁的余额",

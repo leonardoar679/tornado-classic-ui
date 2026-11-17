@@ -206,6 +206,7 @@
   "back": "Geri",
   "yourCurrentVote": "Mevcut oyunuz: {vote}",
   "currentResults": "Mevcut durum",
+  "freezeRisk": "{currency} merkezileştirilmiş bir token olup dondurulma riski taşır.",
   "information": "Bilgi",
   "amountToLock": "Kilitli miktar",
   "amountToUnlock": "Kilitsiz miktar",

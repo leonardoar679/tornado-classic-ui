@@ -61,7 +61,43 @@ function mountHost(HostComponent, props) {
     }
   }
 
-  return { close, promise }
+  // Vue 2 / Buefy call sites use `modal.$on('close', handler)`. Vue 3 removed
+  // instance event emitters, so bridge close via the host promise.
+  const closeHandlers = []
+  promise.then(() => {
+    for (const handler of closeHandlers) {
+      try {
+        handler()
+      } catch (err) {
+        console.error('modal close handler', err)
+      }
+    }
+  })
+
+  return {
+    close,
+    promise,
+    $on(event, handler) {
+      if (event === 'close' && typeof handler === 'function') {
+        closeHandlers.push(handler)
+      }
+      return this
+    },
+    $off(event, handler) {
+      if (event !== 'close') {
+        return this
+      }
+      if (!handler) {
+        closeHandlers.length = 0
+        return this
+      }
+      const idx = closeHandlers.indexOf(handler)
+      if (idx !== -1) {
+        closeHandlers.splice(idx, 1)
+      }
+      return this
+    }
+  }
 }
 
 /**

@@ -30,9 +30,16 @@
             </button>
           </o-tooltip>
         </template>
-        <o-steps v-model="currentStep" size="small" :has-navigation="false" @change="changeAmount">
+        <o-steps
+          v-model="currentStep"
+          size="small"
+          :has-navigation="false"
+          @change="changeAmount"
+          @update:model-value="changeAmount"
+        >
           <template v-for="({ amount, address }, key) in amounts" :key="key">
             <o-step-item
+              :value="key"
               :label="shortenAmount(amount)"
               :clickable="address !== ''"
               :step-class="`token-${selectedToken}-${amount}`"
@@ -48,7 +55,7 @@
       expanded
       :loading="isDepositBtnClicked"
       data-test="button_deposit"
-      @click="onDeposit"
+      @click="onPreDeposit"
     >
       {{ $t('depositButton') }}
     </o-button>
@@ -60,6 +67,7 @@ import { mapGetters } from 'vuex'
 import ApproveModalBox from '@/components/ApproveModalBox.vue'
 import BalanceModalBox from '@/components/BalanceModalBox.vue'
 import DepositModalBox from '@/components/DepositModalBox.vue'
+import RiskModalBox from '@/components/RiskModalBox.vue'
 
 import { ConnectButton } from '@/components/web3Connect/index.js'
 
@@ -128,7 +136,12 @@ export default {
       return `${this.$n(n, 'compact')} ${this.tokens[this.selectedToken].symbol}`
     },
     changeAmount(i) {
-      this.selectedAmount = Number(this.amounts[i].amount)
+      const index = Number(i)
+      if (!Number.isFinite(index) || !this.amounts[index]) {
+        return
+      }
+      this.currentStep = index
+      this.selectedAmount = Number(this.amounts[index].amount)
     },
     sortAmounts(currency = this.selectedToken) {
       this.amounts = Object.entries(this.tokens[currency].instanceAddress)
@@ -190,6 +203,19 @@ export default {
         approveModal.$on('close', onApproval)
       }
       this.isDepositBtnClicked = false
+    },
+    onPreDeposit() {
+      if (this.selectedToken.toUpperCase() === 'USDT' || this.selectedToken.toUpperCase() === 'USDC') {
+        const riskModal = this.$buefy.modal.open({
+          parent: this,
+          component: RiskModalBox,
+          hasModalCard: true,
+          width: 440
+        })
+        riskModal.$on('close', this.onDeposit)
+      } else {
+        this.onDeposit()
+      }
     }
   }
 }

@@ -915,8 +915,10 @@ const actions = {
       })
 
       if (lastEvent) {
-        const { nextDepositIndex } = state.statistic[note.currency][note.amount]
-        const depositsPast = Number(nextDepositIndex) - Number(lastEvent.leafIndex) - 1
+        const poolStats = state.statistic?.[note.currency]?.[note.amount] || {}
+        const nextDepositIndex = poolStats.nextDepositIndex
+        const depositsPast =
+          nextDepositIndex != null ? Number(nextDepositIndex) - Number(lastEvent.leafIndex) - 1 : 0
 
         const isSpent = await dispatch('checkSpentEventFromNullifier', note)
 

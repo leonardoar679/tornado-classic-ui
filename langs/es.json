@@ -206,6 +206,7 @@
   "back": "Volver",
   "yourCurrentVote": "Su voto actual: {vote}",
   "currentResults": "Estado actual",
+  "freezeRisk": "{currency} es un token centralizado con riesgo de congelación.",
   "information": "Info",
   "amountToLock": "Cantidad a bloquear",
   "amountToUnlock": "Cantidad a desbloquear",
