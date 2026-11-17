@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 $control-height: 2.857em;
 $control-border-width: 1px;
 $control-padding-vertical: calc(0.429em - #{$control-border-width});
@@ -72,8 +74,8 @@ $button-focus-border-color: $primary;
 $button-focus-color: $primary;
 $button-focus-box-shadow-color: rgba($primary, 0.25);
 
-$button-active-border-color: darken($primary, 10%);
-$button-active-color: darken($primary, 10%);
+$button-active-border-color: color.adjust($primary, $lightness: -10%);
+$button-active-color: color.adjust($primary, $lightness: -10%);
 
 $button-text-color: $primary;
 $button-text-hover-background-color: $primary;

@@ -50,15 +50,15 @@
     }
 
     &.is-metamask:before {
-      background-image: url('../img/metamask-fox.svg');
+      background-image: url('../../img/metamask-fox.svg');
     }
 
     &.is-walletConnect:before {
-      background-image: url('../img/walletConnect.svg');
+      background-image: url('../../img/walletConnect.svg');
     }
 
     &.is-generic:before {
-      background-image: url('../img/ethereum.svg');
+      background-image: url('../../img/ethereum.svg');
     }
   }
 

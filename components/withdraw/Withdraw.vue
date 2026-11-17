@@ -521,13 +521,13 @@ export default {
     animation-fill-mode: backwards;
   }
 
-  ::v-deep span {
+  :deep(span) {
     position: relative;
     z-index: 2;
   }
 
   &-active {
-    ::v-deep span,
+    :deep(span),
     &:after {
       filter: invert(0.5);
     }

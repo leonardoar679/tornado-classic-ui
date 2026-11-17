@@ -15,7 +15,7 @@
 
 @mixin flag-icon($country) {
   .flag-icon-#{$country} {
-    background-image: url('../img/flags/#{$country}.svg');
+    background-image: url('../../img/flags/#{$country}.svg');
   }
 }
 $countries: es fr gb ru tr uk cn;

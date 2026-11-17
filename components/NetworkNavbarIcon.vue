@@ -56,7 +56,7 @@ export default {
     background-color: #393939;
   }
 
-  ::v-deep .icon {
+  :deep(.icon) {
     height: 2.857em;
     width: 2.857em;
     background-color: #0f1f19;

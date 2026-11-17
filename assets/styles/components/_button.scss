@@ -260,7 +260,7 @@
     }
 
     &.network {
-      background-color: darken($primary, 80);
+      background-color: #000; // legacy darken($primary, 80) clamped to black
       border-color: $primary;
 
       .trnd {

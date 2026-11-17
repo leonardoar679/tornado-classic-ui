@@ -170,6 +170,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 .network {
   color: white;
   display: flex;
@@ -179,11 +181,11 @@ export default {
   margin-top: 1rem;
 
   :deep(.is-dark) {
-    background-color: darken(#ff8a00, 15);
+    background-color: color.adjust(#ff8a00, $lightness: -15%);
     font-size: 0.9rem;
 
     &:hover {
-      background-color: darken(#ff8a00, 10);
+      background-color: color.adjust(#ff8a00, $lightness: -10%);
     }
   }
 }

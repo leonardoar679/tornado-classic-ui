@@ -111,7 +111,7 @@ export default {
   .network-icon {
     margin-right: 12px;
 
-    ::v-deep .trnd {
+    :deep(.trnd) {
       height: 1.571rem;
       width: 1.571rem;
     }

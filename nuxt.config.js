@@ -119,6 +119,17 @@ export default defineNuxtConfig({
 
   vite: {
     define: envDefines,
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // Third-party Sass deprecation noise, silenced until the SCSS suite is
+          // migrated off the Buefy-style @import cascade (a full @use rewrite):
+          // - import: our deliberate @import cascade + Bulma 1.x internals
+          // - global-builtin / if-function: Bulma 1.x utilities (string.length, if())
+          silenceDeprecations: ['import', 'global-builtin', 'if-function']
+        }
+      }
+    },
     resolve: {
       alias: {
         // websnark requires 'assert' at module level and calls it while proving;
@@ -128,7 +139,31 @@ export default defineNuxtConfig({
       }
     },
     build: {
-      assetsInlineLimit: 25000
+      assetsInlineLimit: 25000,
+      // the entry bundle legitimately embeds the zk crypto/proof stack (~3 MB);
+      // splitting it further is a separate optimization, not a warning to chase
+      chunkSizeWarningLimit: 3000,
+      rolldownOptions: {
+        onwarn(warning, warn) {
+          // Node builtins (worker_threads, crypto, url, http, https, zlib) referenced
+          // from Node-only branches in websnark/micro-ftch are externalized for
+          // browser compatibility by design - those branches never run in a browser.
+          if (warning?.message?.includes('externalized for browser compatibility')) {
+            return
+          }
+          // direct eval() inside the pinned snarkjs git fork (witness generation);
+          // the fork is protocol-critical and intentionally not upgradeable
+          if (warning?.code === 'EVAL' || warning?.message?.includes('direct eval')) {
+            return
+          }
+          warn(warning)
+        },
+        checks: {
+          // build-speed diagnostic only ("callbacks ran for X% of the build"),
+          // no code-quality signal
+          bundlerTimings: false
+        }
+      }
     }
   },
 

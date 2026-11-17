@@ -4,41 +4,41 @@
   background-size: contain;
 
   &-info {
-    background-image: url('../img/icons/info.svg');
+    background-image: url('../../img/icons/info.svg');
   }
   &-update {
-    background-image: url('../img/icons/refresh.svg');
+    background-image: url('../../img/icons/refresh.svg');
   }
   &-eye {
-    background-image: url('../img/icons/eye.svg');
+    background-image: url('../../img/icons/eye.svg');
   }
   &-copy {
-    background-image: url('../img/icons/copy.svg');
+    background-image: url('../../img/icons/copy.svg');
   }
   &-save {
-    background-image: url('../img/icons/save.svg');
+    background-image: url('../../img/icons/save.svg');
   }
   &-close {
-    background-image: url('../img/icons/close.svg');
+    background-image: url('../../img/icons/close.svg');
   }
   &-link {
-    background-image: url('../img/icons/link.svg');
+    background-image: url('../../img/icons/link.svg');
   }
 
   &.information {
-    background-image: url('../img/icons/warning.svg');
+    background-image: url('../../img/icons/warning.svg');
   }
 
   &.alert {
-    background-image: url('../img/icons/alert.svg');
+    background-image: url('../../img/icons/alert.svg');
   }
 
   &-chevron-up {
-    background-image: url('../img/icons/chevron-up.svg');
+    background-image: url('../../img/icons/chevron-up.svg');
   }
 
   &-arrow-up {
-    background-image: url('../img/icons/arrow-up.svg');
+    background-image: url('../../img/icons/arrow-up.svg');
   }
 
   &.is-desc {
@@ -91,49 +91,49 @@
   }
 
   &-arrow-down {
-    mask-image: url('../img/icons/arrow-down.svg');
+    mask-image: url('../../img/icons/arrow-down.svg');
   }
 
   &-arrow-up {
     transform: rotate(180deg);
-    mask-image: url('../img/icons/arrow-down.svg');
+    mask-image: url('../../img/icons/arrow-down.svg');
   }
 
   &-arrow-up-down {
-    mask-image: url('../img/icons/arrow-up-down.svg');
+    mask-image: url('../../img/icons/arrow-up-down.svg');
   }
 
   &-tool {
-    mask-image: url('../img/icons/tool.svg');
+    mask-image: url('../../img/icons/tool.svg');
   }
 
   &-alert {
-    mask-image: url('../img/icons/warning.svg');
+    mask-image: url('../../img/icons/warning.svg');
   }
 
   &-plus {
-    mask-image: url('../img/icons/plus.svg');
+    mask-image: url('../../img/icons/plus.svg');
   }
 
   &-close {
-    mask-image: url('../img/icons/close.svg');
+    mask-image: url('../../img/icons/close.svg');
   }
 
   &-check {
-    mask-image: url('../img/icons/check.svg');
+    mask-image: url('../../img/icons/check.svg');
   }
 
   &-arrow-left {
-    mask-image: url('../img/icons/arrow-left.svg');
+    mask-image: url('../../img/icons/arrow-left.svg');
   }
 
   &-arrow-right {
-    mask-image: url('../img/icons/arrow-left.svg');
+    mask-image: url('../../img/icons/arrow-left.svg');
     transform: rotate(-180deg);
   }
 
   &-logo {
-    mask-image: url('../img/logo.svg');
+    mask-image: url('../../img/logo.svg');
   }
 
   &-loading {
@@ -175,7 +175,7 @@
       height: 2.286rem;
       width: 2.286rem;
     }
-    background-image: url('../img/icons/info.svg');
+    background-image: url('../../img/icons/info.svg');
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 100%;
@@ -185,7 +185,7 @@
       height: 2.286rem;
       width: 2.286rem;
     }
-    background-image: url('../img/icons/notice/success.svg');
+    background-image: url('../../img/icons/notice/success.svg');
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 100%;
@@ -195,7 +195,7 @@
       height: 2.286rem;
       width: 2.286rem;
     }
-    background-image: url('../img/icons/notice/warning.svg');
+    background-image: url('../../img/icons/notice/warning.svg');
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 100%;
@@ -206,7 +206,7 @@
       height: 2.286rem;
       width: 2.286rem;
     }
-    background-image: url('../img/icons/notice/danger.svg');
+    background-image: url('../../img/icons/notice/danger.svg');
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 100%;
@@ -214,59 +214,59 @@
   }
 
   &-more {
-    mask-image: url('../img/icons/more.svg');
+    mask-image: url('../../img/icons/more.svg');
   }
 
   &-copy {
-    mask-image: url('../img/icons/copy.svg');
+    mask-image: url('../../img/icons/copy.svg');
   }
 
   &-decrypt {
-    mask-image: url('../img/icons/decrypt.svg');
+    mask-image: url('../../img/icons/decrypt.svg');
   }
 
   &-remove {
-    mask-image: url('../img/icons/remove.svg');
+    mask-image: url('../../img/icons/remove.svg');
   }
 
   &-account {
-    mask-image: url('../img/icons/account.svg');
+    mask-image: url('../../img/icons/account.svg');
   }
 
   &-astronaut {
-    mask-image: url('../img/icons/astronaut.svg');
+    mask-image: url('../../img/icons/astronaut.svg');
   }
 
   &-account-key {
-    mask-image: url('../img/icons/account/key.svg');
+    mask-image: url('../../img/icons/account/key.svg');
   }
 
   &-account-notes {
-    mask-image: url('../img/icons/account/notes.svg');
+    mask-image: url('../../img/icons/account/notes.svg');
   }
 
   &-account-raw {
-    mask-image: url('../img/icons/account/raw.svg');
+    mask-image: url('../../img/icons/account/raw.svg');
   }
 
   &-account-recover {
-    mask-image: url('../img/icons/account/recover.svg');
+    mask-image: url('../../img/icons/account/recover.svg');
   }
 
   &-account-remove {
-    mask-image: url('../img/icons/account/remove.svg');
+    mask-image: url('../../img/icons/account/remove.svg');
   }
 
   &-account-rpc {
-    mask-image: url('../img/icons/account/rpc.svg');
+    mask-image: url('../../img/icons/account/rpc.svg');
   }
 
   &-account-setup {
-    mask-image: url('../img/icons/account/setup.svg');
+    mask-image: url('../../img/icons/account/setup.svg');
   }
 
   &-account-wallet {
-    mask-image: url('../img/icons/account/wallet.svg');
+    mask-image: url('../../img/icons/account/wallet.svg');
   }
 
   &-stats {
@@ -298,95 +298,95 @@
   }
 
   &-account {
-    mask-image: url('../img/icons/account.svg');
+    mask-image: url('../../img/icons/account.svg');
   }
 
   &-astronaut {
-    mask-image: url('../img/icons/astronaut.svg');
+    mask-image: url('../../img/icons/astronaut.svg');
   }
 
   &-ethereum-mainnet {
-    mask-image: url('../img/icons/ethereum.svg');
+    mask-image: url('../../img/icons/ethereum.svg');
   }
 
   &-ethereum-goerli {
-    mask-image: url('../img/icons/goerli.svg');
+    mask-image: url('../../img/icons/goerli.svg');
   }
 
   &-optimism {
-    mask-image: url('../img/icons/optimism.svg');
+    mask-image: url('../../img/icons/optimism.svg');
   }
 
   &-arbitrum-one {
-    mask-image: url('../img/icons/arbitrum.svg');
+    mask-image: url('../../img/icons/arbitrum.svg');
   }
 
   &-binance-smart-chain {
-    mask-image: url('../img/icons/binance.svg');
+    mask-image: url('../../img/icons/binance.svg');
   }
 
   &-polygon-matic-network {
-    mask-image: url('../img/icons/polygon.svg');
+    mask-image: url('../../img/icons/polygon.svg');
   }
 
   &-gnosis-chain {
-    mask-image: url('../img/icons/gnosis.svg');
+    mask-image: url('../../img/icons/gnosis.svg');
   }
 
   &-avalanche-mainnet {
-    mask-image: url('../img/icons/avalanche.svg');
+    mask-image: url('../../img/icons/avalanche.svg');
   }
 
   &-account-key {
-    mask-image: url('../img/icons/account/key.svg');
+    mask-image: url('../../img/icons/account/key.svg');
   }
 
   &-account-notes {
-    mask-image: url('../img/icons/account/notes.svg');
+    mask-image: url('../../img/icons/account/notes.svg');
   }
 
   &-account-raw {
-    mask-image: url('../img/icons/account/raw.svg');
+    mask-image: url('../../img/icons/account/raw.svg');
   }
 
   &-account-recover {
-    mask-image: url('../img/icons/account/recover.svg');
+    mask-image: url('../../img/icons/account/recover.svg');
   }
 
   &-account-remove {
-    mask-image: url('../img/icons/account/remove.svg');
+    mask-image: url('../../img/icons/account/remove.svg');
   }
 
   &-account-rpc {
-    mask-image: url('../img/icons/account/rpc.svg');
+    mask-image: url('../../img/icons/account/rpc.svg');
   }
 
   &-account-setup {
-    mask-image: url('../img/icons/account/setup.svg');
+    mask-image: url('../../img/icons/account/setup.svg');
   }
 
   &-account-wallet {
-    mask-image: url('../img/icons/account/wallet.svg');
+    mask-image: url('../../img/icons/account/wallet.svg');
   }
 
   &-account-file {
-    mask-image: url('../img/icons/account/file.svg');
+    mask-image: url('../../img/icons/account/file.svg');
   }
 
   &-account-balance {
-    mask-image: url('../img/icons/account/balance.svg');
+    mask-image: url('../../img/icons/account/balance.svg');
   }
 
   &-metamask {
-    mask-image: url('../img/icons/metamask.svg');
+    mask-image: url('../../img/icons/metamask.svg');
   }
 
   &-walletConnect {
-    mask-image: url('../img/walletConnect.svg');
+    mask-image: url('../../img/walletConnect.svg');
   }
 
   &-open-book {
-    mask-image: url('../img/icons/open-book.svg');
+    mask-image: url('../../img/icons/open-book.svg');
   }
 }
 

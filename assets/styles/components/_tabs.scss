@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 .b-tabs.is-tornado {
   display: flex;
   flex-direction: column;
@@ -45,11 +47,11 @@
           }
 
           &:hover {
-            background-color: lighten(#0e1f17, 10%);
+            background-color: color.adjust(#0e1f17, $lightness: 10%);
 
             &:after,
             &:before {
-              background-color: lighten(#0e1f17, 10%);
+              background-color: color.adjust(#0e1f17, $lightness: 10%);
             }
           }
         }
@@ -201,7 +203,7 @@
     fieldset[disabled] {
       .withdraw-address {
         .fee {
-          color: darken(#7b7b7b, 20%);
+          color: color.adjust(#7b7b7b, $lightness: -20%);
         }
       }
     }
