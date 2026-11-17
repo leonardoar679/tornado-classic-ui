@@ -6,7 +6,9 @@ export default defineConfig({
   plugins: [vue()],
   test: {
     environment: 'happy-dom',
-    include: ['tests/**/*.spec.js']
+    include: ['tests/**/*.spec.js'],
+    setupFiles: ['tests/setup/globals.js'],
+    testTimeout: 300000
   },
   resolve: {
     alias: {

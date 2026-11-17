@@ -11,4 +11,7 @@ export { default as schema } from './schema/index.js'
 export { default as walletConnectConnector } from './walletConnect.js'
 export * from './lookupAddress.js'
 
-window.graph = graph
+// debug hook, browser only
+if (typeof window !== 'undefined') {
+  window.graph = graph
+}
