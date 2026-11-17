@@ -1,5 +1,5 @@
 <template>
-  <o-tooltip position="bottom" class="is-dark-tooltip" :triggers="[]">
+  <o-tooltip position="bottom" variant="dark-tooltip" :open-on-hover="false">
     <template #content>
       <template v-if="isLoggedIn">
         <p>{{ $t('web3connected') }}</p>
@@ -10,7 +10,7 @@
       </template>
       <template v-else>
         <p>{{ $t('notConnected') }}</p>
-        <connect-button type="is-primary-link mb-0" />
+        <connect-button variant="" class="is-primary-link mb-0" />
       </template>
     </template>
     <o-button class="is-nav-icon" :icon-left="wallet" :class="{ [wallet]: isLoggedIn }"></o-button>

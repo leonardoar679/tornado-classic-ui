@@ -45,7 +45,7 @@
       <div class="column is-status" :data-label="$t('status')">{{ status }}</div>
 
       <div class="column column-buttons">
-        <o-tooltip :active="activeCopyTooltip" :label="tooltipCopy" position="left" multiline>
+        <o-tooltip :disabled="!activeCopyTooltip" :label="tooltipCopy" position="left" multiline>
           <o-button
             variant="primary"
             class="hide-icon-desktop"

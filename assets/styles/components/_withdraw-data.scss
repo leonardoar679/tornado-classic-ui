@@ -3,7 +3,7 @@
   width: 100%;
   line-height: 1;
 
-  .b-tooltip {
+  .tooltip {
     .tooltip-content {
       line-height: 1.5;
     }
@@ -62,7 +62,7 @@
       }
     }
 
-    .b-tooltip {
+    .tooltip {
       flex-shrink: 0;
 
       &:after {

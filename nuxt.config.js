@@ -35,6 +35,10 @@ for (const key of ENV_KEYS) {
 // or Nuxt plugin runs, so a global assignment alone is too late.
 const injectNodeGlobals = { inject: { Buffer: ['buffer', 'Buffer'] } }
 
+// Builds inline the fonts into the CSS (see `assetsInlineLimit`), but the dev server
+// serves them as files, which `font-src data:` alone would block
+const fontSrc = process.env.NODE_ENV === 'development' ? "'self' data:" : 'data:'
+
 export default defineNuxtConfig({
   ssr: false,
   srcDir: '.',
@@ -57,13 +61,13 @@ export default defineNuxtConfig({
     baseURL: process.env.NUXT_APP_BASE_URL || '/',
     head: {
       title: 'Tornado.cash',
-      htmlAttrs: { lang: 'en' },
+      // The design is dark-only: pin Bulma's dark scheme instead of following the OS setting
+      htmlAttrs: { lang: 'en', 'data-theme': 'dark' },
       meta: [
         { charset: 'utf-8' },
         {
           'http-equiv': 'Content-Security-Policy',
-          content:
-            "img-src 'self' data:;font-src data:;style-src 'self' 'unsafe-inline';connect-src *;script-src 'self' 'unsafe-eval' 'unsafe-inline';default-src 'self';object-src 'none';base-uri 'none';child-src blob:;worker-src blob:;"
+          content: `img-src 'self' data:;font-src ${fontSrc};style-src 'self' 'unsafe-inline';connect-src *;script-src 'self' 'unsafe-eval' 'unsafe-inline';default-src 'self';object-src 'none';base-uri 'none';child-src blob:;worker-src blob:;`
         },
         {
           name: 'Referer-Policy',

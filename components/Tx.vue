@@ -37,7 +37,7 @@
       <div class="column is-status" :data-label="$t('status')">{{ status }}</div>
 
       <div class="column column-buttons">
-        <o-tooltip :active="!!tx.note" :label="tooltipShareUrl" position="left">
+        <o-tooltip :disabled="!tx.note" :label="tooltipShareUrl" position="left">
           <o-button
             v-clipboard:copy="`${tx.prefix}-${tx.note}`"
             v-clipboard:success="onCopyLink"

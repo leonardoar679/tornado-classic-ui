@@ -97,7 +97,7 @@
     }
 
     @include until(375px) {
-      .b-tooltip.is-top.is-multiline.is-large:after {
+      .tooltip.is-top.is-multiline.is-large:after {
         width: 100%;
       }
     }
@@ -171,7 +171,7 @@
     }
 
     .buttons {
-      .b-tooltip {
+      .tooltip {
         margin-bottom: 0.5rem;
 
         .button {

@@ -5,7 +5,9 @@
       :active="isActiveNotification.binanceInternal"
       class="main-notification"
       variant="warning"
+      type="warning"
       icon-pack="icon"
+      closeable
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'binanceInternal' })"
     >
@@ -16,7 +18,9 @@
       :active="isActiveNotification.third"
       class="main-notification"
       variant="warning"
+      type="warning"
       icon-pack="icon"
+      closeable
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'third' })"
     >
@@ -31,7 +35,9 @@
       :active="isActiveNotification.first"
       class="main-notification"
       variant="info"
+      type="info"
       icon-pack="icon"
+      closeable
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'first' })"
     >
@@ -52,7 +58,9 @@
       :active="isActiveNotification.ethLink"
       class="main-notification"
       variant="warning"
+      type="warning"
       icon-pack="icon"
+      closeable
       :aria-close-label="$t('closeNotification')"
       @close="disableNotification({ key: 'ethLink' })"
     >
@@ -74,8 +82,8 @@
     <div class="columns">
       <div class="column is-half">
         <o-tabs v-model="activeTab" class="is-tornado" :animated="false" @change="tabChanged">
-          <Deposit />
-          <Withdraw :active-tab="activeTab" @get-key="onGetKey" />
+          <Deposit :value="0" />
+          <Withdraw :value="1" :active-tab="activeTab" @get-key="onGetKey" />
         </o-tabs>
       </div>
       <Statistics />

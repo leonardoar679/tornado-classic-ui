@@ -1,12 +1,12 @@
 <template>
-  <o-tab-item :label="$t('withdraw')" header-class="button_tab_withdraw">
+  <o-tab-item :label="$t('withdraw')" tab-class="button_tab_withdraw">
     <div class="field">
       <div class="label-with-buttons">
         <div class="label">
           {{ $t('note') }}
           <o-tooltip
             :label="$t('noteTooltip')"
-            size="small"
+            class="is-small"
             position="right"
             multiline
             data-test="enter_note_info"
@@ -23,7 +23,7 @@
           rel="noopener noreferrer"
           class="button is-icon"
         >
-          <o-tooltip :label="$t('depositTransactionOnEtherscan')" size="small" position="left" multiline>
+          <o-tooltip :label="$t('depositTransactionOnEtherscan')" class="is-small" position="left" multiline>
             <LinkIcon />
           </o-tooltip>
         </a>
@@ -33,7 +33,7 @@
           data-test="withdrawal_settings_button"
           @click="onSettings"
         >
-          <o-tooltip :label="$t('withdrawalSettings')" size="small" position="right" multiline>
+          <o-tooltip :label="$t('withdrawalSettings')" class="is-small" position="right" multiline>
             <SettingsIcon />
           </o-tooltip>
         </button>
@@ -42,7 +42,7 @@
       <o-input
         v-model="withdrawNote"
         :placeholder="$t('pleaseEnterYourNote')"
-        :custom-class="hasErrorNote ? hasErrorNote.type : 'is-primary'"
+        :input-class="hasErrorNote ? hasErrorNote.type : 'is-primary'"
         data-test="enter_note_field"
       ></o-input>
       <div v-if="hasErrorNote" class="help" :class="hasErrorNote.type">
@@ -59,11 +59,11 @@
         <div class="withdraw-data-item">
           {{ $t('timePassed') }}
           <o-tooltip
-            :active="notEnoughPassedTime"
+            :disabled="!notEnoughPassedTime"
             :label="$t('timePassedTooltip')"
             position="left"
             multiline
-            size="large"
+            class="is-large"
             :class="{ 'has-low-anonymity': notEnoughPassedTime }"
           >
             <span>{{ timePassed }}</span>
@@ -72,11 +72,11 @@
         <div class="withdraw-data-item">
           {{ $t('subsequentDeposits') }}
           <o-tooltip
-            :active="notEnoughDeposits"
+            :disabled="!notEnoughDeposits"
             :label="$t('subsequentDepositsTooltip')"
             position="left"
             multiline
-            size="large"
+            class="is-large"
             :class="{ 'has-low-anonymity': notEnoughDeposits }"
           >
             <span>{{ $t('userDeposit', depositsPast) }}</span>
@@ -99,7 +99,7 @@
         <o-input
           v-model="withdrawAddress"
           :placeholder="$t('pleasePasteAddressHere')"
-          :size="!withdrawAddress ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
+          :input-class="!withdrawAddress ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
           data-test="recipient_address_field"
         ></o-input>
         <p class="help">
@@ -117,14 +117,14 @@
         class="is-block"
         :label="`${$t(tooltipText)}`"
         position="top"
-        :active="shouldTooltipShow"
+        :disabled="!shouldTooltipShow"
         multiline
       >
         <o-button
           variant="primary"
           class="slide-animation"
           :outlined="isLoading"
-          :expanded="isLoading"
+          expanded
           :class="{ 'slide-animation-active': isLoading }"
           :disabled="isWithdrawalButtonDisable"
           :loading="isLoadingRelayers || isLoading"

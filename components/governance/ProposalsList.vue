@@ -18,7 +18,7 @@
               PROPOSAL_THRESHOLD: $n(proposalThreshold)
             })
           "
-          :active="!hasProposalThreshold"
+          :disabled="hasProposalThreshold"
           multiline
         >
           <o-button

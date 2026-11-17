@@ -1,10 +1,10 @@
 <template>
-  <o-field :type="type" :message="error">
+  <o-field :variant="variant" :message="error">
     <template #label>
       {{ $t('ethPurchase', { currency }) }}
       <o-tooltip
         :label="$t('ethPurchaseTooltip', { currency: selectedStatisticCurrency, networkCurrency: currency })"
-        size="small"
+        class="is-small"
         position="right"
         multiline
       >
@@ -15,7 +15,7 @@
     </template>
     <div
       class="field has-eth-purchase"
-      :class="[type, { 'is-disabled': disabled }]"
+      :class="[variant && `is-${variant}`, { 'is-disabled': disabled }]"
       @click="onEthPurchaseClick"
     >
       <div class="columns is-mobile">
@@ -31,7 +31,7 @@
             :disabled="disabled"
             :use-html5-validation="false"
             expanded
-            custom-class="hide-spinner"
+            input-class="hide-spinner"
             @input="onInput"
             @focus="$emit('focus', $event)"
             @blur="$emit('blur', $event)"
@@ -79,7 +79,7 @@ export default {
   emits: ['focus', 'blur', 'input', 'isValidEthToReceive'],
   data() {
     return {
-      type: '',
+      variant: '',
       min: 0,
       error: '',
       newValue: this.value
@@ -125,25 +125,25 @@ export default {
       }
     },
     validateEthToReceive(value) {
-      let type = ''
+      let variant = ''
       let error = ''
 
       if (value === '') {
-        type = 'is-warning'
+        variant = 'warning'
         error = this.$t('incorrectAmount')
       } else if (value < 0) {
-        type = 'is-warning'
+        variant = 'warning'
         error = this.$t('amountIsLow', { value: this.min })
       } else if (value > this.max) {
-        type = 'is-warning'
+        variant = 'warning'
         error = this.$t('amountIsHigh', { value: this.max })
       } else if (value === this.defaultEthToReceive) {
-        type = 'is-primary'
+        variant = 'primary'
       }
 
       this.error = error
-      this.type = type
-      this.$emit('isValidEthToReceive', type !== 'is-warning')
+      this.variant = variant
+      this.$emit('isValidEthToReceive', variant !== 'warning')
     }
   }
 }

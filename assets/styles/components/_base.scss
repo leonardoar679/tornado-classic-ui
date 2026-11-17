@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:list';
 
 $control-height: 2.857em;
 $control-border-width: 1px;
@@ -20,7 +21,24 @@ $violet: #865ff3;
 $gray: #6b6b6b;
 $grey-lighter: #393939;
 $dark-tooltip: #313131;
-$custom-colors: (
+// Bulma 1 computes its own invert colors unless they are given as (color, invert) pairs
+$theme-bulma-custom-colors: (
+  'primary': (
+    $primary,
+    $primary-invert
+  ),
+  'danger': (
+    $danger,
+    $danger-invert
+  ),
+  'dark': (
+    $dark,
+    $dark-invert
+  ),
+  'info': (
+    $info,
+    $info-invert
+  ),
   'black': (
     $black,
     $primary-invert
@@ -38,9 +56,6 @@ $custom-colors: (
     $gray
   )
 );
-
-@import 'bulma/sass/utilities/index';
-@import 'bulma/sass/utilities/mixins';
 
 // Buefy-era variables (Buefy SCSS is no longer imported; same default values)
 $tooltip-arrow-size: 5px;
@@ -61,10 +76,10 @@ $navbar-item-color: $white;
 $navbar-item-hover-color: $primary;
 $navbar-item-hover-background-color: transparent;
 $navbar-item-active-color: $primary;
-$navbar-breakpoint: $tablet;
+$navbar-breakpoint: 769px;
 
 $label-color: $white;
-$label-weight: $weight-normal;
+$label-weight: 400;
 
 $button-background-color: #181818;
 $button-border-color: #666;
@@ -86,12 +101,11 @@ $button-disabled-border-color: #393939;
 
 $input-color: $white;
 $input-background-color: transparent;
-$input-border-color: #393939;
 $input-hover-border-color: $white;
 $input-hover-color: $white;
 $input-focus-border-color: $primary;
 $input-placeholder-color: #393939;
-$input-focus-box-shadow-size: 0 0 0;
+$input-focus-shadow-size: 0 0 0;
 
 $input-disabled-background-color: #181818;
 $input-disabled-border-color: #222222;
@@ -156,7 +170,7 @@ $dropdown-item-active-color: $primary-invert;
 $dropdown-content-padding-bottom: 0;
 $dropdown-content-padding-top: 0;
 
-$dropdown-background-color: $modal-background-background-color;
+$dropdown-background-background-color: $modal-background-background-color;
 
 $widescreen-enabled: false;
 $fullhd-enabled: false;
@@ -172,7 +186,7 @@ $navbar-dropdown-boxed-shadow: $dropdown-content-shadow;
 
 $button-static-color: #6b6b6b;
 $button-static-background-color: $input-background-color;
-$button-static-border-color: $input-border-color;
+$button-static-border-color: $grey-lighter;
 
 $tag-background-color: #1c1c1c;
 $tag-color: #6b6b6b;
@@ -192,6 +206,33 @@ $button-text-hover-color: #6b6b6b;
 $textarea-padding: 0.75rem;
 
 $icon-dimensions-large: 3.429rem;
+
+// Bulma 1 derives scheme and control colors from HSL channels instead of the
+// Bulma 0.9 color variables above; these reproduce the same neutral palette.
+$scheme-h: 0;
+$scheme-s: 0%;
+$radius: 4px;
+$radius-large: 6px;
+$tooltip-border-radius: $radius-large;
+$tooltip-content-multiline-width: 240px;
+// Every amount step stays visible on mobile (theme-bulma would show only the active one)
+$steps-mobile-breakpoint: 0;
+// An `$input-border-color` would replace the variant colors (is-primary, is-warning...) of inputs
+$input-border-l: color.channel($grey-lighter, 'lightness', $space: hsl);
+$input-focus-h: color.channel($input-focus-border-color, 'hue', $space: hsl);
+$input-focus-s: color.channel($input-focus-border-color, 'saturation', $space: hsl);
+$input-focus-l: color.channel($input-focus-border-color, 'lightness', $space: hsl);
+
+// Bulma 1 + the Oruga theme in one build. Its modules are configured by the
+// global variables above, so they must all be declared before this import.
+@import '@oruga-ui/theme-bulma/scss/theme-build.scss';
+@import 'bulma/sass/utilities/mixins';
+
+// `.is-primary, .is-danger, ...`: the modifiers that give controls their own color
+$color-modifier-classes: ();
+@each $name, $_ in $colors {
+  $color-modifier-classes: list.append($color-modifier-classes, '.is-#{$name}', $separator: comma);
+}
 
 .column {
   @include from(576px) {
@@ -226,14 +267,6 @@ $icon-dimensions-large: 3.429rem;
     }
   }
 }
-
-@import 'bulma/sass/base/index';
-@import 'bulma/sass/helpers/index';
-@import 'bulma/sass/elements/index';
-@import 'bulma/sass/components/index';
-@import 'bulma/sass/form/index';
-@import 'bulma/sass/grid/index';
-@import 'bulma/sass/layout/index';
 
 @mixin noWrap {
   white-space: nowrap;

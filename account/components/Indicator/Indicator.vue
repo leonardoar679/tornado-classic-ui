@@ -1,5 +1,5 @@
 <template>
-  <o-tooltip position="bottom" class="is-dark-tooltip" :triggers="[]">
+  <o-tooltip position="bottom" variant="dark-tooltip" :open-on-hover="false">
     <template #content>
       <template v-if="isSetupAccount">
         <p>{{ $t('accountConnected') }}</p>

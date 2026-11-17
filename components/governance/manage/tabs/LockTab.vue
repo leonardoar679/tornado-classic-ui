@@ -1,9 +1,9 @@
 <template>
-  <o-tab-item :label="$t('lock')" header-class="lock_torn_tab">
+  <o-tab-item :label="$t('lock')" tab-class="lock_torn_tab">
     <div class="p">
       {{ $t('lockTabDesc') }}
     </div>
-    <o-field :label="$t('amountToLock')" expanded>
+    <o-field :label="$t('amountToLock')">
       <o-field :class="hasErrorAmount ? 'is-warning' : ''">
         <o-input
           v-model="computedAmountToLock"
@@ -11,7 +11,7 @@
           step="0.01"
           :min="minAmount"
           :max="maxAmountToLock"
-          custom-class="hide-spinner"
+          input-class="hide-spinner"
           :use-html5-validation="false"
           :placeholder="$t('amount')"
           expanded

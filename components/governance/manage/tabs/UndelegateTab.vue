@@ -13,7 +13,7 @@
       class="is-block"
       :label="`${$t('pleaseDelegate')}`"
       position="top"
-      :active="!canUndelegate"
+      :disabled="canUndelegate"
       multiline
     >
       <o-button :disabled="!canUndelegate" variant="primary" expanded outlined @click="onUndelegate">

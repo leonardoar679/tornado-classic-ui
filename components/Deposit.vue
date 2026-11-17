@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('deposit')" header-class="button_tab_deposit">
+  <o-tab-item :label="$t('deposit')" tab-class="button_tab_deposit">
     <fieldset>
       <o-field :label="$t('token')" data-test="token_list_dropdown">
         <o-dropdown v-model="selectedToken" expanded aria-role="list">
@@ -24,7 +24,7 @@
       <o-field>
         <template #label>
           {{ $t('amount') }}
-          <o-tooltip :label="$t('amountTooltip')" size="small" position="right" multiline>
+          <o-tooltip :label="$t('amountTooltip')" class="is-small" position="right" multiline>
             <button class="button is-primary has-icon">
               <span class="icon icon-info" data-test="choose_amount_info"></span>
             </button>
@@ -35,13 +35,13 @@
             <o-step-item
               :label="shortenAmount(amount)"
               :clickable="address !== ''"
-              :header-class="`token-${selectedToken}-${amount}`"
+              :step-class="`token-${selectedToken}-${amount}`"
             ></o-step-item>
           </template>
         </o-steps>
       </o-field>
     </fieldset>
-    <connect-button v-if="!isLoggedIn" type="is-primary is-fullwidth" data-test="button_connect" />
+    <connect-button v-if="!isLoggedIn" expanded data-test="button_connect" />
     <o-button
       v-else
       variant="primary"

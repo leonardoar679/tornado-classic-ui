@@ -1,22 +1,18 @@
 <template>
   <div class="main">
     <Metrics />
-    <nuxt-child />
+    <NuxtPage />
   </div>
 </template>
 
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex'
+import { showError } from '#app'
 import Metrics from '@/components/governance/Metrics.vue'
 
 export default {
   components: {
     Metrics
-  },
-  middleware({ store, error }) {
-    if (!store.getters['governance/gov/isEnabledGovernance']) {
-      return error({ statusCode: 204, pageName: 'governance' })
-    }
   },
   computed: {
     ...mapState('metamask', ['isInitialized']),
@@ -28,6 +24,8 @@ export default {
         if (this.isEnabledGovernance) {
           this.fetchProposals({})
           this.fetchConstants()
+        } else if (this.isInitialized) {
+          showError({ statusCode: 204, pageName: 'governance' })
         }
       },
       immediate: true

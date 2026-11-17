@@ -5,13 +5,14 @@
       v-show="notice.isShowed"
       :key="notice.id"
       class="is-top-right"
+      closeable
       :icon="notice.type"
       :aria-close-label="$t('closeNotification')"
       role="alert"
       @close="close(notice.id)"
     >
       <span v-if="notice.untranslatedTitle">{{ notice.untranslatedTitle }}</span>
-      <i18n-t v-else :path="notice.title.path || notice.title" tag="span">
+      <i18n-t v-else :keypath="notice.title.path || notice.title" tag="span">
         <template #value>
           <b><number-format :value="notice.title.amount" /> {{ getSymbol(notice.title.currency) }}</b>
         </template>
@@ -34,9 +35,9 @@
       >
         {{ $t('viewOnEtherscan') }}
       </a>
-      <n-link v-else-if="notice.routerLink" v-bind="notice.routerLink.params" @on-click="$forceUpdate()">
+      <nuxt-link v-else-if="notice.routerLink" v-bind="notice.routerLink.params" @on-click="$forceUpdate()">
         {{ $t(notice.routerLink.title) }}
-      </n-link>
+      </nuxt-link>
     </o-notification>
   </div>
 </template>

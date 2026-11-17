@@ -17,7 +17,6 @@
             :label="`${$n(toDecimals(lockedBalance, 18))} ${$t('locked')} TORN + ${$n(
               toDecimals(delegatedBalance, 18)
             )} ${$t('delegated')} TORN`"
-            size="medium"
             position="top"
             multiline
           >

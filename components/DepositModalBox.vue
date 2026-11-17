@@ -52,7 +52,7 @@
         <div class="notice__p">{{ $t('yourNoteWontBeSaved') }}</div>
       </div>
     </template>
-    <connect-button v-if="!isLoggedIn" type="is-primary is-fullwidth" />
+    <connect-button v-if="!isLoggedIn" expanded />
     <o-button
       v-else
       variant="primary"

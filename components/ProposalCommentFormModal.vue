@@ -14,7 +14,6 @@
             {{ $t('proposalComment.form-contact') }}
             <o-tooltip
               :label="$t('proposalComment.form-contact-tooltip')"
-              size="medium"
               position="top"
               multiline
             >
@@ -27,7 +26,6 @@
           <o-input
             v-model.trim="form.contact"
             :maxlength="limit / 2"
-            :has-counter="false"
             :placeholder="$t('proposalComment.form-contact-placeholder')"
           />
         </o-field>
@@ -35,12 +33,13 @@
       <div class="column is-12">
         <o-field
           :message="fields.message ? '' : $t('proposalComment.form-message-required')"
-          :type="{ 'is-warning': !fields.message && !support }"
+          :variant="!fields.message && !support ? 'warning' : ''"
           :label="$t('proposalComment.form-message')"
         >
           <o-input
             v-model="form.message"
             :maxlength="limit"
+            counter
             type="textarea"
             :placeholder="
               support

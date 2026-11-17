@@ -1,5 +1,12 @@
+@use 'sass:color';
+
 .notification {
+  // Bulma 1 ignores `$notification-background-color` and derives the background from this lightness
+  --bulma-notification-background-l: #{color.channel($notification-background-color, 'lightness', $space: hsl)};
+
   &.main-notification {
+    display: flex;
+    align-items: center;
     padding: 0;
     border: solid 1px #393939;
     overflow: hidden;
@@ -16,55 +23,54 @@
       font-size: 0.85rem;
     }
 
-    .media {
-      align-items: center;
+    .notification-icon {
+      position: relative;
+      align-self: stretch;
+      height: auto;
+      min-height: 3rem;
+      margin-right: 1rem;
 
-      .media-left {
-        position: relative;
-        align-self: stretch;
-        display: inline-flex;
-        align-items: center;
-
-        + .media-content {
-          padding: 0.5rem 2rem 0.5rem 0.5rem;
-        }
-
-        &:after {
-          content: '';
-          position: absolute;
-          transform: skewX(20deg);
-          background-color: #1d1d1d;
-          border-right: 1px solid #393939;
-          top: -1px;
-          bottom: -1px;
-          border-top-right-radius: 2px;
-          left: -50%;
-          right: -0.2rem;
-        }
-
-        > .icon {
-          position: relative;
-          z-index: 1;
-        }
-
-        @media print {
-          display: none;
-        }
+      + .notification-content {
+        padding: 0.5rem 2rem 0.5rem 0.5rem;
       }
 
-      &-content {
-        text-align: center;
-        padding: 0.5rem 2rem 0.5rem 1rem;
+      &:after {
+        content: '';
+        position: absolute;
+        transform: skewX(20deg);
+        background-color: #1d1d1d;
+        border-right: 1px solid #393939;
+        top: -1px;
+        bottom: -1px;
+        border-top-right-radius: 2px;
+        left: -50%;
+        right: -0.2rem;
+      }
 
-        span {
-          @media print {
-            font-weight: bold;
-          }
+      > i {
+        position: relative;
+        z-index: 1;
+      }
+
+      @media print {
+        display: none;
+      }
+    }
+
+    .notification-content {
+      flex-grow: 1;
+      text-align: center;
+      padding: 0.5rem 2rem 0.5rem 1rem;
+
+      span {
+        @media print {
+          font-weight: bold;
         }
       }
     }
 
     .delete {
+      inset-inline-end: 0.5rem;
       top: 50%;
       margin-top: -10px;
 
@@ -74,6 +80,12 @@
       }
     }
 
+    // Bulma 1 tints the invert (text) color with the hue of the variant
+    &.is-info {
+      background-color: $info;
+      color: $info-invert;
+    }
+
     &.is-primary {
       background-color: #000403;
       color: #eee;
@@ -81,17 +93,14 @@
       max-width: 500px;
       margin: 0 auto;
 
-      .media {
-        .media-left {
-          &:after {
-            background-color: #1a1203;
-            border-right: 1px solid $primary;
-          }
-        }
-        .media-content {
-          strong {
-            color: $primary;
-          }
+      .notification-icon:after {
+        background-color: #1a1203;
+        border-right: 1px solid $primary;
+      }
+
+      .notification-content {
+        strong {
+          color: $primary;
         }
       }
     }
@@ -101,17 +110,14 @@
       color: #eee;
       border-color: $warning;
 
-      .media {
-        .media-left {
-          &:after {
-            background-color: #1a1203;
-            border-right: 1px solid $warning;
-          }
-        }
-        .media-content {
-          strong {
-            color: $warning;
-          }
+      .notification-icon:after {
+        background-color: #1a1203;
+        border-right: 1px solid $warning;
+      }
+
+      .notification-content {
+        strong {
+          color: $warning;
         }
       }
     }
@@ -120,7 +126,7 @@
       border-color: #000 !important;
       color: #000 !important;
 
-      .media-content {
+      .notification-content {
         span {
           color: #000 !important;
         }
@@ -148,13 +154,9 @@
       }
     }
 
-    .media {
-      align-items: center;
-
-      &-content {
-        b {
-          white-space: nowrap;
-        }
+    .notification-content {
+      b {
+        white-space: nowrap;
       }
     }
 

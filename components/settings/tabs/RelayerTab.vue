@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('relayer')" value="relayer" header-class="withdrawal_settings_relayer_tab">
+  <o-tab-item :label="$t('relayer')" value="relayer" tab-class="withdrawal_settings_relayer_tab">
     <div class="field">
       <o-field :label="$t('relayer')" data-test="withdrawal_settings_relayer_dropdown">
         <o-dropdown v-model="selectedRelayer" expanded aria-role="list" @change="onChangeRelayer">
@@ -31,7 +31,7 @@
           type="url"
           data-test="enter_relayer_url_field"
           :placeholder="$t('pasteYourRelayerUrlorEnsRecord')"
-          :custom-class="hasErrorRelayer.type"
+          :input-class="hasErrorRelayer.type"
           :use-html5-validation="false"
           @input="onInputCustomRelayer"
         ></o-input>

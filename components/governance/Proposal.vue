@@ -21,7 +21,7 @@
               class="fit-content"
               :label="tooltipMessage"
               position="top"
-              :active="readyForAction"
+              :disabled="!readyForAction"
               multiline
             >
               <div class="buttons buttons__halfwidth">
@@ -63,7 +63,7 @@
               class="fit-content"
               :label="$t('connectYourWalletFirst')"
               position="top"
-              :active="!ethAccount"
+              :disabled="!!ethAccount"
               multiline
             >
               <o-button
@@ -104,7 +104,6 @@
                     votes: $n(quorumVotes, 'compact')
                   })
                 "
-                size="medium"
                 position="top"
                 multiline
               >
@@ -137,7 +136,7 @@
               <div class="column is-half-small">
                 <strong>{{ $t('status') }}</strong>
                 <div class="value">
-                  <o-tag :type="getStatusType(data.status)">{{ $t(data.status) }}</o-tag>
+                  <o-tag :variant="getStatusVariant(data.status)">{{ $t(data.status) }}</o-tag>
                 </div>
               </div>
               <div class="column is-half-small">
@@ -275,29 +274,29 @@ export default {
   },
   methods: {
     ...mapActions('governance/gov', ['castVote', 'executeProposal', 'fetchReceipt', 'fetchProposals']),
-    getStatusType(status) {
-      let statusType = ''
+    getStatusVariant(status) {
+      let statusVariant = ''
       switch (status) {
         case 'awaitingExecution':
         case 'active':
-          statusType = 'is-primary'
+          statusVariant = 'primary'
           break
         case 'expired':
-          statusType = 'is-gray'
+          statusVariant = 'gray'
           break
         case 'failed':
         case 'defeated':
-          statusType = 'is-danger'
+          statusVariant = 'danger'
           break
         case 'pending':
         case 'timeLocked':
-          statusType = 'is-warning'
+          statusVariant = 'warning'
           break
         case 'executed':
-          statusType = 'is-violet'
+          statusVariant = 'violet'
           break
       }
-      return statusType
+      return statusVariant
     },
     calculatePercent(result) {
       return this.results.isZero()

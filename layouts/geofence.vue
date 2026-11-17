@@ -3,15 +3,15 @@
     <nav class="navbar header" role="navigation" aria-label="main navigation">
       <div class="container">
         <div class="navbar-brand">
-          <nuxt-link to="/" active-class="" class="navbar-item">
+          <NuxtLink to="/" active-class="" class="navbar-item">
             <Logo />
-          </nuxt-link>
+          </NuxtLink>
         </div>
       </div>
     </nav>
     <section class="main-content section">
       <div class="container">
-        <nuxt />
+        <slot />
       </div>
     </section>
     <Footer />

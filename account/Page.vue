@@ -1,16 +1,16 @@
 <template>
   <div class="account">
-    <Settings />
+    <WalletSettings />
     <NoteAccount />
   </div>
 </template>
 
 <script>
-import { Settings, NoteAccount } from './components/index.js'
+import { Settings as WalletSettings, NoteAccount } from './components/index.js'
 
 export default {
   components: {
-    Settings,
+    WalletSettings,
     NoteAccount
   }
 }

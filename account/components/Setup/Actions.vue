@@ -5,7 +5,7 @@
       <div class="desc">
         {{ $t('account.setup.desc') }}
       </div>
-      <o-tooltip :active="isAccountDisabled" :label="$t(setupAccountTooltip)" multiline size="large">
+      <o-tooltip :disabled="!isAccountDisabled" :label="$t(setupAccountTooltip)" multiline class="is-large">
         <o-button
           :disabled="isAccountDisabled"
           outlined
@@ -22,7 +22,7 @@
       <div class="desc">
         {{ $t('account.setup.recoverDesc') }}
       </div>
-      <o-tooltip :active="isRecoverDisabled" :label="$t(recoverAccountTooltip)" multiline size="large">
+      <o-tooltip :disabled="!isRecoverDisabled" :label="$t(recoverAccountTooltip)" multiline class="is-large">
         <o-button
           variant="primary"
           outlined

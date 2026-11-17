@@ -15,7 +15,7 @@
             </div>
           </template>
           <o-dropdown-item
-            v-for="{ name, url } in Object.values(networkConfig.rpcUrls)"
+            v-for="{ name, url } in rpcOptions"
             :key="name"
             :value="name"
             aria-role="listitem"
@@ -40,7 +40,7 @@
           v-model="customRpcUrl"
           type="url"
           :placeholder="$t('customRpcPlaceholder')"
-          :custom-class="hasErrorRpc.type"
+          :input-class="hasErrorRpc.type"
           :use-html5-validation="false"
           @input="checkCustomRpc"
         ></o-input>
@@ -87,6 +87,9 @@ export default {
     networkConfig() {
       return networkConfig[`netId${this.netId}`]
     },
+    rpcOptions() {
+      return this.networkConfig?.rpcUrls ? Object.values(this.networkConfig.rpcUrls) : []
+    },
     isCustomRpc() {
       return this.selectedRpc === 'custom'
     },
@@ -97,6 +100,10 @@ export default {
     }
   },
   created() {
+    if (!this.networkConfig) {
+      return
+    }
+
     this.rpc = this.getRpc(this.netId)
     this.selectedRpc = this.rpc.name
 
@@ -114,7 +121,12 @@ export default {
       this.checkingRpc = false
       this.hasErrorRpc = { type: '', msg: '' }
 
-      this.rpc = Object.entries(this.networkConfig.rpcUrls)[0][1]
+      const [firstRpc] = this.rpcOptions
+      if (!firstRpc) {
+        return
+      }
+
+      this.rpc = firstRpc
       this.selectedRpc = this.rpc.name
       this.checkRpc(this.rpc)
     },

@@ -1,6 +1,6 @@
 @use 'sass:color';
 
-.b-tabs.is-tornado {
+.tabs-wrapper.is-tornado {
   display: flex;
   flex-direction: column;
   margin-bottom: 0;
@@ -12,110 +12,101 @@
   .tabs {
     font-size: 1.35rem;
     min-height: 3.3483rem;
+    justify-content: space-between;
 
     @include until(375px) {
       font-size: 1.135rem;
       min-height: 3.074rem;
     }
 
-    ul {
-      justify-content: space-between;
+    .tab {
+      color: $primary;
+      font-size: inherit;
+      line-height: inherit;
+      font-weight: $weight-bold;
+      position: relative;
+      z-index: 1;
+      border: 1px solid $primary;
+      border-bottom-width: 0;
+      background-color: #0e1f17;
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+      padding: 0.68rem 1.25rem;
 
-      li {
-        a {
-          color: $primary;
-          font-weight: $weight-bold;
-          position: relative;
-          z-index: 1;
-          border: 1px solid $primary;
-          border-bottom-width: 0;
-          background-color: #0e1f17;
-          transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-          padding: 0.68rem 1.25rem;
+      &:after,
+      &:before {
+        position: absolute;
+        background-color: #0e1f17;
+        transform-origin: bottom left;
+        width: 1.5rem;
+        border: 1px solid $primary;
+        border-bottom-width: 0;
+        top: -1px;
+        bottom: 0;
+        transition: background-color 0.15s ease-in-out;
+      }
 
-          &:after,
-          &:before {
-            position: absolute;
-            background-color: #0e1f17;
-            transform-origin: bottom left;
-            width: 1.5rem;
-            border: 1px solid $primary;
-            border-bottom-width: 0;
-            top: -1px;
-            bottom: 0;
-            transition: background-color 0.15s ease-in-out;
-          }
+      &:hover {
+        background-color: color.adjust(#0e1f17, $lightness: 10%);
 
-          &:hover {
-            background-color: color.adjust(#0e1f17, $lightness: 10%);
+        &:after,
+        &:before {
+          background-color: color.adjust(#0e1f17, $lightness: 10%);
+        }
+      }
 
-            &:after,
-            &:before {
-              background-color: color.adjust(#0e1f17, $lightness: 10%);
-            }
-          }
+      &:first-child {
+        margin-right: 1.75rem;
+        border-top-left-radius: 4px;
+        border-right-width: 0;
+        padding-left: 1.75rem;
+
+        @include until(375px) {
+          padding-left: 1.5rem;
+          padding-right: 0.75rem;
         }
 
-        &:first-child {
-          a {
-            margin-right: 1.75rem;
-            border-top-left-radius: 4px;
-            border-right-width: 0;
-            padding-left: 1.75rem;
+        &:after {
+          content: '';
+          right: -1.5rem;
+          transform: skewX(20deg);
+          border-left: none;
+          border-top-right-radius: 4px;
+        }
+      }
 
-            @include until(375px) {
-              padding-left: 1.5rem;
-              padding-right: 0.75rem;
-            }
+      &:last-child {
+        margin-left: 1.75rem;
+        border-top-right-radius: 4px;
+        border-left-width: 0;
+        padding-right: 1.75rem;
 
-            &:after {
-              content: '';
-              right: -1.5rem;
-              transform: skewX(20deg);
-              border-left: none;
-              border-top-right-radius: 4px;
-            }
-          }
+        @include until(375px) {
+          padding-right: 1.5rem;
+          padding-left: 0.75rem;
         }
 
-        &:last-child {
-          a {
-            margin-left: 1.75rem;
-            border-top-right-radius: 4px;
-            border-left-width: 0;
-            padding-right: 1.75rem;
-
-            @include until(375px) {
-              padding-right: 1.5rem;
-              padding-left: 0.75rem;
-            }
-
-            &:before {
-              content: '';
-              left: -1.5rem;
-              transform: skewX(-20deg);
-              border-right: none;
-              border-top-left-radius: 4px;
-            }
-          }
+        &:before {
+          content: '';
+          left: -1.5rem;
+          transform: skewX(-20deg);
+          border-right: none;
+          border-top-left-radius: 4px;
         }
+      }
 
-        &.is-active {
-          a {
-            color: $primary-invert;
-            background-color: $primary;
+      &.is-active {
+        color: $primary-invert;
+        background-color: $primary;
 
-            &:after,
-            &:before {
-              background-color: $primary;
-            }
-          }
+        &:after,
+        &:before {
+          background-color: $primary;
         }
       }
     }
   }
 
-  .tab-content {
+  .tabs-content {
     background-color: $primary-invert;
     padding: 1.5rem 1.5rem 2rem;
     border: 1px solid $primary;
@@ -136,14 +127,14 @@
 
     .withdraw-radio {
       @include mobile {
-        .b-tooltip {
+        .tooltip {
           &:after {
             width: 200px;
           }
         }
 
         .radio-relayer {
-          .b-tooltip {
+          .tooltip {
             &:before,
             &:after {
               top: auto;
@@ -164,7 +155,7 @@
         }
 
         .radio-metamask {
-          .b-tooltip {
+          .tooltip {
             &:before,
             &:after {
               top: 50%;
@@ -210,7 +201,7 @@
   }
 }
 
-.b-tabs.is-modal {
+.tabs-wrapper.is-modal {
   &:not(:last-child) {
     margin-bottom: 1.25rem;
   }
@@ -218,36 +209,32 @@
   .tabs {
     overflow: initial;
 
-    ul {
-      li {
-        flex: 1 1 auto;
+    .tab {
+      flex: 1 1 auto;
+      font-size: inherit;
+      line-height: inherit;
+      transition: border-color 0.15s ease-in-out;
+      border-bottom: 2px solid #767676;
 
-        a {
-          transition: border-color 0.15s ease-in-out;
-          border-bottom: 2px solid #767676;
+      &:hover {
+        border-bottom-color: $primary;
+      }
 
-          &:hover {
-            border-bottom-color: $primary;
-          }
+      .tooltip {
+        margin: 0 0.45rem;
+      }
 
-          .b-tooltip {
-            margin: 0 0.45rem;
-          }
+      .is-manage-box & {
+        padding: 0.5em;
+      }
 
-          .is-manage-box & {
-            padding: 0.5em;
-          }
-        }
-
-        &.is-active {
-          a {
-            border-bottom: 2px solid $primary;
-          }
-        }
+      &.is-active {
+        border-bottom: 2px solid $primary;
       }
     }
   }
-  .tab-content {
+
+  .tabs-content {
     padding: 1rem 0 0;
   }
 }

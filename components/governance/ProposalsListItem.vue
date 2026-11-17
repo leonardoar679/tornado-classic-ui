@@ -9,7 +9,7 @@
           <div class="proposals-box--id">
             <span class="tag">{{ data.id }}</span>
           </div>
-          <o-tag :type="getStatusType(data.status)">
+          <o-tag :variant="getStatusVariant(data.status)">
             {{ $t(data.status) }}
           </o-tag>
           <div class="date">
@@ -55,29 +55,29 @@ export default {
     }
   },
   methods: {
-    getStatusType(status) {
-      let statusType = ''
+    getStatusVariant(status) {
+      let statusVariant = ''
       switch (status) {
         case 'awaitingExecution':
         case 'active':
-          statusType = 'is-primary'
+          statusVariant = 'primary'
           break
         case 'expired':
-          statusType = 'is-gray'
+          statusVariant = 'gray'
           break
         case 'failed':
         case 'defeated':
-          statusType = 'is-danger'
+          statusVariant = 'danger'
           break
         case 'pending':
         case 'timeLocked':
-          statusType = 'is-warning'
+          statusVariant = 'warning'
           break
         case 'executed':
-          statusType = 'is-violet'
+          statusVariant = 'violet'
           break
       }
-      return statusType
+      return statusVariant
     },
     onClick() {
       if (this.data.status !== 'loading') {

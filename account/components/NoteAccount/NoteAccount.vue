@@ -4,7 +4,7 @@
       <!-- <o-icon icon="astronaut" size="large" /> -->
       {{ $t('account.title') }}
     </h2>
-    <o-notification class="main-notification" variant="info">
+    <o-notification class="main-notification" variant="info" closeable>
       {{ $t('account.description') }}
     </o-notification>
     <Setup v-if="!isSetupAccount" />

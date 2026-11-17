@@ -4,7 +4,7 @@ fieldset[disabled] {
   filter: grayscale(70%);
   color: #5e5e5e;
 
-  .tooltip {
+  .fieldset-tooltip {
     &:after {
       position: absolute;
       opacity: 0;

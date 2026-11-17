@@ -1,9 +1,9 @@
 <template>
-  <o-tab-item :label="$t('unlock')" header-class="unlock_torn_tab">
+  <o-tab-item :label="$t('unlock')" tab-class="unlock_torn_tab">
     <div class="p">
       {{ $t('unlockTabDesc') }}
     </div>
-    <o-field :label="$t('amountToUnlock')" expanded>
+    <o-field :label="$t('amountToUnlock')">
       <o-field :class="hasErrorAmount ? 'is-warning' : ''">
         <o-input
           v-model="computedAmountToUnlock"
@@ -11,7 +11,7 @@
           step="0.01"
           :min="minAmount"
           :max="maxAmountToUnlock"
-          custom-class="hide-spinner"
+          input-class="hide-spinner"
           :placeholder="$t('amount')"
           :use-html5-validation="false"
           expanded
@@ -36,7 +36,7 @@
       class="is-block"
       :label="unlockMsgErr"
       position="top"
-      :active="!hasLockedBalance || !canWithdraw"
+      :disabled="hasLockedBalance && canWithdraw"
       multiline
     >
       <o-button

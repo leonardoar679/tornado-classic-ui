@@ -22,7 +22,7 @@
         {{ $t('account.control.fileDesc') }}
       </div>
       <div data-test="download_notes__config_switch">
-        <o-switch :value="isEnabledSaveFile" size="medium" @update:model-value="handleEnabledSaveFile" />
+        <o-switch :model-value="isEnabledSaveFile" size="medium" @update:model-value="handleEnabledSaveFile" />
       </div>
     </div>
   </div>

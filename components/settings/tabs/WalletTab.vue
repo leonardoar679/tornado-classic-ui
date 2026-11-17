@@ -1,9 +1,9 @@
 <template>
-  <o-tab-item :label="$t('wallet')" value="wallet" header-class="withdrawal_settings_wallet_tab">
+  <o-tab-item :label="$t('wallet')" value="wallet" tab-class="withdrawal_settings_wallet_tab">
     <fieldset :disabled="isNotLoggedIn">
       <div class="notice is-warning">
         <div class="notice__p">{{ $t('withdrawWalletWarning', { currency: networkCurrency }) }}</div>
-        <div v-if="isNotLoggedIn" class="tooltip" :data-label="$t('connectYourWalletFirst')"></div>
+        <div v-if="isNotLoggedIn" class="fieldset-tooltip" :data-label="$t('connectYourWalletFirst')"></div>
       </div>
       <WithdrawTotal :currency="currency" withdraw-type="wallet" />
     </fieldset>

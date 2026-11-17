@@ -12,7 +12,7 @@
           <o-tooltip
             :label="ens.voter || voter"
             position="top"
-            :multilined="ens.voter && ens.voter.length > 50"
+            :multiline="ens.voter && ens.voter.length > 50"
           >
             <a
               target="_blank"
@@ -28,7 +28,7 @@
           <o-tooltip
             :label="ens.delegator || delegator"
             position="top"
-            :multilined="ens.delegator && ens.delegator.length > 50"
+            :multiline="ens.delegator && ens.delegator.length > 50"
           >
             <a
               target="_blank"
@@ -49,7 +49,7 @@
     <div class="proposals-box--comment">
       <o-icon
         :icon="support ? 'check' : 'close'"
-        :type="support ? 'is-primary' : 'is-danger'"
+        :variant="support ? 'primary' : 'danger'"
         class="proposals-box--status-icon"
       />
       <span v-if="loading" class="proposals-box--skeleton">

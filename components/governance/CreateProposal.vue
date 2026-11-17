@@ -7,7 +7,7 @@
         <o-field
           :label="$t('proposalTitle')"
           :message="isValidTitle ? '' : $t('proposal.error.title')"
-          :type="{ 'is-warning': !isValidTitle }"
+          :variant="isValidTitle ? '' : 'warning'"
         >
           <o-input v-model="validTitle" :placeholder="$t('title')"></o-input>
         </o-field>
@@ -15,27 +15,27 @@
       <div class="column is-6">
         <o-field
           :label="$t('proposalAddress')"
-          :type="{ 'is-warning': !hasValidAddress }"
+          :variant="hasValidAddress ? '' : 'warning'"
           :message="hasValidAddress ? '' : addressErrorMessage"
         >
           <o-input
             v-model="address"
             :placeholder="$t('proposalAddress')"
-            :size="!address ? '' : hasValidAddress ? '' : 'is-warning'"
+            :input-class="!address ? '' : hasValidAddress ? '' : 'is-warning'"
           ></o-input>
         </o-field>
       </div>
       <div class="column is-12">
         <o-field
           :message="isValidDescription ? '' : $t('proposal.error.description')"
-          :type="{ 'is-warning': !isValidDescription }"
+          :variant="isValidDescription ? '' : 'warning'"
           :label="$t('proposalDescription')"
         >
-          <o-input v-model="validDescription" maxlength="2000" type="textarea"></o-input>
+          <o-input v-model="validDescription" maxlength="2000" counter type="textarea"></o-input>
         </o-field>
       </div>
     </div>
-    <o-tooltip :label="`${$t('onlyOneProposalErr')}`" position="top" :active="cannotCreate" multiline>
+    <o-tooltip :label="`${$t('onlyOneProposalErr')}`" position="top" :disabled="!cannotCreate" multiline>
       <o-button
         :disabled="cannotCreate"
         variant="primary"

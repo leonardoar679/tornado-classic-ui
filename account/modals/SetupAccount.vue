@@ -16,7 +16,7 @@
         <div class="notice__p">{{ recoveryKey }}</div>
       </div>
     </div>
-    <o-notification class="main-notification" variant="info" :closable="false">
+    <o-notification class="main-notification" variant="info">
       {{ $t('account.modals.setupAccount.isNotSupportedWithHw') }}
     </o-notification>
     <o-checkbox v-model="isSaveOnChain" :disabled="isPartialSupport">{{
@@ -29,7 +29,6 @@
       v-if="!isSaveOnChain && warningMessage"
       class="main-notification"
       variant="warning"
-      :closable="false"
     >
       {{ warningMessage }}
     </o-notification>
@@ -37,7 +36,6 @@
       v-if="setupAccountRequest.isError"
       class="main-notification"
       variant="warning"
-      :closable="false"
     >
       {{ setupAccountRequest.errorMessage }}
     </o-notification>

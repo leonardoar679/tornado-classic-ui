@@ -1,5 +1,5 @@
 <template>
-  <o-button :type="type" v-bind="$attrs" @click="onLogIn">{{ $t(actionText) }}</o-button>
+  <o-button :variant="variant" v-bind="$attrs" @click="onLogIn">{{ $t(actionText) }}</o-button>
 </template>
 
 <script>
@@ -12,9 +12,9 @@ import { detectMob } from '@/utils/index.js'
 export default {
   inheritAttrs: false,
   props: {
-    type: {
+    variant: {
       type: String,
-      default: 'is-primary'
+      default: 'primary'
     },
     actionText: {
       type: String,

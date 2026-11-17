@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('delegate')" header-class="delegate_tab">
+  <o-tab-item :label="$t('delegate')" tab-class="delegate_tab">
     <div class="p">
       {{ $t('delegateTabDesc') }}
     </div>
@@ -7,7 +7,7 @@
       <o-input
         v-model="delegatee"
         :placeholder="$t('address')"
-        :size="!delegatee ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
+        :input-class="!delegatee ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
       ></o-input>
     </o-field>
     <div class="label-with-value">
@@ -21,7 +21,7 @@
         class="is-block"
         :label="`${$t('pleaseLockBalance')}`"
         position="top"
-        :active="!canDelegate"
+        :disabled="canDelegate"
         multiline
       >
         <o-button

@@ -26,7 +26,6 @@
       v-if="recoverAccountFromKeyRequest.isError"
       class="main-notification"
       variant="warning"
-      :closable="false"
     >
       {{ recoverAccountFromKeyRequest.errorMessage }}
     </o-notification>

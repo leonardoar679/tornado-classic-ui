@@ -10,7 +10,7 @@
       <div class="box">
         <div class="label">
           {{ $t('anonymitySet') }}
-          <o-tooltip :label="$t('anonymitySetTooltip')" size="medium" position="top" multiline>
+          <o-tooltip :label="$t('anonymitySetTooltip')" position="top" multiline>
             <button class="button is-primary has-icon">
               <span class="icon icon-info"></span>
             </button>

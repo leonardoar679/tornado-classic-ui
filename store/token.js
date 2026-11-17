@@ -128,10 +128,10 @@ export const getters = {
   },
   getSymbol: (state, getters, rootState, rootGetters) => (currency) => {
     const tokens = rootGetters['metamask/networkConfig'].tokens
-    if (tokens[currency]) {
+    if (currency && tokens[currency]) {
       return tokens[currency].symbol
     }
-    return currency.toUpperCase()
+    return currency ? currency.toUpperCase() : ''
   }
 }
 

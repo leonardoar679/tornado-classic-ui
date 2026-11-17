@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 html {
   @media print {
     background-color: #fff !important;
@@ -65,8 +67,17 @@ body {
 @import 'components/slider';
 @import 'components/account';
 
-.b-tooltip {
+.tooltip {
   align-items: center;
+
+  // Buefy's multiline sizes (medium is the default width)
+  &.is-small {
+    --bulma-tooltip-content-multiline-width: 180px;
+  }
+
+  &.is-large {
+    --bulma-tooltip-content-multiline-width: 300px;
+  }
 
   .tooltip-trigger {
     display: inline-flex;
@@ -83,6 +94,31 @@ body {
         flex: 1 1 50%;
       }
     }
+  }
+}
+
+// theme-bulma lays every control out inline (full width only when `expanded`), in
+// Bulma 0.9 the block controls filled their field and only selects stayed inline
+div.control:not(.select) {
+  display: block;
+}
+
+.input,
+.textarea,
+.select select {
+  background-color: $input-background-color;
+  color: $input-color;
+}
+
+.input,
+.textarea,
+.select {
+  // Bulma 1 lightens every border on hover: only plain controls change (to $input-hover-border-color)
+  --bulma-input-hover-border-l-delta: 0%;
+
+  &:where(:not(#{$color-modifier-classes})) {
+    --bulma-input-hover-border-l-delta: #{color.channel($input-hover-border-color, 'lightness', $space: hsl) -
+      $input-border-l};
   }
 }
 

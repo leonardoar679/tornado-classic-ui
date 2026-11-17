@@ -1,4 +1,33 @@
+@use 'sass:color';
+
+// Plain buttons turn primary on hover/focus as in Bulma 0.9 (Bulma 1 only shifts their
+// lightness); :where() keeps the specificity of `.button:hover` so the classes below win
+.button:where(:not(#{$color-modifier-classes}, .is-text, .is-ghost, .is-static)) {
+  &:hover,
+  &.is-hovered {
+    border-color: $button-hover-border-color;
+    color: $link-hover;
+  }
+
+  &:focus,
+  &.is-focused {
+    border-color: $button-focus-border-color;
+    color: $button-focus-color;
+  }
+
+  &:active,
+  &.is-active {
+    border-color: $button-active-border-color;
+    color: $button-active-color;
+  }
+}
+
 .button {
+  // Bulma 1 paints plain buttons from these lightness channels (color modifiers override them)
+  --bulma-button-background-l: #{color.channel($button-background-color, 'lightness', $space: hsl)};
+  --bulma-button-border-l: #{color.channel($button-border-color, 'lightness', $space: hsl)};
+  --bulma-button-color-l: #{color.channel($button-color, 'lightness', $space: hsl)};
+  height: $control-height;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
     box-shadow 0.15s ease-in-out;
   font-weight: $weight-bold;
@@ -212,7 +241,7 @@
   }
 
   &:not(.is-small):not(.is-primary-text) {
-    span:not(.icon):not(.b-tooltip):first-child:last-child {
+    span:not(.icon):not(.tooltip):first-child:last-child {
       padding: 0 0.5rem;
     }
   }
@@ -274,6 +303,19 @@
       span.icon {
         display: none;
       }
+    }
+  }
+
+  // Bulma 0.9 fills outlined buttons on hover/focus, Bulma 1 only thickens their border
+  &.is-outlined:not([disabled]) {
+    &:hover,
+    &.is-hovered,
+    &:focus,
+    &.is-focused {
+      --bulma-button-border-width: max(1px, 0.0625em);
+      background-color: hsl(var(--bulma-button-h), var(--bulma-button-s), var(--bulma-button-l));
+      border-color: hsl(var(--bulma-button-h), var(--bulma-button-s), var(--bulma-button-l));
+      color: hsl(var(--bulma-button-h), var(--bulma-button-s), var(--bulma-button-color-l));
     }
   }
 }

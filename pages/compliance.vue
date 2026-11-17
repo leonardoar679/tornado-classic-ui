@@ -15,7 +15,7 @@
         v-model="withdrawNote"
         data-test="input_enter_note_for_compliance"
         :placeholder="$t('pleaseEnterYourNote')"
-        :custom-class="error ? error.type : 'is-primary'"
+        :input-class="error ? error.type : 'is-primary'"
       ></o-input>
       <div class="print-help">{{ withdrawNote }}</div>
       <p v-show="error.msg !== ''" class="help" :class="error.type">{{ error.msg }}</p>
@@ -26,8 +26,8 @@
         :active="!txDepositInfo.isSpent && loaded"
         class="main-notification"
         variant="warning"
+        type="warning"
         icon-pack="icon"
-        :closable="false"
       >
         <strong>{{ $t('warning') }}</strong> {{ $t('doNotShareYouNote') }}
       </o-notification>
