@@ -190,7 +190,7 @@ export default {
         return 'loading'
       }
 
-      return this.$tc('userDeposit', depositsPast)
+      return this.$t('userDeposit', depositsPast)
     }
   }
 }

@@ -13,6 +13,8 @@
   </div>
 </template>
 <script>
+import { eventBus } from '@/services/eventBus.js'
+
 export default {
   props: {
     note: {
@@ -42,7 +44,7 @@ export default {
         await this.$store.dispatch(this.withdrawalMethod, {
           note: this.note
         })
-        this.$root.$emit('resetWithdraw')
+        eventBus.emit('resetWithdraw')
       } catch (e) {
         console.error(e)
         this.$store.dispatch('notice/addNoticeWithInterval', {

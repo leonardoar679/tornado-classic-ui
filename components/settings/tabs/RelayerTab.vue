@@ -87,6 +87,7 @@ import EthPurchase from '@/components/settings/EthPurchase.vue'
 import WithdrawTotal from '@/components/withdraw/WithdrawTotal.vue'
 import { debounce } from '@/utils/index.js'
 import { fromWei, toWei } from 'web3-utils'
+import { eventBus } from '@/services/eventBus.js'
 
 export default {
   components: {
@@ -163,10 +164,10 @@ export default {
     this.setEthToReceive(this.ethToReceiveFromStore)
   },
   mounted() {
-    this.$root.$on('resetSettings', this.onReset)
+    eventBus.on('resetSettings', this.onReset)
   },
   beforeUnmount() {
-    this.$root.$off('resetSettings', this.onReset)
+    eventBus.off('resetSettings', this.onReset)
   },
   methods: {
     ...mapMutations('relayer', ['SET_SELECTED_RELAYER']),

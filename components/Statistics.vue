@@ -25,7 +25,7 @@
               <b v-if="anonimitySet > 1">{{ Number(anonimitySet) }}</b>
             </template>
             <template #equalUserDepositText>
-              <span>{{ $tc('equalUserDepositPlural', Number(anonimitySet)) }}</span>
+              <span>{{ $t('equalUserDepositPlural', Number(anonimitySet)) }}</span>
             </template>
           </i18n-t>
           <o-skeleton size="large" :active="!anonimitySet" width="200"></o-skeleton>

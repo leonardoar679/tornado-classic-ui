@@ -120,7 +120,7 @@ const numberFormats = {
 
 function slavicPluralization(choice, choicesLength) {
   /**
-   * @param choice {number} a choice index given by the input to $tc: `$tc('path.to.rule', choiceIndex)`
+   * @param choice {number} a choice index given by the input to $t: `$t('path.to.rule', choiceIndex)`
    * @param choicesLength {number} an overall amount of available choices
    * @returns a final choice index to select plural word by
    */
@@ -150,7 +150,7 @@ const pluralRules = {
   uk: slavicPluralization
 }
 
-// legacy: true keeps the Options API style ($t, $tc, app.i18n.t) used across this codebase
+// legacy: true keeps the Options API style ($t, app.i18n.t) used across this codebase
 export const i18n = createI18n({
   legacy: true,
   globalInjection: true,

@@ -79,7 +79,7 @@
             size="large"
             :class="{ 'has-low-anonymity': notEnoughDeposits }"
           >
-            <span>{{ $tc('userDeposit', depositsPast) }}</span>
+            <span>{{ $t('userDeposit', depositsPast) }}</span>
           </o-tooltip>
         </div>
       </div>
@@ -150,6 +150,7 @@ import WithdrawTotal from '@/components/withdraw/WithdrawTotal.vue'
 import WithdrawModalBox from '@/components/withdraw/WithdrawModalBox.vue'
 import SettingsModalBox from '@/components/settings/SettingsModalBox.vue'
 import { toChecksumAddress, isHexStrict, isAddress } from 'web3-utils'
+import { eventBus } from '@/services/eventBus.js'
 
 export default {
   components: {
@@ -370,12 +371,16 @@ export default {
     this.$emit('get-key', this.getKeys)
   },
   mounted() {
-    this.$root.$on('resetWithdraw', () => {
-      this.withdrawAddress = ''
-      this.withdrawNote = ''
-    })
+    eventBus.on('resetWithdraw', this.onReset)
+  },
+  beforeUnmount() {
+    eventBus.off('resetWithdraw', this.onReset)
   },
   methods: {
+    onReset() {
+      this.withdrawAddress = ''
+      this.withdrawNote = ''
+    },
     async getKeys() {
       try {
         this.isFileError = false

@@ -36,6 +36,8 @@ export default defineNuxtConfig({
   // proving keys / event caches / favicon ship in the build output (site root).
   dir: { public: 'static' },
   devtools: { enabled: false },
+  // `localhost` alone binds IPv6 ::1 only on this setup, which the browser can't reach
+  devServer: { host: '127.0.0.1' },
   modules: ['@nuxt/eslint'],
 
   css: ['~/assets/styles/app.scss'],

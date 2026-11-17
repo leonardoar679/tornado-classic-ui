@@ -100,7 +100,7 @@
               <o-tooltip
                 :label="
                   $t('quorumTooltip', {
-                    days: $tc('dayPlural', votingPeriod),
+                    days: $t('dayPlural', votingPeriod),
                     votes: $n(quorumVotes, 'compact')
                   })
                 "

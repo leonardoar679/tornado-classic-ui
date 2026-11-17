@@ -14,6 +14,7 @@
 import { mapState, mapMutations } from 'vuex'
 
 import { RelayerTab, WalletTab } from '@/components/settings/tabs/index.js'
+import { eventBus } from '@/services/eventBus.js'
 
 export default {
   components: {
@@ -55,7 +56,7 @@ export default {
     ...mapMutations('application', ['SET_WITHDRAW_TYPE']),
     reset() {
       this.withdrawType = 'relayer'
-      this.$root.$emit('resetSettings')
+      eventBus.emit('resetSettings')
     },
     save() {
       this.SET_WITHDRAW_TYPE({ withdrawType: this.withdrawType })
