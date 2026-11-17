@@ -27,6 +27,40 @@ export default {
     networkName: 'Ethereum Mainnet',
     deployedBlock: 9116966,
     rpcUrls: {
+      // verified public RPCs (chainlist) - archive-capable ones first for,
+      // compliance lookups of historical notes; the app failover walks this list,
+      drpc: {
+        name: 'dRPC',
+        url: 'https://eth.drpc.org'
+      },
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://ethereum-rpc.publicnode.com'
+      },
+      mevBlocker: {
+        name: 'MEV Blocker',
+        url: 'https://rpc.mevblocker.io'
+      },
+      pocketNetwork: {
+        name: 'Pocket Network',
+        url: 'https://eth.api.pocket.network'
+      },
+      blockmachine: {
+        name: 'Blockmachine',
+        url: 'https://rpc-eth.blockmachine.io'
+      },
+      stakely: {
+        name: 'Stakely',
+        url: 'https://ethereum-json-rpc.stakely.io'
+      },
+      blastApi: {
+        name: 'Blast API',
+        url: 'https://eth-mainnet.public.blastapi.io'
+      },
+      nowNodes: {
+        name: 'NOWNodes',
+        url: 'https://public-eth.nownodes.io'
+      },
       Infura: {
         name: 'Infura',
         url: `https://mainnet.infura.io/v3/${INFURA_KEY}`
@@ -147,6 +181,10 @@ export default {
     multicall: '0x41263cba59eb80dc200f3e2544eda4ed6a90e76c',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://bsc-rpc.publicnode.com'
+      },
       publicRpc1: {
         name: 'BSC Public RPC 1',
         url: 'https://bsc-dataseed.binance.org/'
@@ -158,6 +196,14 @@ export default {
       publicRpc3: {
         name: 'BSC Public RPC 3',
         url: 'https://bsc-dataseed1.ninicoin.io/'
+      },
+      bnbChain: {
+        name: 'BNB Chain',
+        url: 'https://bsc-dataseed.bnbchain.org'
+      },
+      drpc: {
+        name: 'dRPC',
+        url: 'https://bsc.drpc.org'
       }
     },
     tokens: {
@@ -202,6 +248,14 @@ export default {
     multicall: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://polygon-bor-rpc.publicnode.com'
+      },
+      drpc: {
+        name: 'dRPC',
+        url: 'https://polygon.drpc.org'
+      },
       Infura: {
         name: 'Infura',
         url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`
@@ -254,6 +308,14 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     ovmGasPriceOracleContract: '0x420000000000000000000000000000000000000F',
     rpcUrls: {
+      optimism: {
+        name: 'Optimism Public RPC',
+        url: 'https://mainnet.optimism.io'
+      },
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://optimism-rpc.publicnode.com'
+      },
       Alchemy: {
         name: 'Alchemy',
         url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_OPTIMISM_KEY}`
@@ -309,6 +371,10 @@ export default {
         name: 'Arbitrum Public RPC',
         url: 'https://arb1.arbitrum.io/rpc'
       },
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://arbitrum-one-rpc.publicnode.com'
+      },
       Alchemy: {
         name: 'Alchemy',
         url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ARBITRUM_KEY}`
@@ -360,9 +426,13 @@ export default {
     multicall: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicRpc: {
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://gnosis-rpc.publicnode.com'
+      },
+      gnosisChain: {
         name: 'Gnosis Chain RPC',
-        url: 'https://rpc.gnosischain.com/tornado'
+        url: 'https://rpc.gnosischain.com'
       }
     },
     tokens: {
@@ -407,7 +477,11 @@ export default {
     multicall: '0xe86e3989c74293Acc962156cd3F525c07b6a1B6e',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicRpc: {
+      publicNode: {
+        name: 'PublicNode',
+        url: 'https://avalanche-c-chain-rpc.publicnode.com'
+      },
+      avalanche: {
         name: 'Avalanche RPC',
         url: 'https://api.avax.network/ext/bc/C/rpc'
       }
