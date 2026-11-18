@@ -238,16 +238,17 @@ export default {
       return this.depositsPast < 5 || this.notEnoughPassedTime
     },
     isWithdrawDisabled() {
-      return (
+      // hasErrorNote is an object (or false); coerce so Oruga :disabled gets a boolean
+      return Boolean(
         this.isLoading ||
-        !!this.error.type ||
-        this.hasErrorNote ||
-        (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
-        !this.isValidAddress
+          this.error.type ||
+          this.hasErrorNote ||
+          (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
+          !this.isValidAddress
       )
     },
     isWithdrawalButtonDisable() {
-      return (
+      return Boolean(
         this.isWithdrawDisabled || this.isNotEnoughTokens || this.isFileError || this.withDisconnectedWallet
       )
     },

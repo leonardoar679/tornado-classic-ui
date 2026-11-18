@@ -1,4 +1,7 @@
+import { createRequire } from 'node:module'
 import { execSync } from 'node:child_process'
+
+const require = createRequire(import.meta.url)
 
 function getCurrentCommit() {
   try {
@@ -151,7 +154,10 @@ export default defineNuxtConfig({
         // websnark requires 'assert' at module level and calls it while proving;
         // webpack 4 polyfilled it, Vite externalizes it (throws at runtime).
         // The npm `assert` package is the same browserify polyfill.
-        assert: 'assert/'
+        assert: require.resolve('assert/'),
+        // eth-ens-namehash → idna-uts46-hx calls punycode.decode; Vite would
+        // otherwise resolve the broken Node builtin stub (no .decode in browser).
+        punycode: require.resolve('punycode/punycode.js')
       }
     },
     build: {

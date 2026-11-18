@@ -178,24 +178,43 @@ class RelayerRegister {
   }
 
   getValidRelayers = async (relayers, ensSubdomainKey) => {
-    const relayerNameHashes = relayers.map((r) => namehash.hash(r.ensName))
+    const hashed = []
+    for (const relayer of relayers) {
+      try {
+        if (!relayer?.ensName) {
+          continue
+        }
+        hashed.push({ relayer, nameHash: namehash.hash(relayer.ensName) })
+      } catch (err) {
+        console.warn(`skipping relayer namehash for ${relayer?.ensName}:`, err.message)
+      }
+    }
 
-    const relayersData = await this.aggregator.methods.relayersData(relayerNameHashes, subdomains).call()
+    if (!hashed.length) {
+      return []
+    }
 
-    const validRelayers = relayersData.reduce(
-      (acc, curr, index) => this.filterRelayer(acc, curr, ensSubdomainKey, relayers[index]),
+    const relayersData = await this.aggregator.methods
+      .relayersData(
+        hashed.map((h) => h.nameHash),
+        subdomains
+      )
+      .call()
+
+    return relayersData.reduce(
+      (acc, curr, index) => this.filterRelayer(acc, curr, ensSubdomainKey, hashed[index].relayer),
       []
     )
-
-    return validRelayers
   }
 
   getRelayers = async (ensSubdomainKey) => {
-    const relayers = await this.fetchRelayers()
-
-    const validRelayers = await this.getValidRelayers(relayers, ensSubdomainKey)
-
-    return validRelayers
+    try {
+      const relayers = await this.fetchRelayers()
+      return await this.getValidRelayers(relayers, ensSubdomainKey)
+    } catch (err) {
+      console.error('getRelayers failed:', err.message)
+      return []
+    }
   }
 }
 

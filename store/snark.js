@@ -111,7 +111,8 @@ function getAssetsBase() {
   }
   const ipfsPathRegExp = /^(\/(?:ipfs|ipns)\/[^/]+)/
   const ipfsPathPrefix = (window.location.pathname.match(ipfsPathRegExp) || [])[1]
-  return ipfsPathPrefix ? `${ipfsPathPrefix}/` : '/'
+  // Must not return '/' — `${'/'}/${name}` becomes `//tornado.json.zip` (protocol-relative).
+  return ipfsPathPrefix || ''
 }
 
 async function getIPFSIdFromENS(ensName) {
@@ -163,14 +164,23 @@ async function fetchFile({ url, name, getProgress, id, retryAttempt = 0 }) {
 
     return response
   } catch (err) {
+    const ensName = APP_ENS_NAME || 'tornadocash.eth'
     if (!id) {
-      id = await getIPFSIdFromENS(APP_ENS_NAME)
+      try {
+        id = await getIPFSIdFromENS(ensName)
+      } catch (ensErr) {
+        console.warn('ENS contenthash lookup failed:', ensErr.message)
+      }
     }
     const knownResources = [
       url,
-      `https://ipfs.io/ipfs/${id}`,
-      `https://dweb.link/ipfs/${id}`,
-      `https://gateway.pinata.cloud/ipfs/${id}`
+      ...(id
+        ? [
+            `https://ipfs.io/ipfs/${id}`,
+            `https://dweb.link/ipfs/${id}`,
+            `https://gateway.pinata.cloud/ipfs/${id}`
+          ]
+        : [])
     ]
 
     if (retryAttempt < knownResources.length) {

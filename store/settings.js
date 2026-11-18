@@ -19,7 +19,9 @@ export const state = () => {
     isActiveNotification: {
       first: true,
       second: true,
-      third: true
+      third: true,
+      ethLink: true,
+      binanceInternal: true
     }
   }
 }

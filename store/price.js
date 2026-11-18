@@ -101,7 +101,7 @@ export const actions = {
 
       setTimeout(() => dispatch('fetchTokenPrice'), 1000 * 30)
     } catch (e) {
-      console.error(e)
+      console.error('fetchTokenPrice failed:', e.message || e)
       setTimeout(() => dispatch('fetchTokenPrice'), 1000 * 30)
     }
   }

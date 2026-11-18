@@ -74,7 +74,7 @@ export const actions = {
       commit('SAVE_GAS_PARAMS', txGasParams)
       await dispatch('fetchL1Fee')
     } catch (e) {
-      console.error('fetchGasPrice', e)
+      console.error('fetchGasPrice', e.message || e)
     } finally {
       setTimeout(() => dispatch('fetchGasPrice'), 1000 * pollInterval)
     }

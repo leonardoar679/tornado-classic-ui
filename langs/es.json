@@ -2,6 +2,8 @@
   "closeNotification": "Cerrar notificación",
   "indexNotification": "Tornado.cash {link}. No obstante, todavía es un software experimental. Por favor, úselo teniendo en cuenta el riesgo y bajo su responsabilidad.",
   "indexNotificationLinkText": "ha sido auditado",
+  "phishingNotification": "El dominio tornado.cash está en manos de estafadores. ¡Varios usuarios ya han perdido grandes sumas de dinero en este sitio web! {link}",
+  "details": "Detalles",
   "binanceInternalTxsNotification": "Por favor, no use direcciones a monederos Binance para retiros. Las transacciones internas (incluidos los retiros de Tornado.cash) actualmente no son compatibles con el Exchange de Binance. Si tiene problemas en la recepción de sus fondos, debería contactar con el soporte de Binance.",
   "deposit": "Depósito",
   "depositButton": "Depósito",

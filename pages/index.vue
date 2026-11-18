@@ -15,6 +15,28 @@
     </o-notification>
 
     <o-notification
+      :active="isActiveNotification.first"
+      class="main-notification"
+      variant="info"
+      type="info"
+      icon-pack="icon"
+      closeable
+      :aria-close-label="$t('closeNotification')"
+      @close="disableNotification({ key: 'first' })"
+    >
+      <i18n-t keypath="phishingNotification">
+        <template #link>
+          <a
+            href="https://github.com/MetaMask/eth-phishing-detect/pull/174144"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ $t('details') }}</a
+          >
+        </template>
+      </i18n-t>
+    </o-notification>
+
+    <o-notification
       :active="isActiveNotification.third"
       class="main-notification"
       variant="warning"
@@ -26,29 +48,7 @@
     >
       <i18n-t keypath="trustBanner.trustLess">
         <template #link>
-          <a href="https://tornado.cash/">{{ $t('trustBanner.link') }}</a>
-        </template>
-      </i18n-t>
-    </o-notification>
-
-    <o-notification
-      :active="isActiveNotification.first"
-      class="main-notification"
-      variant="info"
-      type="info"
-      icon-pack="icon"
-      closeable
-      :aria-close-label="$t('closeNotification')"
-      @close="disableNotification({ key: 'first' })"
-    >
-      <i18n-t keypath="indexNotification">
-        <template #link>
-          <a
-            href="https://twitter.com/TornadoCash/status/1204745639759884289"
-            target="_blank"
-            rel="noopener noreferrer"
-            >{{ $t('indexNotificationLinkText') }}</a
-          >
+          <a href="https://tornadocash.eth.limo/">{{ $t('trustBanner.link') }}</a>
         </template>
       </i18n-t>
     </o-notification>
@@ -142,20 +142,25 @@ export default {
       this.getKeys = fn
     },
     async tabChanged(tabIndex) {
-      if (tabIndex === 1) {
-        this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
+      try {
+        if (tabIndex === 1) {
+          await this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
 
-        if (typeof this.getKeys === 'function' && !this.isActive) {
-          this.isActive = true
-          const result = await this.getKeys()
+          if (typeof this.getKeys === 'function' && !this.isActive) {
+            this.isActive = true
+            const result = await this.getKeys()
 
-          if (!result) {
-            this.isActive = false
+            if (!result) {
+              this.isActive = false
+            }
           }
+        } else {
+          const { currency, amount } = this.selectedInstance
+          this.$store.dispatch('application/setAndUpdateStatistic', { currency, amount })
         }
-      } else {
-        const { currency, amount } = this.selectedInstance
-        this.$store.dispatch('application/setAndUpdateStatistic', { currency, amount })
+      } catch (err) {
+        console.error('tabChanged failed:', err)
+        this.isActive = false
       }
     }
   }

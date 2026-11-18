@@ -93,8 +93,9 @@ export default {
     ...mapGetters('metamask', ['networkConfig']),
     ...mapGetters('application', ['selectedStatisticCurrency', 'latestDeposits']),
     anonimitySet() {
-      const currency = this.selectedStatistic.currency.toLowerCase()
-      return this.statistic[currency][this.selectedStatistic.amount].anonymitySet
+      const currency = this.selectedStatistic?.currency?.toLowerCase()
+      const amount = this.selectedStatistic?.amount
+      return this.statistic?.[currency]?.[amount]?.anonymitySet
     }
   },
   mounted() {

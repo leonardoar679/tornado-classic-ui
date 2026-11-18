@@ -285,15 +285,21 @@ export const actions = {
 
     commit('SET_IS_LOADING_RELAYERS', true)
 
-    const registeredRelayers = await relayerRegisterService(getters.ethProvider).getRelayers(ensSubdomainKey)
+    let statuses = []
+    try {
+      const registeredRelayers = await relayerRegisterService(getters.ethProvider).getRelayers(ensSubdomainKey)
 
-    const requests = []
-    for (const registeredRelayer of registeredRelayers) {
-      requests.push(dispatch('observeRelayer', { relayer: registeredRelayer }))
+      const requests = []
+      for (const registeredRelayer of registeredRelayers) {
+        requests.push(dispatch('observeRelayer', { relayer: registeredRelayer }))
+      }
+      statuses = await Promise.all(requests)
+      statuses = statuses.filter((status) => status.isValid)
+    } catch (err) {
+      console.error('pickRandomRelayer failed:', err.message)
+      commit('SET_IS_LOADING_RELAYERS', false)
+      return
     }
-    let statuses = await Promise.all(requests)
-
-    statuses = statuses.filter((status) => status.isValid)
     // const validRelayerENSnames = statuses.map((relayer) => relayer.name)
     commit('SAVE_VALIDATED_RELAYERS', statuses)
     console.log('filtered statuses ', statuses)
