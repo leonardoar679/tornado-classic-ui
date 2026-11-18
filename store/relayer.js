@@ -8,8 +8,9 @@ import ENSABI from '@/abis/ENS.abi.json'
 import networkConfig from '@/networkConfig.js'
 import { createWeb3 } from '@/utils/web3.js'
 
-const getAxios = () => {
-  return import('axios')
+const getAxios = async () => {
+  const mod = await import('axios')
+  return mod.default || mod
 }
 
 const calculateScore = ({ stakeBalance, tornadoServiceFee }, minFee = 0.33, maxFee = 0.53) => {
@@ -200,7 +201,9 @@ export const actions = {
         hostname += '/'
       }
 
-      const url = `${window.location.protocol}//${hostname}`
+      // Always https except .onion (local http://127.0.0.1 must not force http://relayer).
+      const protocol = hostname.endsWith('.onion') ? 'http:' : 'https:'
+      const url = `${protocol}//${hostname}`
       const response = await axios.get(`${url}status`, { timeout: 5000 }).catch(() => {
         throw new Error(this.app.i18n.t('canNotFetchStatusFromTheRelayer'))
       })

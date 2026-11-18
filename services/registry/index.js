@@ -11,8 +11,33 @@ import RelayerRegistryABI from '@/abis/RelayerRegistry.abi.json'
 import { getIndexedDB } from '@/services/idb.js'
 
 const MIN_STAKE_BALANCE = '0x22B1C8C1227A00000' // 40 TORN
+const ENS_REGISTRY = '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e'
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+const ENS_REGISTRY_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'node', type: 'bytes32' }],
+    name: 'resolver',
+    outputs: [{ name: '', type: 'address' }],
+    type: 'function'
+  }
+]
+const ENS_RESOLVER_ABI = [
+  {
+    constant: true,
+    inputs: [
+      { name: 'node', type: 'bytes32' },
+      { name: 'key', type: 'string' }
+    ],
+    name: 'text',
+    outputs: [{ name: '', type: 'string' }],
+    type: 'function'
+  }
+]
 
 const subdomains = Object.values(networkConfig).map(({ ensSubdomainKey }) => ensSubdomainKey)
+const emptyRecords = () => Array(20).fill('')
 
 class RelayerRegister {
   constructor(provider) {
@@ -23,6 +48,7 @@ class RelayerRegister {
 
     this.aggregator = new this.provider.Contract(AggregatorABI, aggregatorContract)
     this.relayerRegistry = new this.provider.Contract(RelayerRegistryABI, registryContract)
+    this.ensRegistry = new this.provider.Contract(ENS_REGISTRY_ABI, ENS_REGISTRY)
   }
 
   fetchEvents = async (fromBlock, toBlock) => {
@@ -136,18 +162,26 @@ class RelayerRegister {
       allRelayers = allRelayers.concat(relayers.events)
     }
 
-    return allRelayers
+    // Deduplicate by ensName (cached + graph/RPC sync can overlap).
+    const byName = new Map()
+    for (const relayer of allRelayers) {
+      if (relayer?.ensName) {
+        byName.set(relayer.ensName.toLowerCase(), relayer)
+      }
+    }
+    return [...byName.values()]
   }
 
   filterRelayer = (acc, curr, ensSubdomainKey, relayer) => {
     const subdomainIndex = subdomains.indexOf(ensSubdomainKey)
+    const records = curr.records || emptyRecords()
 
-    const mainnetSubdomain = curr.records[0]
-    const hostname = curr.records[subdomainIndex]
+    const mainnetSubdomain = records[0]
+    const hostname = records[subdomainIndex] || ''
     const isHostWithProtocol = hostname.includes('http')
 
     const isOwner = relayer.relayerAddress === curr.owner
-    const hasMinBalance = new BN(curr.balance).gte(MIN_STAKE_BALANCE)
+    const hasMinBalance = new BN(curr.balance || 0).gte(MIN_STAKE_BALANCE)
 
     if (
       hostname &&
@@ -164,7 +198,7 @@ class RelayerRegister {
         relayerAddress: relayer.relayerAddress
       })
     } else {
-      console.error(`${relayer.ensName} invalid: `, {
+      console.warn(`${relayer.ensName} invalid: `, {
         isOwner,
         hasTXT: Boolean(hostname),
         isHasMinBalance: hasMinBalance,
@@ -175,6 +209,73 @@ class RelayerRegister {
     }
 
     return acc
+  }
+
+  /**
+   * Aggregator.relayersData reverts the whole batch when any ENS name has no
+   * resolver (it calls resolver.text on address(0)). Split failing batches and
+   * fall back to empty-subdomain + off-chain TXT reads for individuals.
+   */
+  resolveSubdomainUrl = async (ensName, subdomainKey) => {
+    try {
+      const parentNode = namehash.hash(ensName)
+      const resolverAddress = await this.ensRegistry.methods.resolver(parentNode).call()
+      if (!resolverAddress || resolverAddress === EMPTY_ADDRESS) {
+        return ''
+      }
+      const resolver = new this.provider.Contract(ENS_RESOLVER_ABI, resolverAddress)
+      const subdomainNode = namehash.hash(`${subdomainKey}.${ensName}`)
+      return (await resolver.methods.text(subdomainNode, 'url').call()) || ''
+    } catch (err) {
+      console.warn(`ENS url lookup failed for ${subdomainKey}.${ensName}:`, err.message)
+      return ''
+    }
+  }
+
+  getRelayerRowFallback = async ({ relayer, nameHash }) => {
+    try {
+      const [row] = await this.aggregator.methods.relayersData([nameHash], subdomains).call()
+      return row
+    } catch {
+      let basic
+      try {
+        ;[basic] = await this.aggregator.methods.relayersData([nameHash], []).call()
+      } catch (err) {
+        console.warn(`aggregator fallback failed for ${relayer.ensName}:`, err.message)
+        return {
+          owner: EMPTY_ADDRESS,
+          balance: '0',
+          isRegistered: false,
+          records: emptyRecords()
+        }
+      }
+
+      const records = emptyRecords()
+      for (let j = 0; j < subdomains.length; j++) {
+        records[j] = await this.resolveSubdomainUrl(relayer.ensName, subdomains[j])
+      }
+      return { ...basic, records }
+    }
+  }
+
+  fetchRelayersDataForHashed = async (hashed) => {
+    const nameHashes = hashed.map((h) => h.nameHash)
+    try {
+      return await this.aggregator.methods.relayersData(nameHashes, subdomains).call()
+    } catch (err) {
+      if (hashed.length === 1) {
+        return [await this.getRelayerRowFallback(hashed[0])]
+      }
+      console.warn(
+        `relayersData batch of ${hashed.length} failed (${err.message}); splitting`
+      )
+      const mid = Math.floor(hashed.length / 2)
+      const [left, right] = await Promise.all([
+        this.fetchRelayersDataForHashed(hashed.slice(0, mid)),
+        this.fetchRelayersDataForHashed(hashed.slice(mid))
+      ])
+      return left.concat(right)
+    }
   }
 
   getValidRelayers = async (relayers, ensSubdomainKey) => {
@@ -194,12 +295,7 @@ class RelayerRegister {
       return []
     }
 
-    const relayersData = await this.aggregator.methods
-      .relayersData(
-        hashed.map((h) => h.nameHash),
-        subdomains
-      )
-      .call()
+    const relayersData = await this.fetchRelayersDataForHashed(hashed)
 
     return relayersData.reduce(
       (acc, curr, index) => this.filterRelayer(acc, curr, ensSubdomainKey, hashed[index].relayer),

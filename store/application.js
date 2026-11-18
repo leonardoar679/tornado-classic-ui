@@ -857,15 +857,22 @@ const actions = {
       throw new Error(e.message)
     }
   },
-  loadAllNotesData({ dispatch, rootGetters }) {
+  async loadAllNotesData({ dispatch, rootGetters }) {
     const { tokens } = rootGetters['metamask/networkConfig']
+    const jobs = []
 
     for (const [currency, { instanceAddress }] of Object.entries(tokens)) {
       for (const amount in instanceAddress) {
         if (instanceAddress[amount]) {
-          dispatch('updateLastIndex', { currency, amount })
+          jobs.push({ currency, amount })
         }
       }
+    }
+
+    // Cap concurrency — Infura 429s from parallel nextIndex fan-out were common.
+    const concurrency = 2
+    for (let i = 0; i < jobs.length; i += concurrency) {
+      await Promise.all(jobs.slice(i, i + concurrency).map((job) => dispatch('updateLastIndex', job)))
     }
   },
   async updateLastIndex({ dispatch, commit, rootState }, { currency, amount }) {
