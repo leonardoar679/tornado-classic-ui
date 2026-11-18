@@ -99,7 +99,9 @@ export default {
       const { decimals } = this.networkConfig.tokens[currency]
       const price = this.tokenRate
 
-      const ethToReceive = toBN(toWei(Math.min(Math.max(this.min, this.newValue), this.max).toString()))
+      const ethToReceive = toBN(
+        toWei(Math.min(Math.max(this.min, this.newValue), this.max).toString(), 'ether')
+      )
       if (!price || price === '0') {
         return this.toDecimals(toBN(0), null, 6)
       }

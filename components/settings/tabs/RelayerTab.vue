@@ -140,7 +140,7 @@ export default {
       return this.currency.toLowerCase() !== this.nativeCurrency
     },
     ethToReceiveToWei() {
-      return toWei(this.ethToReceive.toString())
+      return toWei(this.ethToReceive.toString(), 'ether')
     },
     isCustomRelayer() {
       return this.selectedRelayer === 'custom'

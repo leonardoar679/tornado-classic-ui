@@ -121,7 +121,7 @@ export const getters = {
     const { decimals } = rootGetters['metamask/networkConfig'].tokens[currency]
     const nativeCurrency = rootGetters['metamask/nativeCurrency']
     if (currency === nativeCurrency) {
-      return toBN(ethBalance).gte(toBN(toWei(amount.toString())))
+      return toBN(ethBalance).gte(toBN(toWei(amount.toString(), 'ether')))
     } else {
       return toBN(state.balance).gte(toBN(getters.fromDecimals(amount, decimals)))
     }

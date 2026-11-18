@@ -54,7 +54,7 @@ const actions = {
       console.log('call approve')
       const netId = rootGetters['metamask/netId']
       const govInstance = rootGetters['governance/gov/govContract']({ netId })
-      const amountToApprove = toHex(toWei(amount.toString()))
+      const amountToApprove = toHex(toWei(amount.toString(), 'ether'))
       const data = getters.tokenContract.methods
         .approve(govInstance.options.address, amountToApprove.toString())
         .encodeABI()
@@ -157,7 +157,7 @@ const actions = {
       // let result = pre.length % 2 === 0 ? pre : '0' + pre
       // result = '0x' + result
 
-      const value = toWei(amount.toString())
+      const value = toWei(amount.toString(), 'ether')
 
       const args = {
         owner: ethAccount,

@@ -242,7 +242,7 @@ const actions = {
       const netId = rootGetters['metamask/netId']
       const { deadline, v, r, s } = rootState.torn.signature
       const govInstance = getters.govContract({ netId })
-      const amount = toWei(rootState.torn.signature.amount.toString())
+      const amount = toWei(rootState.torn.signature.amount.toString(), 'ether')
       const gas = await govInstance.methods
         .lock(ethAccount, amount, deadline, v, r, s)
         .estimateGas({ from: ethAccount, value: 0 })
@@ -300,7 +300,7 @@ const actions = {
       const { ethAccount } = rootState.metamask
       const netId = rootGetters['metamask/netId']
       const govInstance = getters.govContract({ netId })
-      amount = toWei(amount.toString())
+      amount = toWei(amount.toString(), 'ether')
       const gas = await govInstance.methods
         .lockWithApproval(amount)
         .estimateGas({ from: ethAccount, value: 0 })
@@ -486,7 +486,7 @@ const actions = {
       const { ethAccount } = rootState.metamask
       const netId = rootGetters['metamask/netId']
       const govInstance = getters.govContract({ netId })
-      amount = toWei(amount.toString())
+      amount = toWei(amount.toString(), 'ether')
       const gas = await govInstance.methods.unlock(amount).estimateGas({ from: ethAccount, value: 0 })
       const data = await govInstance.methods.unlock(amount).encodeABI()
 

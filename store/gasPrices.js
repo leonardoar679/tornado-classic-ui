@@ -45,11 +45,17 @@ export const getters = {
     return state.gasParams
   },
   gasPrice: (state, getters) => {
-    const { gasPrice, maxFeePerGas } = getters.getGasParams
-    return toHex(maxFeePerGas || gasPrice)
+    const { gasPrice, maxFeePerGas } = getters.getGasParams || {}
+    // Fallback 50 gwei in wei — toHex(undefined) throws in web3 v4.
+    const raw = maxFeePerGas ?? gasPrice ?? 50_000_000_000
+    return toHex(raw)
   },
   gasPriceInGwei: (state, getters) => {
-    return fromWei(getters.gasPrice, 'gwei')
+    try {
+      return fromWei(getters.gasPrice, 'gwei')
+    } catch {
+      return '50'
+    }
   }
 }
 
