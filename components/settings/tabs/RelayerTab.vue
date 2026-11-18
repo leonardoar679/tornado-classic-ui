@@ -2,7 +2,13 @@
   <o-tab-item :label="$t('relayer')" value="relayer" tab-class="withdrawal_settings_relayer_tab">
     <div class="field">
       <o-field :label="$t('relayer')" data-test="withdrawal_settings_relayer_dropdown">
-        <o-dropdown v-model="selectedRelayer" expanded aria-role="list" @change="onChangeRelayer">
+        <o-dropdown
+          v-model="selectedRelayer"
+          selectable
+          expanded
+          aria-role="list"
+          @change="onChangeRelayer"
+        >
           <template #trigger>
             <div class="control" :class="{ 'is-loading': checkingRelayer || isLoadingRelayers }">
               <div class="input">

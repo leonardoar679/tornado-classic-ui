@@ -6,7 +6,7 @@
     </header>
     <div class="field">
       <o-field :label="$t('rpc')" class="has-custom-field" data-test="rpc_endpoint_dropdown">
-        <o-dropdown v-model="selectedRpc" expanded aria-role="list">
+        <o-dropdown v-model="selectedRpc" selectable expanded aria-role="list">
           <template #trigger>
             <div class="control" :class="{ 'is-loading': checkingRpc && !isCustomRpc }">
               <div class="input">

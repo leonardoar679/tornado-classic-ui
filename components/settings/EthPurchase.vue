@@ -59,7 +59,7 @@ import { mapState, mapGetters } from 'vuex'
 import { EthPurchaseArrow } from '@/components/icons/index.js'
 import { debounce } from '@/utils/index.js'
 import { toWei } from 'web3-utils'
-import { toBN } from '@/utils/bn.js'
+import { toBN, pow10 } from '@/utils/bn.js'
 
 export default {
   components: {
@@ -100,7 +100,10 @@ export default {
       const price = this.tokenRate
 
       const ethToReceive = toBN(toWei(Math.min(Math.max(this.min, this.newValue), this.max).toString()))
-      return this.toDecimals(ethToReceive.mul(toBN(10 ** decimals)).div(toBN(price)), null, 6)
+      if (!price || price === '0') {
+        return this.toDecimals(toBN(0), null, 6)
+      }
+      return this.toDecimals(ethToReceive.mul(pow10(decimals)).div(toBN(price)), null, 6)
     }
   },
   watch: {

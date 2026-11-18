@@ -195,7 +195,10 @@ export default {
       return false
     },
     shouldSettingsShow() {
-      return !this.hasErrorNote && !this.error.message
+      // hasErrorNote is `{ type, msg }` or false; empty note uses `{ type: '', msg: '' }`
+      // and must still allow opening withdrawal/relayer settings.
+      const noteError = this.hasErrorNote
+      return !(noteError && noteError.msg) && !this.error.message
     },
     hasErrorNote() {
       const note = this.withdrawNote.split('-')[4]

@@ -69,7 +69,7 @@ export const actions = {
         commit('SAVE_RPC', { netId, name, url })
         return
       }
-      console.error('preselectRpc', url, error)
+      console.warn('preselectRpc', url, error)
     }
 
     // Fall back to whatever was persisted from a previous session
@@ -100,7 +100,7 @@ export const actions = {
         return { isValid: false, error: this.app.i18n.t('thisRpcIsForDifferentNetwork') }
       }
     } catch (e) {
-      console.error('checkRpc', e)
+      console.warn('checkRpc', e.message || e)
       return { isValid: false, error: this.app.i18n.t('rpcIsDown') }
     }
   }

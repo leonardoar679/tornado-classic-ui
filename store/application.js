@@ -22,7 +22,7 @@ import {
 
 import { buildGroth16, download, getTornadoKeys } from './snark.js'
 import { toWei, numberToHex, isAddress } from 'web3-utils'
-import { toBN } from '@/utils/bn.js'
+import { toBN, pow10 } from '@/utils/bn.js'
 import { createWeb3 } from '@/utils/web3.js'
 import websnarkUtils from 'websnark/src/utils'
 
@@ -189,7 +189,11 @@ const getters = {
         return ethFee.add(tornadoServiceFee)
       }
       default: {
-        const tokenFee = ethFee.mul(toBN(10 ** decimals)).div(toBN(rootState.price.prices[currency]))
+        const price = rootState.price.prices[currency]
+        if (!price || price === '0') {
+          return tornadoServiceFee
+        }
+        const tokenFee = ethFee.mul(pow10(decimals)).div(toBN(price))
         return tokenFee.add(tornadoServiceFee)
       }
     }
@@ -198,8 +202,11 @@ const getters = {
     const { currency } = rootState.application.selectedStatistic
     const { decimals } = rootGetters['metamask/networkConfig'].tokens[currency]
     const price = rootState.price.prices[currency]
+    if (!price || price === '0') {
+      return toBN(0)
+    }
     const ethToReceive = toBN(state.ethToReceive)
-    return ethToReceive.mul(toBN(10 ** decimals)).div(toBN(price))
+    return ethToReceive.mul(pow10(decimals)).div(toBN(price))
   },
   isNotEnoughTokens: (state, getters, rootState, rootGetters) => {
     const { amount, currency } = rootState.application.selectedStatistic
@@ -225,10 +232,10 @@ const getters = {
     const total = toBN(rootGetters['token/fromDecimals'](amount.toString()))
     const price = rootState.price.prices[currency]
     const relayerFee = getters.relayerFee
-    return total
-      .sub(relayerFee)
-      .mul(toBN(price))
-      .div(toBN(10 ** decimals))
+    if (!price || price === '0') {
+      return toBN(0)
+    }
+    return total.sub(relayerFee).mul(toBN(price)).div(pow10(decimals))
   },
   selectedCurrency: (state, getters, rootState, rootGetters) => {
     const tokens = rootGetters['metamask/networkConfig'].tokens

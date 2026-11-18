@@ -273,7 +273,7 @@ export const actions = {
         tornadoServiceFee: response.data.tornadoServiceFee
       }
     } catch (e) {
-      console.error('askRelayerStatus', ensName, e.message)
+      console.warn('askRelayerStatus', ensName, e.message)
       return { isValid: false, error: e.message }
     }
   },

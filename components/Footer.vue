@@ -85,6 +85,7 @@
                 <div class="break"></div>
                 <o-dropdown
                   v-model="$i18n.locale"
+                  selectable
                   class="dropdown-langs"
                   position="top-left"
                   aria-role="list"

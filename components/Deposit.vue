@@ -2,7 +2,7 @@
   <o-tab-item :label="$t('deposit')" tab-class="button_tab_deposit">
     <fieldset>
       <o-field :label="$t('token')" data-test="token_list_dropdown">
-        <o-dropdown v-model="selectedToken" expanded aria-role="list">
+        <o-dropdown v-model="selectedToken" selectable expanded aria-role="list">
           <template #trigger>
             <div class="control">
               <div class="input">

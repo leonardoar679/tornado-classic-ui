@@ -99,7 +99,7 @@
     </div>
     <div class="tx-head-mobile field is-grouped">
       <div class="control is-expanded">
-        <o-dropdown v-model="mobileSort" expanded aria-role="list">
+        <o-dropdown v-model="mobileSort" selectable expanded aria-role="list">
           <template #trigger>
             <div class="control">
               <div class="input">

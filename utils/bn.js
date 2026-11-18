@@ -27,4 +27,7 @@ export const toBN = (value) => {
   return new BN(value)
 }
 
+/** 10^n without Number precision loss (10**18 is > Number.MAX_SAFE_INTEGER). */
+export const pow10 = (decimals) => toBN(10).pow(toBN(String(decimals)))
+
 export default BN

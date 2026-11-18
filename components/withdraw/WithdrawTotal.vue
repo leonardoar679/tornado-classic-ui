@@ -47,7 +47,7 @@
 import { mapState, mapGetters } from 'vuex'
 import { decimalPlaces } from '@/utils/index.js'
 import { fromWei } from 'web3-utils'
-import { toBN } from '@/utils/bn.js'
+import { toBN, pow10 } from '@/utils/bn.js'
 
 export default {
   props: {
@@ -96,7 +96,11 @@ export default {
       if (currency === this.nativeCurrency) {
         return ethFee.add(tornadoServiceFee)
       }
-      const tokenFee = ethFee.mul(toBN(10 ** decimals)).div(toBN(this.tokenRate))
+      const price = this.tokenRate
+      if (!price || price === '0') {
+        return tornadoServiceFee
+      }
+      const tokenFee = ethFee.mul(pow10(decimals)).div(toBN(price))
       return tokenFee.add(tornadoServiceFee)
     },
     isTokenSelected() {
@@ -110,9 +114,10 @@ export default {
       const { currency } = this.selectedStatistic
       const { decimals } = this.networkConfig.tokens[currency]
       const price = this.tokenRate
-      return toBN(this.ethToReceive)
-        .mul(toBN(10 ** decimals))
-        .div(toBN(price))
+      if (!price || price === '0') {
+        return toBN(0)
+      }
+      return toBN(this.ethToReceive).mul(pow10(decimals)).div(toBN(price))
     },
     ethToReceiveFromWei() {
       return fromWei(this.ethToReceive, 'ether')
