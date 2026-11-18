@@ -9,6 +9,7 @@ import AggregatorABI from '@/abis/Aggregator.abi.json'
 import { numberToHex, toWei, fromWei, hexToNumber, hexToNumberString, toChecksumAddress } from 'web3-utils'
 import { toBN } from '@/utils/bn.js'
 import { createWeb3 } from '@/utils/web3.js'
+import { formatRpcError, isRateLimitError } from '@/utils/rpcError.js'
 
 const state = () => {
   return {
@@ -645,7 +646,7 @@ const actions = {
       )
     }
   },
-  async fetchProposals({ rootGetters, getters, commit }, { requestId }) {
+  async fetchProposals({ rootGetters, getters, commit, dispatch }, { requestId }) {
     let proposals = []
     try {
       commit('SAVE_FETCHING_PROPOSALS', true)
@@ -686,14 +687,33 @@ const actions = {
             toBlock: 'latest'
           })
         } catch (rpcErr) {
-          console.warn('fetchProposals RPC events failed:', rpcErr.message)
+          console.warn('fetchProposals RPC events failed:', formatRpcError(rpcErr))
+          if (isRateLimitError(rpcErr)) {
+            await dispatch('settings/failoverRpc', { reason: 'proposal events rate limit' }, { root: true })
+          }
         }
       }
 
       try {
         statuses = await aggregatorContract.methods.getAllProposals(govInstance.options.address).call()
       } catch (statusErr) {
-        console.warn('fetchProposals statuses failed:', statusErr.message)
+        console.warn('fetchProposals statuses failed:', formatRpcError(statusErr))
+        if (isRateLimitError(statusErr)) {
+          const next = await dispatch(
+            'settings/failoverRpc',
+            { reason: 'proposal statuses rate limit' },
+            { root: true }
+          )
+          if (next?.url) {
+            try {
+              statuses = await getters.aggregatorContract.methods
+                .getAllProposals(govInstance.options.address)
+                .call()
+            } catch (retryErr) {
+              console.warn('fetchProposals statuses retry failed:', formatRpcError(retryErr))
+            }
+          }
+        }
       }
 
       const parseDescription = ({ id, text }) => {

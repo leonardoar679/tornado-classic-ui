@@ -25,7 +25,12 @@ class EventService {
   }
 
   getInstanceName(type) {
-    return `${type}s_${this.currency}_${this.amount}`
+    // IDB stores are always lowercase (`deposits_eth_0.1`). Callers must not
+    // pass display labels like `Deposit` or IndexedDB throws "store was not found".
+    const normalized = String(type || '')
+      .toLowerCase()
+      .replace(/s$/, '')
+    return `${normalized}s_${this.currency}_${this.amount}`
   }
 
   async getEvents(type) {
@@ -371,7 +376,9 @@ class EventService {
         storeName: 'lastEvents'
       })
     } catch (err) {
-      console.error('saveEvents has error:', err.message)
+      // Missing/wrong store names are programming errors; keep them visible but
+      // do not treat expected empty writes as fatal overlays.
+      console.warn('saveEvents has error:', err.message)
     }
   }
 }

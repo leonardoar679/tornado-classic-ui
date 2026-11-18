@@ -107,7 +107,8 @@ export default {
       return allowance.gte(amount)
     },
     disabledLock() {
-      return Number(this.amountToLock) && !this.hasEnoughApproval
+      // Must be a real boolean — `Number('') && …` yields 0 and trips Vue prop warnings.
+      return !Number(this.amountToLock) || !this.hasEnoughApproval
     },
     computedAmountToLock: {
       get() {

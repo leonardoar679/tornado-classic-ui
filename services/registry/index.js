@@ -5,6 +5,7 @@ import { toChecksumAddress } from 'web3-utils'
 import { graph } from '@/services/index.js'
 import networkConfig from '@/networkConfig.js'
 import { REGISTRY_DEPLOYED_BLOCK } from '@/constants/index.js'
+import { formatRpcError } from '@/utils/rpcError.js'
 
 import AggregatorABI from '@/abis/Aggregator.abi.json'
 import RelayerRegistryABI from '@/abis/RelayerRegistry.abi.json'
@@ -198,23 +199,19 @@ class RelayerRegister {
         relayerAddress: relayer.relayerAddress
       })
     } else {
-      console.warn(`${relayer.ensName} invalid: `, {
-        isOwner,
-        hasTXT: Boolean(hostname),
-        isHasMinBalance: hasMinBalance,
-        isRegistered: curr.isRegistered,
-        isHostWithoutProtocol: !isHostWithProtocol,
-        isMainnetSubdomain: Boolean(mainnetSubdomain)
-      })
+      // Expected for unregistered / under-staked ENS names — keep a count, not a flood.
+      acc._invalid = (acc._invalid || 0) + 1
     }
 
     return acc
   }
 
   /**
-   * Aggregator.relayersData reverts the whole batch when any ENS name has no
-   * resolver (it calls resolver.text on address(0)). Split failing batches and
-   * fall back to empty-subdomain + off-chain TXT reads for individuals.
+   * Aggregator.relayersData(..., subdomains) reverts the whole batch when any
+   * ENS name has no resolver (it calls resolver.text on address(0)). Always
+   * fetch ownership/stake with empty subdomains, then resolve TXT off-chain
+   * only for candidates that can pass filterRelayer. This avoids binary-split
+   * storms and web3's "No matching error abi" console.error spam.
    */
   resolveSubdomainUrl = async (ensName, subdomainKey) => {
     try {
@@ -227,58 +224,77 @@ class RelayerRegister {
       const subdomainNode = namehash.hash(`${subdomainKey}.${ensName}`)
       return (await resolver.methods.text(subdomainNode, 'url').call()) || ''
     } catch (err) {
-      console.warn(`ENS url lookup failed for ${subdomainKey}.${ensName}:`, err.message)
+      this._ensLookupFails = (this._ensLookupFails || 0) + 1
+      this._lastEnsLookupError = formatRpcError(err)
       return ''
     }
   }
 
-  getRelayerRowFallback = async ({ relayer, nameHash }) => {
-    try {
-      const [row] = await this.aggregator.methods.relayersData([nameHash], subdomains).call()
-      return row
-    } catch {
-      let basic
-      try {
-        ;[basic] = await this.aggregator.methods.relayersData([nameHash], []).call()
-      } catch (err) {
-        console.warn(`aggregator fallback failed for ${relayer.ensName}:`, err.message)
-        return {
-          owner: EMPTY_ADDRESS,
-          balance: '0',
-          isRegistered: false,
-          records: emptyRecords()
-        }
-      }
-
-      const records = emptyRecords()
-      for (let j = 0; j < subdomains.length; j++) {
-        records[j] = await this.resolveSubdomainUrl(relayer.ensName, subdomains[j])
-      }
-      return { ...basic, records }
+  enrichRelayerRecords = async (row, relayer, ensSubdomainKey) => {
+    const records = emptyRecords()
+    const subdomainIndex = subdomains.indexOf(ensSubdomainKey)
+    const keysNeeded = new Set([0])
+    if (subdomainIndex >= 0) {
+      keysNeeded.add(subdomainIndex)
     }
+
+    await Promise.all(
+      [...keysNeeded].map(async (idx) => {
+        records[idx] = await this.resolveSubdomainUrl(relayer.ensName, subdomains[idx])
+      })
+    )
+
+    return { ...row, records }
   }
 
-  fetchRelayersDataForHashed = async (hashed) => {
+  fetchRelayersDataForHashed = async (hashed, ensSubdomainKey) => {
     const nameHashes = hashed.map((h) => h.nameHash)
+    let rows
     try {
-      return await this.aggregator.methods.relayersData(nameHashes, subdomains).call()
+      // Empty subdomain list: no resolver.text calls → no batch-wide reverts.
+      rows = await this.aggregator.methods.relayersData(nameHashes, []).call()
     } catch (err) {
-      if (hashed.length === 1) {
-        return [await this.getRelayerRowFallback(hashed[0])]
+      // Rare: if even the empty-subdomain batch fails, fall back per-name.
+      console.warn(`Relayer aggregator batch failed (${formatRpcError(err)}); fetching individually`)
+      rows = []
+      for (const item of hashed) {
+        try {
+          const [row] = await this.aggregator.methods.relayersData([item.nameHash], []).call()
+          rows.push(row)
+        } catch (innerErr) {
+          this._aggregatorFallbackFails = (this._aggregatorFallbackFails || 0) + 1
+          this._lastAggregatorFallbackError = formatRpcError(innerErr)
+          rows.push({
+            owner: EMPTY_ADDRESS,
+            balance: '0',
+            isRegistered: false,
+            records: emptyRecords()
+          })
+        }
       }
-      console.warn(
-        `relayersData batch of ${hashed.length} failed (${err.message}); splitting`
-      )
-      const mid = Math.floor(hashed.length / 2)
-      const [left, right] = await Promise.all([
-        this.fetchRelayersDataForHashed(hashed.slice(0, mid)),
-        this.fetchRelayersDataForHashed(hashed.slice(mid))
-      ])
-      return left.concat(right)
     }
+
+    return Promise.all(
+      rows.map(async (row, index) => {
+        const relayer = hashed[index].relayer
+        const hasMinBalance = new BN(row.balance || 0).gte(MIN_STAKE_BALANCE)
+        const isOwner = relayer.relayerAddress === row.owner
+
+        if (!row.isRegistered || !hasMinBalance || !isOwner) {
+          return { ...row, records: emptyRecords() }
+        }
+
+        return this.enrichRelayerRecords(row, relayer, ensSubdomainKey)
+      })
+    )
   }
 
   getValidRelayers = async (relayers, ensSubdomainKey) => {
+    this._ensLookupFails = 0
+    this._aggregatorFallbackFails = 0
+    this._lastEnsLookupError = null
+    this._lastAggregatorFallbackError = null
+
     const hashed = []
     for (const relayer of relayers) {
       try {
@@ -287,7 +303,7 @@ class RelayerRegister {
         }
         hashed.push({ relayer, nameHash: namehash.hash(relayer.ensName) })
       } catch (err) {
-        console.warn(`skipping relayer namehash for ${relayer?.ensName}:`, err.message)
+        console.warn(`skipping relayer namehash for ${relayer?.ensName}:`, formatRpcError(err))
       }
     }
 
@@ -295,12 +311,28 @@ class RelayerRegister {
       return []
     }
 
-    const relayersData = await this.fetchRelayersDataForHashed(hashed)
+    const relayersData = await this.fetchRelayersDataForHashed(hashed, ensSubdomainKey)
 
-    return relayersData.reduce(
+    const valid = relayersData.reduce(
       (acc, curr, index) => this.filterRelayer(acc, curr, ensSubdomainKey, hashed[index].relayer),
       []
     )
+    const skipped = valid._invalid || 0
+    delete valid._invalid
+    if (skipped) {
+      console.warn(
+        `Skipped ${skipped} invalid ENS relayer registrations (under-staked / missing TXT / unregistered)`
+      )
+    }
+    if (this._aggregatorFallbackFails) {
+      console.warn(
+        `Relayer aggregator: ${this._aggregatorFallbackFails} individual fallback(s) failed (${this._lastAggregatorFallbackError})`
+      )
+    }
+    if (this._ensLookupFails) {
+      console.warn(`ENS url lookup: ${this._ensLookupFails} miss(es) (${this._lastEnsLookupError})`)
+    }
+    return valid
   }
 
   getRelayers = async (ensSubdomainKey) => {

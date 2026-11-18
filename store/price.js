@@ -4,6 +4,7 @@ import { toBN } from '@/utils/bn.js'
 import networkConfig from '@/networkConfig.js'
 import offchainOracleABI from '@/abis/OffchainOracle.abi.json'
 import { createWeb3 } from '@/utils/web3.js'
+import { formatRpcError, isRateLimitError } from '@/utils/rpcError.js'
 
 const offchainOracleAddress = '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb'
 
@@ -125,12 +126,14 @@ export const actions = {
     fetching = true
 
     try {
-      const rpcUrl = resolveMainnetRpcUrl(rootState)
-      const web3 = this.$provider?.getWeb3?.(rpcUrl) || createWeb3(rpcUrl)
-      const offchainOracle = new web3.eth.Contract(offchainOracleABI, offchainOracleAddress)
+      let rpcUrl = resolveMainnetRpcUrl(rootState)
+      let web3 = this.$provider?.getWeb3?.(rpcUrl) || createWeb3(rpcUrl)
+      let offchainOracle = new web3.eth.Contract(offchainOracleABI, offchainOracleAddress)
       const { tokenAddresses, oneUintAmount, currencyLookup } = getters.getArgsForOracle
 
       const prices = {}
+      let failedOver = false
+
       for (let i = 0; i < tokenAddresses.length; i++) {
         try {
           const isWrap =
@@ -144,7 +147,22 @@ export const actions = {
 
           prices[currencyLookup[tokenAddresses[i]]] = priceFormatted.toString()
         } catch (e) {
-          console.warn('cant get price of ', tokenAddresses[i], e?.message || e)
+          if (!failedOver && isRateLimitError(e)) {
+            failedOver = true
+            const next = await dispatch(
+              'settings/failoverRpc',
+              { netId: 1, reason: 'token price rate limit' },
+              { root: true }
+            )
+            if (next?.url) {
+              rpcUrl = next.url
+              web3 = this.$provider?.getWeb3?.(rpcUrl) || createWeb3(rpcUrl)
+              offchainOracle = new web3.eth.Contract(offchainOracleABI, offchainOracleAddress)
+              i -= 1 // retry this token on the new RPC
+              continue
+            }
+          }
+          console.warn('cant get price of ', tokenAddresses[i], formatRpcError(e))
         }
 
         // space out calls so nextIndex / relayer jobs don't trip RPC rate limits
@@ -157,7 +175,7 @@ export const actions = {
         commit('SAVE_TOKEN_PRICES', prices)
       }
     } catch (e) {
-      console.error('fetchTokenPrice failed:', e.message || e)
+      console.error('fetchTokenPrice failed:', formatRpcError(e))
     } finally {
       fetching = false
       if (pollTimer) {

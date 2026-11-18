@@ -2,20 +2,17 @@
  * Infura/Alchemy RPC failures (429, empty "Returned error:") are expected under
  * parallel nextIndex / price fan-out. Nuxt 4 treats unhandled ResponseError
  * rejections as fatal client overlays; swallow only those transient RPC errors.
+ *
+ * Also quiets web3-eth-abi's console.error for empty revert data (`0x`), which
+ * fires on expected ENS/aggregator misses and is not an app bug.
  */
-function isTransientRpcError(err) {
-  if (!err) {
-    return false
-  }
-  const name = err.name || ''
-  const message = err.message || String(err)
-  const causeMessage = err.cause?.message || ''
+import { formatRpcError, isTransientRpcError } from '@/utils/rpcError.js'
+
+function isEmptyAbiErrorLog(args) {
+  const [first, second] = args
   return (
-    name === 'ResponseError' ||
-    name === 'ContractExecutionError' ||
-    message.startsWith('Returned error:') ||
-    /429|rate.?limit|Too Many Requests|execution reverted|Failed to fetch/i.test(message) ||
-    /429|rate.?limit|execution reverted/i.test(causeMessage)
+    first === 'No matching error abi found for error data' &&
+    (second === '0x' || second === '0x0' || second == null)
   )
 }
 
@@ -24,10 +21,18 @@ export default defineNuxtPlugin((nuxtApp) => {
     return
   }
 
+  const originalError = console.error.bind(console)
+  console.error = (...args) => {
+    if (isEmptyAbiErrorLog(args)) {
+      return
+    }
+    return originalError(...args)
+  }
+
   const prev = nuxtApp.vueApp.config.errorHandler
   nuxtApp.vueApp.config.errorHandler = (err, instance, info) => {
     if (isTransientRpcError(err)) {
-      console.warn('[rpc]', err.message || err)
+      console.warn('[rpc]', formatRpcError(err))
       return
     }
     if (typeof prev === 'function') {
@@ -38,14 +43,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   nuxtApp.hook('app:error', (err) => {
     if (isTransientRpcError(err)) {
-      console.warn('[rpc]', err.message || err)
+      console.warn('[rpc]', formatRpcError(err))
       clearError({ redirect: undefined })
     }
   })
 
   nuxtApp.hook('vue:error', (err) => {
     if (isTransientRpcError(err)) {
-      console.warn('[rpc]', err.message || err)
+      console.warn('[rpc]', formatRpcError(err))
       clearError({ redirect: undefined })
     }
   })
@@ -53,7 +58,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   window.addEventListener('unhandledrejection', (event) => {
     if (isTransientRpcError(event.reason)) {
       event.preventDefault()
-      console.warn('[rpc]', event.reason?.message || event.reason)
+      console.warn('[rpc]', formatRpcError(event.reason))
       clearError({ redirect: undefined })
     }
   })

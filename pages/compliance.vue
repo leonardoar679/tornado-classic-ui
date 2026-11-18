@@ -309,6 +309,9 @@ export default {
           const { timestamp, txHash, isSpent } = event
 
           const receipt = await this.getTransactionReceipt(txHash)
+          if (!receipt?.from) {
+            throw new Error('thereIsNoRelatedDeposit')
+          }
 
           const { nullifierHex, commitmentHex } = parseNote(withdrawNote)
 
@@ -323,19 +326,20 @@ export default {
           }
 
           if (isSpent) {
-            const { withdrawalBlock, txHash, to, fee, amount } = await this.$store.dispatch(
-              'application/loadWithdrawalData',
-              {
-                withdrawNote
-              }
-            )
+            const withdrawal = await this.$store.dispatch('application/loadWithdrawalData', {
+              withdrawNote
+            })
+            if (!withdrawal) {
+              throw new Error('thereIsNoRelatedDeposit')
+            }
 
-            const { timestamp } = await this.getBlock(withdrawalBlock)
+            const { withdrawalBlock, txHash: withdrawTxHash, to, fee, amount: withdrawAmount } = withdrawal
+            const { timestamp: withdrawTimestamp } = await this.getBlock(withdrawalBlock)
 
             this.txWithdrawalInfo = {
-              amount,
-              txHash,
-              timestamp,
+              amount: withdrawAmount,
+              txHash: withdrawTxHash,
+              timestamp: withdrawTimestamp,
               to,
               nullifier: nullifierHex,
               fee
@@ -382,8 +386,9 @@ export default {
       }
 
       const doc = new JsPdf()
+      const tEn = (key, values) => this.$t(key, values, { locale: 'en' })
 
-      doc.setFontSize(9).setLineHeightFactor(1.5).setFont('courier').setFontStyle('normal')
+      doc.setFontSize(9).setLineHeightFactor(1.5).setFont('courier', 'normal')
 
       const width = doc.internal.pageSize.getWidth()
       const padding = 10
@@ -399,7 +404,7 @@ export default {
       const withdrawalAmount = `${this.$n(Number(this.txWithdrawalInfo.amount))} ${this.getSymbol(
         this.txDepositInfo.currency
       )}`
-      const fee = `${this.$t('relayerFee', 'en')} ${this.$n(Number(this.txWithdrawalInfo.fee))} ${this.getSymbol(
+      const fee = `${tEn('relayerFee')} ${this.$n(Number(this.txWithdrawalInfo.fee))} ${this.getSymbol(
         this.txDepositInfo.currency
       )}`
 
@@ -418,22 +423,22 @@ export default {
       const nullifier = doc.splitTextToSize(this.txWithdrawalInfo.nullifier, splitColumnSize)
       const note = doc.splitTextToSize(this.withdrawNote, splitLineSize)
       const complianceWarning = doc.splitTextToSize(
-        this.$t('compliancePrintWarning', 'en', { newline: '\n' }),
+        tEn('compliancePrintWarning', { newline: '\n' }),
         splitLineSize
       )
 
-      doc.text(this.$t('note', 'en'), padding, 50)
-      doc.text(this.$t('date', 'en'), padding, 91)
-      doc.text(this.$t('date', 'en'), startSecondColumnX, 91)
-      doc.text(this.$t('transaction', 'en'), padding, 106)
-      doc.text(this.$t('transaction', 'en'), startSecondColumnX, 106)
-      doc.text(this.$t('from', 'en'), padding, 126)
-      doc.text(this.$t('to', 'en'), startSecondColumnX, 126)
-      doc.text(this.$t('commitment', 'en'), padding, 141)
-      doc.text(this.$t('nullifierHash', 'en'), startSecondColumnX, 141)
+      doc.text(tEn('note'), padding, 50)
+      doc.text(tEn('date'), padding, 91)
+      doc.text(tEn('date'), startSecondColumnX, 91)
+      doc.text(tEn('transaction'), padding, 106)
+      doc.text(tEn('transaction'), startSecondColumnX, 106)
+      doc.text(tEn('from'), padding, 126)
+      doc.text(tEn('to'), startSecondColumnX, 126)
+      doc.text(tEn('commitment'), padding, 141)
+      doc.text(tEn('nullifierHash'), startSecondColumnX, 141)
       doc.text(complianceWarning, padding, 209)
 
-      doc.setFontStyle('bold').text(note, padding, 56)
+      doc.setFont('courier', 'bold').text(note, padding, 56)
       doc.text(depositDate, padding, 97)
       doc.text(withdrawDate, startSecondColumnX, 97)
 
@@ -477,17 +482,17 @@ export default {
       doc.text(nullifier, startSecondColumnX, 147)
 
       doc.setFontSize(20).text('Tornado.cash', padding, 40)
-      doc.setFontStyle('normal').text(this.$t('complianceReport', 'en'), 65, 40)
+      doc.setFont('courier', 'normal').text(tEn('complianceReport'), 65, 40)
 
-      doc.setFontSize(8).text(this.$t('verified', 'en'), padding, 81)
-      doc.text(this.$t('verified', 'en'), startSecondColumnX, 81)
-      doc.text(fee, endX, 81, null, null, 'right')
+      doc.setFontSize(8).text(tEn('verified'), padding, 81)
+      doc.text(tEn('verified'), startSecondColumnX, 81)
+      doc.text(fee, endX, 81, { align: 'right' })
 
-      doc.setFontSize(14).text(this.$t('deposit', 'en'), padding, 75)
-      doc.text(this.$t('withdrawal', 'en'), startSecondColumnX, 75)
-      doc.text(this.$t('warning', 'en'), padding, 200)
-      doc.setFontStyle('bold').text(depositAmount, endFirstColumnX, 75, null, null, 'right')
-      doc.text(withdrawalAmount, endX, 75, null, null, 'right')
+      doc.setFontSize(14).text(tEn('deposit'), padding, 75)
+      doc.text(tEn('withdrawal'), startSecondColumnX, 75)
+      doc.text(tEn('warning'), padding, 200)
+      doc.setFont('courier', 'bold').text(depositAmount, endFirstColumnX, 75, { align: 'right' })
+      doc.text(withdrawalAmount, endX, 75, { align: 'right' })
 
       const imgLogo = new Image()
       imgLogo.src = logo

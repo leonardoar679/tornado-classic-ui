@@ -209,6 +209,10 @@ class IndexedDB {
     }
 
     try {
+      if (!this.db?.objectStoreNames?.contains(storeName)) {
+        throw new Error(`object store "${storeName}" was not found`)
+      }
+
       const tx = this.db.transaction(storeName, mode)
 
       data.map((item) => {

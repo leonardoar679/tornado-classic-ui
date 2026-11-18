@@ -144,10 +144,24 @@ export const actions = {
           const gasPrice = await web3.eth.getGasPrice()
           commit('SAVE_GAS_PARAMS', { gasPrice: gasPrice.toString() })
         } else {
-          console.warn('fetchGasPrice', e.message || e)
+          console.warn('fetchGasPrice', e?.message || e)
         }
       } catch (rpcErr) {
-        console.warn('fetchGasPrice', e.message || e, rpcErr.message || rpcErr)
+        console.warn('fetchGasPrice', e?.message || e, rpcErr?.message || rpcErr)
+        const next = await dispatch(
+          'settings/failoverRpc',
+          { reason: 'gasPrice fetch failed' },
+          { root: true }
+        )
+        if (next?.url) {
+          try {
+            const web3 = createWeb3(next.url)
+            const gasPrice = await web3.eth.getGasPrice()
+            commit('SAVE_GAS_PARAMS', { gasPrice: gasPrice.toString() })
+          } catch (retryErr) {
+            console.warn('fetchGasPrice retry', retryErr?.message || retryErr)
+          }
+        }
       }
     } finally {
       if (pollTimer) {

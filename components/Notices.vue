@@ -6,7 +6,7 @@
       :key="notice.id"
       class="is-top-right"
       closeable
-      :icon="notice.type"
+      :variant="notice.type"
       :aria-close-label="$t('closeNotification')"
       role="alert"
       @close="close(notice.id)"

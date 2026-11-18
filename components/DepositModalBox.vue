@@ -109,8 +109,23 @@ export default {
   beforeMount() {
     this.isEncrypted = this.isSetupAccount
   },
+  mounted() {
+    // Second chance while still in the Deposit click task (Vue flush). prepareDeposit
+    // already tried; this covers cases where store state landed after modal open.
+    if (this.isEnabledSaveFile && this.note && this.prefix) {
+      this.saveFile({ note: this.note, prefix: this.prefix })
+    }
+  },
   beforeUnmount() {
     clearTimeout(this.copyTimer)
+  },
+  watch: {
+    // Checking "I backed up the note" is a fresh user gesture — retry download then.
+    isBackuped(value) {
+      if (value && this.isEnabledSaveFile && this.note && this.prefix) {
+        this.saveFile({ note: this.note, prefix: this.prefix })
+      }
+    }
   },
   methods: {
     ...mapActions('application', ['sendDeposit', 'saveFile']),

@@ -28,10 +28,43 @@ export function detectMob() {
   }
 }
 
+/**
+ * Trigger a note/key backup download. Must run inside a user gesture
+ * (click handler). setTimeout/await before calling this will make Chromium
+ * silently block the download.
+ */
 export function saveAsFile(data, name) {
-  if (detectMob()) {
-    return
+  if (typeof window === 'undefined' || detectMob()) {
+    return false
   }
 
-  FileSaver.saveAs(data, name)
+  const blob =
+    data instanceof Blob ? data : new Blob([data], { type: 'text/plain;charset=utf-8' })
+
+  try {
+    const saveAs = FileSaver?.saveAs || FileSaver
+    if (typeof saveAs === 'function') {
+      saveAs(blob, name)
+      return true
+    }
+  } catch (err) {
+    console.warn('file-saver failed, falling back to anchor download', err?.message || err)
+  }
+
+  try {
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = name
+    anchor.rel = 'noopener'
+    anchor.style.display = 'none'
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 2000)
+    return true
+  } catch (err) {
+    console.warn('anchor download failed', err?.message || err)
+    return false
+  }
 }

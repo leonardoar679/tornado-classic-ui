@@ -67,22 +67,28 @@ export default {
   },
   props: {
     disabled: Boolean,
+    // Vue 3 v-model; keep `value` as a deprecated alias for older call sites.
+    modelValue: {
+      type: Number,
+      default: undefined
+    },
     value: {
       type: Number,
-      required: true
+      default: undefined
     },
     defaultEthToReceive: {
       type: Number,
       required: true
     }
   },
-  emits: ['focus', 'blur', 'input', 'isValidEthToReceive'],
+  emits: ['focus', 'blur', 'input', 'update:modelValue', 'isValidEthToReceive'],
   data() {
+    const initial = this.modelValue ?? this.value ?? this.defaultEthToReceive
     return {
       variant: '',
       min: 0,
       error: '',
-      newValue: this.value
+      newValue: initial
     }
   },
   computed: {
@@ -109,8 +115,15 @@ export default {
     }
   },
   watch: {
+    modelValue(value) {
+      if (value !== undefined && value !== this.newValue) {
+        this.newValue = value
+      }
+    },
     value(value) {
-      this.newValue = value
+      if (this.modelValue === undefined && value !== undefined && value !== this.newValue) {
+        this.newValue = value
+      }
     },
     newValue(value) {
       debounce(this.validateEthToReceive, value)
@@ -126,6 +139,7 @@ export default {
     onInput(value) {
       const parsedValue = parseFloat(value)
       if (!Number.isNaN(parsedValue)) {
+        this.$emit('update:modelValue', parsedValue)
         this.$emit('input', parsedValue)
       }
     },

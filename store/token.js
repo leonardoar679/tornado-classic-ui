@@ -174,7 +174,7 @@ export const actions = {
         method: 'eth_sendTransaction',
         params: {
           to: tokenInstance.options.address,
-          gas: numberToHex(gas + 30000),
+          gas: numberToHex(Number(gas) + 30000),
           data
         },
         watcherParams: {

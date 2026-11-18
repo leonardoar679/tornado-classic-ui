@@ -30,13 +30,7 @@
             </button>
           </o-tooltip>
         </template>
-        <o-steps
-          v-model="currentStep"
-          size="small"
-          :has-navigation="false"
-          @change="changeAmount"
-          @update:model-value="changeAmount"
-        >
+        <o-steps v-model="currentStep" size="small" :has-navigation="false" @change="changeAmount">
           <template v-for="({ amount, address }, key) in amounts" :key="key">
             <o-step-item
               :value="key"
@@ -135,6 +129,11 @@ export default {
     shortenAmount(n) {
       return `${this.$n(Number(n), 'compact')} ${this.tokens[this.selectedToken].symbol}`
     },
+    syncStepFromSelectedAmount() {
+      const selected = Number(this.selectedAmount)
+      const idx = this.amounts.findIndex((entry) => Number(entry.amount) === selected)
+      this.currentStep = idx >= 0 ? idx : 0
+    },
     changeAmount(i) {
       const index = Number(i)
       if (!Number.isFinite(index) || !this.amounts[index]) {
@@ -151,12 +150,21 @@ export default {
         .map(([amount, address]) => {
           return { amount: Number(amount), address }
         })
+      this.syncStepFromSelectedAmount()
       return this.amounts
     },
     openDepositModal() {
+      // Keep prepareDeposit + backup download in the same synchronous call stack as
+      // the Deposit click so the browser still has user-activation for saveAs().
+      // Do not await dispatch — Vuex wraps the return in a Promise and awaiting it
+      // can drop the transient user gesture Chromium requires for downloads.
       this.$store.dispatch('application/prepareDeposit', {
         prefix: `tornado-${this.selectedToken}-${this.selectedAmount}-${this.netId}`
       })
+      if (!this.$store.state.application.note || !this.$store.state.application.prefix) {
+        this.isDepositModalOpened = false
+        return false
+      }
       const depositModal = this.$buefy.modal.open({
         parent: this,
         component: DepositModalBox,
@@ -168,6 +176,7 @@ export default {
       depositModal.$on('close', () => {
         this.isDepositModalOpened = false
       })
+      return true
     },
     async onDeposit() {
       const onApproval = () => {
@@ -179,18 +188,37 @@ export default {
         }
       }
       this.isDepositBtnClicked = true
-      await this.$store.dispatch('token/fetchTokenAllowance', {}, { root: true })
-      await this.$store.dispatch('token/fetchTokenBalance', {}, { root: true })
-      await this.$store.dispatch('metamask/updateAccountBalance')
-      if (!this.isSufficientBalance) {
-        this.$buefy.modal.open({
-          parent: this,
-          component: BalanceModalBox,
-          hasModalCard: true,
-          width: 440
-        })
-      } else if (this.isSufficientAllowance || this.selectedToken === this.nativeCurrency) {
+
+      // Prefer opening the note modal (and triggering backup download) before any
+      // await, using cached balances. Awaiting RPC first drops user-activation and
+      // Chromium then blocks the automatic file download.
+      const isNative = this.selectedToken === this.nativeCurrency
+      const canOpenFromCache = (this.isSufficientAllowance || isNative) && this.isSufficientBalance
+      if (canOpenFromCache && !this.isDepositModalOpened) {
+        this.isDepositModalOpened = true
         this.openDepositModal()
+      }
+
+      await Promise.all([
+        this.$store.dispatch('token/fetchTokenAllowance', {}, { root: true }),
+        this.$store.dispatch('token/fetchTokenBalance', {}, { root: true }),
+        this.$store.dispatch('metamask/updateAccountBalance')
+      ])
+
+      if (!this.isSufficientBalance) {
+        if (!this.isDepositModalOpened) {
+          this.$buefy.modal.open({
+            parent: this,
+            component: BalanceModalBox,
+            hasModalCard: true,
+            width: 440
+          })
+        }
+      } else if (this.isSufficientAllowance || isNative) {
+        if (!this.isDepositModalOpened) {
+          this.isDepositModalOpened = true
+          this.openDepositModal()
+        }
       } else {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const parent = this
@@ -206,11 +234,13 @@ export default {
     },
     onPreDeposit() {
       if (this.selectedToken.toUpperCase() === 'USDT' || this.selectedToken.toUpperCase() === 'USDC') {
+        // canCancel:false — Escape must not count as acknowledging the risk.
         const riskModal = this.$buefy.modal.open({
           parent: this,
           component: RiskModalBox,
           hasModalCard: true,
-          width: 440
+          width: 440,
+          canCancel: false
         })
         riskModal.$on('close', this.onDeposit)
       } else {

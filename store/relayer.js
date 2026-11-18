@@ -227,8 +227,7 @@ export const actions = {
 
       const isValid = validate(response.data)
       if (!isValid) {
-        console.warn('askRelayerStatus', ensName, validate?.errors)
-
+        // Unhealthy / offline relayers are expected; status poll filters them out.
         throw new Error(this.app.i18n.t('canNotFetchStatusFromTheRelayer'))
       }
 
@@ -273,7 +272,8 @@ export const actions = {
         tornadoServiceFee: response.data.tornadoServiceFee
       }
     } catch (e) {
-      console.warn('askRelayerStatus', ensName, e.message)
+      // Offline / mismatched reward address / schema failures are expected for many
+      // registered ENS names; pickRandomRelayer keeps only isValid=true.
       return { isValid: false, error: e.message }
     }
   },
@@ -297,13 +297,18 @@ export const actions = {
         requests.push(dispatch('observeRelayer', { relayer: registeredRelayer }))
       }
       statuses = await Promise.all(requests)
+      const checked = statuses.length
       statuses = statuses.filter((status) => status.isValid)
+      if (checked && statuses.length < checked) {
+        console.warn(
+          `Relayer health: ${statuses.length}/${checked} reachable (skipped offline / unhealthy / mismatched)`
+        )
+      }
     } catch (err) {
       console.error('pickRandomRelayer failed:', err.message)
       commit('SET_IS_LOADING_RELAYERS', false)
       return
     }
-    // const validRelayerENSnames = statuses.map((relayer) => relayer.name)
     commit('SAVE_VALIDATED_RELAYERS', statuses)
     console.log('filtered statuses ', statuses)
 

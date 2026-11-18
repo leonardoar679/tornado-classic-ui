@@ -26,7 +26,13 @@ export default {
   },
   provide() {
     return {
-      close: this.$parent.close,
+      // Bind host close so inject'd `this.close()` keeps the correct `this`.
+      close: () => {
+        this.$emit('close')
+        if (typeof this.$parent?.close === 'function') {
+          this.$parent.close()
+        }
+      },
       formatNumber: this.formatNumber
     }
   },

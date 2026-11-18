@@ -64,7 +64,7 @@ const actions = {
         method: 'eth_sendTransaction',
         params: {
           data,
-          gas: numberToHex(gas + 100000),
+          gas: numberToHex(Number(gas) + 100000),
           to: getters.tokenContract.options.address
         },
         watcherParams: {

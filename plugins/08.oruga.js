@@ -15,7 +15,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         iconPack: 'trnd',
         // Buefy's defaults, which the design relies on
         tooltip: { ...bulmaConfig.tooltip, variant: 'primary', position: 'top' },
-        dropdown: { ...bulmaConfig.dropdown, activeClass: 'is-active' }
+        // Oruga defaults selectable:false; classic Buefy dropdowns always selected on click.
+        dropdown: { ...bulmaConfig.dropdown, activeClass: 'is-active', selectable: true }
       },
       OrugaComponentPlugins
     )

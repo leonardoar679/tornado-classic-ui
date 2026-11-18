@@ -86,7 +86,7 @@ export const actions = {
         method: 'eth_sendTransaction',
         params: {
           to: stakingRewardsInstance.options.address,
-          gas: numberToHex(gas + 100000),
+          gas: numberToHex(Number(gas) + 100000),
           data
         },
         watcherParams: {

@@ -24,6 +24,7 @@ import { buildGroth16, download, getTornadoKeys } from './snark.js'
 import { toWei, numberToHex, isAddress } from 'web3-utils'
 import { toBN, pow10 } from '@/utils/bn.js'
 import { createWeb3 } from '@/utils/web3.js'
+import { formatRpcError, isRateLimitError } from '@/utils/rpcError.js'
 import websnarkUtils from 'websnark/src/utils'
 
 let groth16
@@ -364,14 +365,15 @@ const actions = {
 
     return events
   },
-  async getLastDepositIndex({ getters }, params) {
-    const contractInstance = getters.instanceContract(params)
+  async getLastDepositIndex({ getters, dispatch }, params) {
     let lastError
+    let failedOver = false
 
     // Retry a few times — Infura 429 / public RPC blips are common at startup
-    // when price + gas + nextIndex jobs overlap.
-    for (let attempt = 0; attempt < 3; attempt++) {
+    // when price + gas + nextIndex jobs overlap. On sustained rate-limits, rotate RPC.
+    for (let attempt = 0; attempt < 4; attempt++) {
       try {
+        const contractInstance = getters.instanceContract(params)
         const nextDepositIndex = await contractInstance.methods.nextIndex().call()
 
         return {
@@ -380,6 +382,15 @@ const actions = {
         }
       } catch (err) {
         lastError = err
+        if (!failedOver && isRateLimitError(err)) {
+          failedOver = true
+          await dispatch(
+            'settings/failoverRpc',
+            { netId: params.netId, reason: 'nextIndex rate limit' },
+            { root: true }
+          )
+          continue
+        }
         await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
       }
     }
@@ -388,7 +399,7 @@ const actions = {
     // nextIndex RPCs and Infura 429s were bubbling as Nuxt error overlays.
     console.warn(
       `getLastDepositIndex failed (${params.currency} ${params.amount}):`,
-      lastError?.message || lastError
+      formatRpcError(lastError)
     )
     return {
       nextDepositIndex: null,
@@ -414,9 +425,19 @@ const actions = {
       throw new Error(`Method loadCachedEvents has error: ${err.message}`)
     }
   },
-  prepareDeposit({ getters, dispatch, commit, rootGetters }, { prefix }) {
+  prepareDeposit({ getters, dispatch, commit, rootGetters }, { prefix } = {}) {
     try {
+      if (!prefix || typeof prefix !== 'string') {
+        console.warn('prepareDeposit skipped: invalid deposit prefix')
+        return false
+      }
+
       const [, currency, amount, netId] = prefix.split('-')
+      if (!currency || amount == null || !netId) {
+        console.warn('prepareDeposit skipped: invalid deposit prefix', prefix)
+        return false
+      }
+
       const contractInstance = getters.instanceContract({ currency, amount, netId })
 
       const secret = randomBN(31)
@@ -429,33 +450,38 @@ const actions = {
 
       const note = `0x${preimage.toString('hex')}`
 
-      const isEnabled = rootGetters['encryptedNote/isEnabledSaveFile']
+      commit('SAVE_DEPOSIT', { note, commitment: commitmentHex, prefix })
 
+      // Download must stay synchronous with the Deposit click. A setTimeout here
+      // loses browser user-activation and Chromium silently blocks the file.
+      const isEnabled = rootGetters['encryptedNote/isEnabledSaveFile']
       if (isEnabled) {
-        setTimeout(() => {
-          try {
-            dispatch('saveFile', { prefix, note })
-          } catch (err) {
-            console.warn('NoteAccount backup as a file is not supported on this device', err)
-          }
-        }, 1000)
+        try {
+          dispatch('saveFile', { prefix, note })
+        } catch (err) {
+          console.warn('Note backup file download failed', err?.message || err)
+        }
       }
 
-      commit('SAVE_DEPOSIT', { note, commitment: commitmentHex, prefix })
       if (!contractInstance.options.address) {
         throw new Error(this.app.i18n.t('networkIsNotSupported'))
       }
+      return true
     } catch (e) {
       console.error('prepareDeposit', e)
+      return false
     }
   },
   saveFile(_, { prefix, note }) {
     try {
+      if (!prefix || !note) {
+        return false
+      }
       const data = new Blob([`${prefix}-${note}`], { type: 'text/plain;charset=utf-8' })
-
-      saveAsFile(data, `backup-${prefix}-${note.slice(0, 10)}.txt`)
+      return saveAsFile(data, `backup-${prefix}-${note.slice(0, 10)}.txt`)
     } catch (err) {
       console.error('saveFile', err.message)
+      return false
     }
   },
   async getEncryptedEventsFromDb(_, { netId }) {
@@ -808,6 +834,12 @@ const actions = {
     try {
       const parsedNote = parseNote(note)
 
+      // Prefer the cheap deposit lookup before building a full merkle tree.
+      const depositEvent = await dispatch('loadDepositEvent', { withdrawNote: note })
+      if (!depositEvent) {
+        throw new Error(this.app.i18n.t('thereIsNoRelatedDeposit'))
+      }
+
       const { tree, root } = await dispatch('buildTree', parsedNote)
 
       const isSpent = await dispatch('checkSpentEventFromNullifier', parsedNote)
@@ -816,18 +848,31 @@ const actions = {
         throw new Error(this.app.i18n.t('noteHasBeenSpent'))
       }
 
+      const leafIndex = tree.indexOf(parsedNote.commitmentHex)
+      if (leafIndex < 0) {
+        throw new Error(this.app.i18n.t('thereIsNoRelatedDeposit'))
+      }
+
       const { proof, args } = await dispatch('createSnarkProof', {
         root,
         tree,
         recipient,
         note: parsedNote,
-        leafIndex: tree.indexOf(parsedNote.commitmentHex)
+        leafIndex
       })
       console.timeEnd('SNARK proof time')
       commit('SAVE_PROOF', { proof, args, note })
     } catch (e) {
-      console.error('prepareWithdraw', e)
-      throw new Error(e.message)
+      const message = e?.message || String(e)
+      const expected =
+        message === this.app.i18n.t('thereIsNoRelatedDeposit') ||
+        message === this.app.i18n.t('noteHasBeenSpent') ||
+        /no related deposit|already spent|Index out of bounds/i.test(message)
+
+      if (!expected) {
+        console.error('prepareWithdraw', e)
+      }
+      throw new Error(message)
     }
   },
   async withdraw({ state, rootState, dispatch, getters }, { note }) {
@@ -962,7 +1007,11 @@ const actions = {
         }
       }
     } catch (err) {
-      console.error(`Method loadDepositEvent has error: ${err.message}`)
+      // Invalid / unknown notes are expected on the compliance + withdraw forms.
+      const message = err?.message || String(err)
+      if (!/invalid|hex|note/i.test(message)) {
+        console.error(`Method loadDepositEvent has error: ${message}`)
+      }
     }
   },
   async loadWithdrawalEvent({ dispatch }, { withdrawNote }) {
@@ -994,7 +1043,12 @@ const actions = {
       const toDecimals = rootGetters['token/toDecimals']
 
       const { currency, amount } = parseNote(withdrawNote)
-      const { fee, txHash, blockNumber, to } = await dispatch('loadWithdrawalEvent', { withdrawNote })
+      const withdrawalEvent = await dispatch('loadWithdrawalEvent', { withdrawNote })
+      if (!withdrawalEvent) {
+        return null
+      }
+
+      const { fee, txHash, blockNumber, to } = withdrawalEvent
 
       const decimals = rootGetters['metamask/networkConfig'].tokens[currency].decimals
       const withdrawalAmount = toBN(rootGetters['token/fromDecimals'](amount.toString(), decimals)).sub(
