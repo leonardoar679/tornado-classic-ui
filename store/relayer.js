@@ -227,7 +227,7 @@ export const actions = {
 
       const isValid = validate(response.data)
       if (!isValid) {
-        console.error('askRelayerStatus', ensName, validate?.errors)
+        console.warn('askRelayerStatus', ensName, validate?.errors)
 
         throw new Error(this.app.i18n.t('canNotFetchStatusFromTheRelayer'))
       }

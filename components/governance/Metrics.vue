@@ -14,8 +14,8 @@
         <div class="info-value has-tooltip">
           <span><number-format :value="votingPower" /> TORN</span>
           <o-tooltip
-            :label="`${$n(toDecimals(lockedBalance, 18))} ${$t('locked')} TORN + ${$n(
-              toDecimals(delegatedBalance, 18)
+            :label="`${$n(Number(toDecimals(lockedBalance, 18)))} ${$t('locked')} TORN + ${$n(
+              Number(toDecimals(delegatedBalance, 18))
             )} ${$t('delegated')} TORN`"
             position="top"
             multiline

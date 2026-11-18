@@ -92,7 +92,7 @@ export const actions = {
 
           prices[currencyLookup[tokenAddresses[i]]] = priceFormatted.toString()
         } catch (e) {
-          console.error('cant get price of ', tokenAddresses[i])
+          console.warn('cant get price of ', tokenAddresses[i])
         }
       }
 

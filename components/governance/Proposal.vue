@@ -52,7 +52,7 @@
                     'has-text-primary': voterReceipts[data.id].support,
                     'has-text-danger': !voterReceipts[data.id].support
                   }"
-                  >{{ $n(fromWeiToTorn(voterReceipts[data.id].balance)) }} TORN</span
+                  >{{ $n(Number(fromWeiToTorn(voterReceipts[data.id].balance))) }} TORN</span
                 >
               </template>
             </i18n-t>
@@ -101,7 +101,7 @@
                 :label="
                   $t('quorumTooltip', {
                     days: $t('dayPlural', votingPeriod),
-                    votes: $n(quorumVotes, 'compact')
+                    votes: $n(Number(quorumVotes), 'compact')
                   })
                 "
                 position="top"

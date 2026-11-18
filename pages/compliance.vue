@@ -38,7 +38,7 @@
               {{ $t('deposit') }}
               <span>{{
                 txDepositInfo.amount
-                  ? `${$n(txDepositInfo.amount)} ${getSymbol(txDepositInfo.currency)}`
+                  ? `${$n(Number(txDepositInfo.amount))} ${getSymbol(txDepositInfo.currency)}`
                   : '-'
               }}</span>
             </h3>
@@ -112,7 +112,7 @@
               {{ $t('withdrawal') }}
               <span>{{
                 txWithdrawalInfo.amount
-                  ? `${$n(txWithdrawalInfo.amount)} ${getSymbol(txDepositInfo.currency)}`
+                  ? `${$n(Number(txWithdrawalInfo.amount))} ${getSymbol(txDepositInfo.currency)}`
                   : '-'
               }}</span>
             </h3>
@@ -133,7 +133,7 @@
               }}
               <span class="fee">{{
                 txWithdrawalInfo.fee
-                  ? `${$t('relayerFee')} ${$n(txWithdrawalInfo.fee)} ${getSymbol(txDepositInfo.currency)}`
+                  ? `${$t('relayerFee')} ${$n(Number(txWithdrawalInfo.fee))} ${getSymbol(txDepositInfo.currency)}`
                   : $t('relayerFee')
               }}</span>
             </div>
@@ -343,7 +343,15 @@ export default {
           }
           this.loaded = true
         } catch (e) {
-          console.error(e)
+          const expected = [
+            'enterYourDepositsNote',
+            'noteIsInvalid',
+            'changeNetworkNote',
+            'thereIsNoRelatedDeposit'
+          ]
+          if (!expected.includes(e.message)) {
+            console.error(e)
+          }
           this.error = { type: 'is-warning', msg: this.$t(e.message) }
         } finally {
           this.$store.dispatch('loading/disable')
@@ -385,13 +393,13 @@ export default {
       const endFirstColumnX = splitColumnSize + padding
       const startSecondColumnX = splitColumnSize + padding * 2
 
-      const depositAmount = `${this.$n(this.txDepositInfo.amount)} ${this.getSymbol(
+      const depositAmount = `${this.$n(Number(this.txDepositInfo.amount))} ${this.getSymbol(
         this.txDepositInfo.currency
       )}`
-      const withdrawalAmount = `${this.$n(this.txWithdrawalInfo.amount)} ${this.getSymbol(
+      const withdrawalAmount = `${this.$n(Number(this.txWithdrawalInfo.amount))} ${this.getSymbol(
         this.txDepositInfo.currency
       )}`
-      const fee = `${this.$t('relayerFee', 'en')} ${this.$n(this.txWithdrawalInfo.fee)} ${this.getSymbol(
+      const fee = `${this.$t('relayerFee', 'en')} ${this.$n(Number(this.txWithdrawalInfo.fee))} ${this.getSymbol(
         this.txDepositInfo.currency
       )}`
 

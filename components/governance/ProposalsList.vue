@@ -15,7 +15,7 @@
         <o-tooltip
           :label="
             $t('proposalThresholdError', {
-              PROPOSAL_THRESHOLD: $n(proposalThreshold)
+              PROPOSAL_THRESHOLD: $n(Number(proposalThreshold))
             })
           "
           :disabled="hasProposalThreshold"

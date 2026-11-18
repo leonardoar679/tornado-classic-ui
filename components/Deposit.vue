@@ -133,7 +133,7 @@ export default {
   },
   methods: {
     shortenAmount(n) {
-      return `${this.$n(n, 'compact')} ${this.tokens[this.selectedToken].symbol}`
+      return `${this.$n(Number(n), 'compact')} ${this.tokens[this.selectedToken].symbol}`
     },
     changeAmount(i) {
       const index = Number(i)
