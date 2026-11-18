@@ -365,22 +365,34 @@ const actions = {
     return events
   },
   async getLastDepositIndex({ getters }, params) {
-    try {
-      const contractInstance = getters.instanceContract(params)
-      const nextDepositIndex = await contractInstance.methods.nextIndex().call()
+    const contractInstance = getters.instanceContract(params)
+    let lastError
 
-      return {
-        nextDepositIndex,
-        anonymitySet: toBN(nextDepositIndex)
+    // Retry a few times — Infura 429 / public RPC blips are common at startup
+    // when price + gas + nextIndex jobs overlap.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const nextDepositIndex = await contractInstance.methods.nextIndex().call()
+
+        return {
+          nextDepositIndex,
+          anonymitySet: toBN(nextDepositIndex)
+        }
+      } catch (err) {
+        lastError = err
+        await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
       }
-    } catch (err) {
-      // Do not throw: background callers (loadAllNotesData) fire many parallel
-      // nextIndex RPCs and Infura 429s were bubbling as Nuxt error overlays.
-      console.warn(`getLastDepositIndex failed (${params.currency} ${params.amount}):`, err.message)
-      return {
-        nextDepositIndex: null,
-        anonymitySet: null
-      }
+    }
+
+    // Do not throw: background callers (loadAllNotesData) fire many parallel
+    // nextIndex RPCs and Infura 429s were bubbling as Nuxt error overlays.
+    console.warn(
+      `getLastDepositIndex failed (${params.currency} ${params.amount}):`,
+      lastError?.message || lastError
+    )
+    return {
+      nextDepositIndex: null,
+      anonymitySet: null
     }
   },
   async loadEncryptedEvents(_, { netId }) {
@@ -876,10 +888,14 @@ const actions = {
       }
     }
 
-    // Cap concurrency — Infura 429s from parallel nextIndex fan-out were common.
-    const concurrency = 2
+    // Cap concurrency — Infura 429s / browser "Failed to fetch" from parallel
+    // nextIndex fan-out were common alongside price + gas polling.
+    const concurrency = 1
     for (let i = 0; i < jobs.length; i += concurrency) {
       await Promise.all(jobs.slice(i, i + concurrency).map((job) => dispatch('updateLastIndex', job)))
+      if (i + concurrency < jobs.length) {
+        await new Promise((resolve) => setTimeout(resolve, 80))
+      }
     }
   },
   async updateLastIndex({ dispatch, commit, rootState }, { currency, amount }) {

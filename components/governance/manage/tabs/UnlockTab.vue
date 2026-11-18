@@ -36,7 +36,7 @@
       class="is-block"
       :label="unlockMsgErr"
       position="top"
-      :disabled="hasLockedBalance && canWithdraw"
+      :disabled="Boolean(hasLockedBalance && canWithdraw)"
       multiline
     >
       <o-button

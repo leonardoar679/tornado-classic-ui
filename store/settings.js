@@ -55,8 +55,21 @@ export const actions = {
   },
   async preselectRpc({ getters, commit, dispatch }, { netId }) {
     const { rpcUrls } = networkConfig[`netId${netId}`]
-    const isPlaceholderUrl = (url) =>
-      !url || String(url).includes('/null') || String(url).includes('/undefined')
+    const isPlaceholderUrl = (url) => {
+      if (!url) {
+        return true
+      }
+      const value = String(url)
+      // Empty Alchemy/Infura keys compile to `.../v2/` or `.../v3/` and look "up"
+      // on getChainId while failing for eth_call / eth_getLogs.
+      return (
+        value.includes('/null') ||
+        value.includes('/undefined') ||
+        /\/v[23]\/?$/.test(value) ||
+        value.endsWith('/v2/') ||
+        value.endsWith('/v3/')
+      )
+    }
 
     // Prefer keyed providers (Infura/Alchemy) over public endpoints that often
     // pass getChainId then rate-limit eth_getLogs. Walk networkConfig order.
@@ -85,7 +98,14 @@ export const actions = {
   },
   async checkRpc(_, { url, netId }) {
     try {
-      if (!url || String(url).includes('/null') || String(url).includes('/undefined')) {
+      if (
+        !url ||
+        String(url).includes('/null') ||
+        String(url).includes('/undefined') ||
+        /\/v[23]\/?$/.test(String(url)) ||
+        String(url).endsWith('/v2/') ||
+        String(url).endsWith('/v3/')
+      ) {
         return { isValid: false, error: this.app.i18n.t('rpcIsDown') }
       }
 

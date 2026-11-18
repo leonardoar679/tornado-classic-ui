@@ -72,10 +72,11 @@ export default {
         await this.selectRpc({ netId: 1, action: this.preselectRpc })
       }
 
+      // Stagger RPC-heavy jobs so Infura/public endpoints are less likely to 429.
       this.$store.dispatch('gasPrices/fetchGasPrice')
-      this.$store.dispatch('price/fetchTokenPrice', {}, { root: true })
+      await this.$store.dispatch('price/fetchTokenPrice', {}, { root: true })
       try {
-        this.$store.dispatch('application/loadAllNotesData')
+        await this.$store.dispatch('application/loadAllNotesData')
       } catch (e) {
         console.error('default', e)
       }
