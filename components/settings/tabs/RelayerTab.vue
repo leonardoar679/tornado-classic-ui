@@ -230,7 +230,7 @@ export default {
         this.relayer = relayer
       } else {
         this.hasErrorRelayer.type = 'is-warning'
-        this.hasErrorRelayer.msg = error
+        this.hasErrorRelayer.msg = error || this.$t('canNotFetchStatusFromTheRelayer')
       }
 
       this.checkingRelayer = false

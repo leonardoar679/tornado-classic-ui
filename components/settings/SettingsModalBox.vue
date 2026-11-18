@@ -2,7 +2,7 @@
   <div class="modal-card box box-modal">
     <header class="box-modal-header is-spaced">
       <div class="box-modal-title">{{ $t('withdrawalSettings') }}</div>
-      <button type="button" class="delete" @click="$parent.cancel('escape')" />
+      <button type="button" class="delete" @click="$emit('close')" />
     </header>
     <o-tabs v-model="withdrawType" :animated="false" class="is-modal">
       <RelayerTab />

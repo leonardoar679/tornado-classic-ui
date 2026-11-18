@@ -54,6 +54,10 @@ export default {
       this.isActive = false
       this.$emit('close')
     },
+    // Buefy ModalProgrammatic used `$parent.cancel('escape')` on child close buttons.
+    cancel(source) {
+      this.tryCancel(source || 'escape')
+    },
     tryCancel(source) {
       if (!this.canCancel) {
         return

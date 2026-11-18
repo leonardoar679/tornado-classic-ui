@@ -2,7 +2,7 @@
   <div class="modal-card box box-modal">
     <header class="box-modal-header">
       <div class="box-modal-title">{{ $t('settings') }}</div>
-      <button type="button" class="delete" @click="$parent.cancel('escape')" />
+      <button type="button" class="delete" @click="$emit('close')" />
     </header>
     <div class="field">
       <o-field :label="$t('rpc')" class="has-custom-field" data-test="rpc_endpoint_dropdown">
