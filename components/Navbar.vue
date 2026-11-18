@@ -20,7 +20,7 @@
           {{ $t('compliance') }}
         </RouterLink>
         <a
-          href="https://docs.tornado.cash"
+          href="https://github.com/tornadocash/docs"
           target="_blank"
           data-test="docs_link"
           rel="noopener noreferrer"
