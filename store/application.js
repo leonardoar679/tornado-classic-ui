@@ -887,16 +887,20 @@ const actions = {
       const instance = config.tokens[currency].instanceAddress[amount]
       const params = [instance, proof, ...args]
 
+      // args[5] is toFixedHex(refund) (32-byte padded). Wallets/RPCs expect a
+      // quantity hex for `value`, matching the deposit path's numberToHex usage.
+      const refundValue = numberToHex(BigInt(args[5]))
+
       const data = contractInstance.methods.withdraw(...params).encodeABI()
       const gas = await contractInstance.methods
         .withdraw(...params)
-        .estimateGas({ from: ethAccount, value: args[5] })
+        .estimateGas({ from: ethAccount, value: refundValue })
 
       const callParams = {
         method: 'eth_sendTransaction',
         params: {
           data,
-          value: args[5],
+          value: refundValue,
           to: contractInstance.options.address,
           gas: numberToHex(Number(gas) + 200000)
         },

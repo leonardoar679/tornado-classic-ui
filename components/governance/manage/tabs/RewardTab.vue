@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('stakingReward.label.tab')">
+  <o-tab-item value="reward" :label="$t('stakingReward.label.tab')">
     <div class="p">
       {{ $t('stakingReward.description') }}
     </div>

@@ -1,9 +1,17 @@
-import { hexToNumber } from 'web3-utils'
-
 import txStatus from './txStatus.js'
 
 import { eventsType } from '@/constants/index.js'
 import { createChainIdState, parseNote } from '@/utils/index.js'
+
+/**
+ * web3 v4 with STR number format returns receipt.status as '0'|'1'
+ * (and sometimes boolean/number). Older code expected hex '0x0'|'0x1'.
+ */
+function receiptToTxStatus(status) {
+  const failed =
+    status === false || status === 0 || status === '0' || status === '0x0' || status === '0x00'
+  return failed ? txStatus.fail : txStatus.success
+}
 
 const initialState = createChainIdState({
   txs: {},
@@ -169,7 +177,7 @@ export const actions = {
       const result = await this.$provider.web3.eth.getTransactionReceipt(txHash)
 
       if (result) {
-        const status = result.status === '0x0' ? txStatus.fail : txStatus.success
+        const status = receiptToTxStatus(result.status)
 
         commit('CHANGE_TX_STATUS', {
           netId,
@@ -240,7 +248,7 @@ export const actions = {
       const result = await this.$provider.web3.eth.getTransactionReceipt(txHash)
 
       if (result) {
-        const status = result.status === '0x0' ? txStatus.fail : txStatus.success
+        const status = receiptToTxStatus(result.status)
 
         commit('CHANGE_TX_STATUS', {
           storeType: 'txs',
@@ -276,13 +284,14 @@ export const actions = {
     console.log('runTxWatcher storeType txHash, netId', storeType, txHash, netId)
     try {
       let { status, blockNumber } = await this.$provider.waitForTxReceipt({ txHash })
-      status = status === '0x0' ? txStatus.fail : txStatus.success
+      status = receiptToTxStatus(status)
 
       if (isSaving) {
         commit('CHANGE_TX_STATUS', {
           storeType,
           txHash,
-          blockNumber: hexToNumber(blockNumber),
+          // waitForTxReceipt already returns a Number; do not hexToNumber it.
+          blockNumber: Number(blockNumber),
           status,
           netId
         })

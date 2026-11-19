@@ -1,9 +1,11 @@
 import { encrypt, getEncryptionPublicKey } from '@metamask/eth-sig-util'
 
+import { strip0x, with0x } from '@/utils/privateKey.js'
+
 export function getEncryptedAccount(_, { privateKey, pubKey }) {
   try {
-    const { address } = this.$provider.web3.eth.accounts.privateKeyToAccount(privateKey)
-    const keyWithOutPrefix = privateKey.slice(0, 2) === '0x' ? privateKey.replace('0x', '') : privateKey
+    const keyWithOutPrefix = strip0x(privateKey)
+    const { address } = this.$provider.web3.eth.accounts.privateKeyToAccount(with0x(keyWithOutPrefix))
 
     const publicKey = getEncryptionPublicKey(keyWithOutPrefix)
 

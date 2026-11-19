@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('unlock')" tab-class="unlock_torn_tab">
+  <o-tab-item value="unlock" :label="$t('unlock')" tab-class="unlock_torn_tab">
     <div class="p">
       {{ $t('unlockTabDesc') }}
     </div>

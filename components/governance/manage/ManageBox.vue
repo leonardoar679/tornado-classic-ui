@@ -39,7 +39,7 @@ export default {
   emits: ['close'],
   data() {
     return {
-      activeTab: 0
+      activeTab: 'lock'
     }
   },
   mounted() {

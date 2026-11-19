@@ -44,7 +44,7 @@
 
 <script>
 import { recoverAccountComputed, recoverAccountMethods } from '../injectors/index.js'
-import { debounce } from '@/utils/index.js'
+import { debounce, with0x } from '@/utils/index.js'
 
 export default {
   props: {
@@ -82,7 +82,7 @@ export default {
     },
     checkPrivateKey(recoveryKey) {
       try {
-        this.$provider.web3.eth.accounts.privateKeyToAccount(recoveryKey)
+        this.$provider.web3.eth.accounts.privateKeyToAccount(with0x(recoveryKey))
         this.isValidRecoveryKey = true
       } catch {
         this.isValidRecoveryKey = false

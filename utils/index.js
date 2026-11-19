@@ -7,6 +7,7 @@ export * from './storeUtils.js'
 export * from './stringUtils.js'
 export * from './numberUtils.js'
 export * from './instanceUtils.js'
+export * from './privateKey.js'
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))

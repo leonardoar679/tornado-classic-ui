@@ -1,5 +1,5 @@
 <template>
-  <o-tab-item :label="$t('undelegate')">
+  <o-tab-item value="undelegate" :label="$t('undelegate')">
     <div class="p">
       {{ $t('undelegateTabDesc') }}
     </div>

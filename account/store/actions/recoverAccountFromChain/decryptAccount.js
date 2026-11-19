@@ -1,11 +1,14 @@
 import { getEncryptionPublicKey } from '@metamask/eth-sig-util'
 
+import { strip0x, with0x } from '@/utils/privateKey.js'
+
 export async function decryptAccount({ dispatch }, encryptedAccount) {
   try {
-    const privateKey = await dispatch('metamask/ethDecrypt', encryptedAccount, { root: true })
+    const decrypted = await dispatch('metamask/ethDecrypt', encryptedAccount, { root: true })
+    const privateKey = strip0x(decrypted)
     const publicKey = getEncryptionPublicKey(privateKey)
 
-    const { address } = await this.$provider.web3.eth.accounts.privateKeyToAccount(privateKey)
+    const { address } = this.$provider.web3.eth.accounts.privateKeyToAccount(with0x(privateKey))
 
     return { address, publicKey, privateKey }
   } catch (err) {
