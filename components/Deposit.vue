@@ -234,15 +234,18 @@ export default {
     },
     onPreDeposit() {
       if (this.selectedToken.toUpperCase() === 'USDT' || this.selectedToken.toUpperCase() === 'USDC') {
-        // canCancel:false — Escape must not count as acknowledging the risk.
-        const riskModal = this.$buefy.modal.open({
+        // canCancel:false — Escape/outside must not count as acknowledging the risk.
+        // Confirm only via the primary button (`confirm` event), not modal dismiss/X.
+        this.$buefy.modal.open({
           parent: this,
           component: RiskModalBox,
           hasModalCard: true,
           width: 440,
-          canCancel: false
+          canCancel: false,
+          events: {
+            confirm: this.onDeposit
+          }
         })
-        riskModal.$on('close', this.onDeposit)
       } else {
         this.onDeposit()
       }
