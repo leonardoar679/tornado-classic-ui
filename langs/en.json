@@ -56,7 +56,7 @@
   "depositTransactionOnEtherscan": "Deposit transaction on Etherscan",
   "withdrawalSettings": "Withdrawal settings",
   "pleaseEnterYourNote": "Please enter your note",
-  "turnOnWasm": "Error: Please turn on WebAssembly in your browser settings.<br /> If you are using Tor browser, enable javascript.options.wasm in about:config",
+  "turnOnWasm": "Error: Please turn on WebAssembly in your browser settings.\\n If you are using Tor browser, enable javascript.options.wasm in about:config",
   "timePassed": "Time passed",
   "timePassedTooltip": "Even if multiple deposits were made after yours, they could have been made by the same user. Therefore, we recommend waiting for at least 24 hours before withdrawing funds to ensure that multiple other users transacted via Tornado.сash during that time.",
   "subsequentDeposits": "Subsequent deposits",

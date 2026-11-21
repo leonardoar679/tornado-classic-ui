@@ -56,7 +56,7 @@
   "depositTransactionOnEtherscan": "Transacción de depósito en Etherscan",
   "withdrawalSettings": "Configuración de retiro",
   "pleaseEnterYourNote": "Por favor introduzca su ticket",
-  "turnOnWasm": "Error: Por favor active WebAssembly en las opciones de su buscador.<br /> Si usted utiliza el buscador Tor, habilite javascript.options.wasm  en about:config",
+  "turnOnWasm": "Error: Por favor active WebAssembly en las opciones de su buscador.\\n Si usted utiliza el buscador Tor, habilite javascript.options.wasm  en about:config",
   "timePassed": "Tiempo transcurrido",
   "timePassedTooltip": "Incluso si hay múltiples depósitos posteriores al suyo, podrían pertenecer a un mismo usuario. Por tanto, le recomendamos esperar un mínimo de 24 horas antes de retirar fondos para asegurar que varios usuarios hayan utilizado Tornado.cash durante ese periodo.",
   "subsequentDeposits": "Depósitos subsiguientes",

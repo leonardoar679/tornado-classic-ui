@@ -56,7 +56,7 @@
   "depositTransactionOnEtherscan": "Dépôt de la transaction dans l'explorateur Etherscan",
   "withdrawalSettings": "Réglages de retrait",
   "pleaseEnterYourNote": "Veuillez entrer votre note d'enregistrement",
-  "turnOnWasm": "Erreur: Veuillez activer WebAssembly dans vos réglages de navigateur.<br /> Si vous utilisez le navigateur Tor, activez javascript.options.wasm dans about:config",
+  "turnOnWasm": "Erreur: Veuillez activer WebAssembly dans vos réglages de navigateur.\\n Si vous utilisez le navigateur Tor, activez javascript.options.wasm dans about:config",
   "timePassed": "Temps passé",
   "timePassedTooltip": "Même s'il y a plusieurs dépôts après le vôtre, ils pourraient avoir été effectués par le même utilisateur. Par conséquent, nous vous recommandons d'attendre au moins 24 heures avant de retirer des fonds pour vous assurer que plusieurs utilisateurs ont utilisé Tornado.cash pendant cette période.",
   "subsequentDeposits": "Dépôts postérieurs",

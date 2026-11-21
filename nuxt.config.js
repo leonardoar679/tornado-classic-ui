@@ -190,5 +190,16 @@ export default defineNuxtConfig({
     }
   },
 
+  routeRules: {
+    // Clickjacking protection for the dev server and node-server build.
+    // (A <meta> CSP cannot carry frame-ancestors; static hosts should set the
+    // same header at the edge - e.g. nginx add_header / Pages _headers.)
+    '/**': {
+      headers: {
+        'X-Frame-Options': 'DENY'
+      }
+    }
+  },
+
   compatibilityDate: '2026-11-01'
 })

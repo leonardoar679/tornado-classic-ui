@@ -56,7 +56,7 @@
   "depositTransactionOnEtherscan": "在 Etherscan 查看存款交易",
   "withdrawalSettings": "提款设置",
   "pleaseEnterYourNote": "请输入存款凭证",
-  "turnOnWasm": "错误：Error: 请在浏览器设置中打开 WebAssembly。<br /> 如果你使用 Tor 浏览器，请启用 about:config 中的 javascript.options.wasm",
+  "turnOnWasm": "错误：Error: 请在浏览器设置中打开 WebAssembly。\\n 如果你使用 Tor 浏览器，请启用 about:config 中的 javascript.options.wasm",
   "timePassed": "时间",
   "timePassedTooltip": "即便在你之后又多笔存款，它们也可能是由同一个用户存入的。因此，我们建议在提款之前至少等待24小时，以确保在此期间有多个用户使用了 Tornado。",
   "subsequentDeposits": "后续存款",

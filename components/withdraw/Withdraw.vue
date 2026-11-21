@@ -46,8 +46,8 @@
         data-test="enter_note_field"
       ></o-input>
       <div v-if="hasErrorNote" class="help" :class="hasErrorNote.type">
-        <!-- eslint-disable vue/no-v-html -->
-        <p v-html="hasErrorNote.msg"></p>
+        <!-- static i18n text only (line breaks via newline + pre-line); no HTML sink -->
+        <p style="white-space: pre-line">{{ hasErrorNote.msg }}</p>
       </div>
     </div>
     <div v-if="!hasErrorNote && depositTxHash" class="field field-withdraw">
@@ -244,10 +244,10 @@ export default {
       // hasErrorNote is an object (or false); coerce so Oruga :disabled gets a boolean
       return Boolean(
         this.isLoading ||
-          this.error.type ||
-          this.hasErrorNote ||
-          (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
-          !this.isValidAddress
+        this.error.type ||
+        this.hasErrorNote ||
+        (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
+        !this.isValidAddress
       )
     },
     isWithdrawalButtonDisable() {

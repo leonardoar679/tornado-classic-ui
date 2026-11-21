@@ -55,7 +55,7 @@
   "depositTransactionOnEtherscan": "Транзакція депозиту на Etherscan",
   "withdrawalSettings": "Налаштування виводу",
   "pleaseEnterYourNote": "Введіть Note",
-  "turnOnWasm": "Помилка: увімкніть WebAssembly в налаштуваннях вашого браузера.<br /> Якщо ви використовуєте браузер Tor, включите javascript.options.wasm в about:config",
+  "turnOnWasm": "Помилка: увімкніть WebAssembly в налаштуваннях вашого браузера.\\n Якщо ви використовуєте браузер Tor, включите javascript.options.wasm в about:config",
   "timePassed": "Час",
   "timePassedTooltip": "Навіть якщо після вас зроблено кілька депозитів, вони могли бути зроблені одним і тим же користувачем. Тому ми рекомендуємо почекати не менше 24 годин, перш ніж знімати кошти, щоб переконатися, що за цей час кілька користувачів використовували Tornado.cash.",
   "subsequentDeposits": "Депозитів після",

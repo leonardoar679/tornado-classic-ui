@@ -78,5 +78,10 @@
     "vitest": "^5.1.0",
     "wrangler": "^4.163.0",
     "zip-local": "^0.3.4"
+  },
+  "overrides": {
+    "gas-price-oracle": {
+      "axios": "^1.21.1"
+    }
   }
 }
