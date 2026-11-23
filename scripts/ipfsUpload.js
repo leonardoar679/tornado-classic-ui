@@ -3,6 +3,7 @@
 
 import 'dotenv/config'
 import fs from 'node:fs'
+import path from 'node:path'
 import axios from 'axios'
 import FormData from 'form-data'
 import recursive from 'recursive-fs'
@@ -12,10 +13,27 @@ import basePathConverter from 'base-path-converter'
 const MAX_PINS = 5
 
 const baseUrl = `https://api.pinata.cloud`
-const src = process.argv[2] || './dist'
+// `npm run generate` writes to .output/public. (The previous default, ./dist, is the stale
+// pre-Nuxt-4 output: publishing it would ship an outdated build.)
+const src = process.argv[2] || './.output/public'
 const headers = {
   pinata_api_key: process.env.PINATA_API_KEY,
   pinata_secret_api_key: process.env.PINATA_SECRET_API_KEY
+}
+
+// Never print an axios error object: it carries the request config, headers included.
+const describeError = (e) => e?.response?.data || e?.message || String(e)
+
+// Refuse to touch the pin list unless it is clear what should be published and how.
+function assertReadyToUpload() {
+  if (!headers.pinata_api_key || !headers.pinata_secret_api_key) {
+    throw new Error('PINATA_API_KEY and PINATA_SECRET_API_KEY must be set (see .env)')
+  }
+  const isBuildOutput =
+    fs.existsSync(src) && fs.statSync(src).isDirectory() && fs.existsSync(path.join(src, 'index.html'))
+  if (!isBuildOutput) {
+    throw new Error(`"${src}" is not a build output (no index.html). Run \`npm run generate\` first.`)
+  }
 }
 
 async function removeOldPins() {
@@ -65,11 +83,12 @@ async function pinBuild() {
 }
 
 async function main() {
+  assertReadyToUpload()
   await removeOldPins()
   await pinBuild()
 }
 
 main().catch((e) => {
-  console.log(e)
+  console.error(describeError(e))
   process.exit(1)
 })

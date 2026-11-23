@@ -7,6 +7,7 @@ import { createChainIdState, parseNote, parseSemanticVersion } from '@/utils/ind
 import ENSABI from '@/abis/ENS.abi.json'
 import networkConfig from '@/networkConfig.js'
 import { createWeb3 } from '@/utils/web3.js'
+import { isSafeJobId, verifyWithdrawalOnChain } from '@/utils/relayerVerification.js'
 
 const getAxios = async () => {
   const mod = await import('axios')
@@ -163,15 +164,10 @@ export const mutations = {
       account
     }
   },
-  UPDATE_JOB(state, { id, netId, type, txHash, confirmations, status, failedReason }) {
+  // only the fields present in `updates` are overridden (a status-only update keeps txHash)
+  UPDATE_JOB(state, { id, netId, type, ...updates }) {
     const job = state.jobs[`netId${netId}`][type][id]
-    state.jobs[`netId${netId}`][type][id] = {
-      ...job,
-      txHash,
-      confirmations,
-      status,
-      failedReason
-    }
+    state.jobs[`netId${netId}`][type][id] = { ...job, ...updates }
   },
   DELETE_JOB(state, { id, netId, type }) {
     delete state.jobs[`netId${netId}`][type][id]
@@ -456,6 +452,10 @@ export const actions = {
 
       if (response.status === 200) {
         const { id } = await response.json()
+        // The relayer controls this value and it becomes a state key
+        if (!isSafeJobId(id)) {
+          throw new Error(this.app.i18n.t('unknownError'))
+        }
         const timestamp = Math.round(new Date().getTime() / 1000)
         commit('SAVE_JOB', {
           id,
@@ -537,6 +537,30 @@ export const actions = {
       { amount, currency, netId, type, action, note, txHash, fee },
       { root: true }
     )
+  },
+  async verifyRelayerWithdrawal({ rootGetters }, { txHash, job, netId }) {
+    const config = networkConfig[`netId${netId}`]
+    const instanceAddress = config?.tokens?.[job.currency]?.instanceAddress?.[job.amount]
+    if (!instanceAddress || !job.note) {
+      return { verified: null, reason: 'unknown instance or note' }
+    }
+
+    const rpc = rootGetters['settings/currentRpc']
+    let result
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const { nullifierHex } = parseNote(job.note)
+        result = await verifyWithdrawalOnChain({ rpcUrl: rpc?.url, txHash, instanceAddress, nullifierHex })
+      } catch (e) {
+        result = { verified: null, reason: e?.message }
+      }
+      // definitive either way: stop; otherwise the receipt may not be visible on the node yet
+      if (result.verified !== null) {
+        return result
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+    return result
   },
   runJobWatcher({ state, dispatch }, { id, netId, type, noticeId }) {
     console.log('runJobWatcher started for job', id)
@@ -621,6 +645,41 @@ export const actions = {
       console.error('runJobWatcher.handleResponse', failedReason)
 
       throw new Error(this.app.i18n.t('relayerError'))
+    }
+
+    // A relayer's word is not proof: check the claimed transaction on-chain (through the
+    // user's own RPC) before reporting success and marking the note as spent.
+    const claimsWithdrawal = Boolean(txHash) && (Number(confirmations) > 0 || status === 'CONFIRMED')
+    let verification = job.verification
+    if (claimsWithdrawal && verification === undefined) {
+      verification = await dispatch('verifyRelayerWithdrawal', { txHash, job, netId })
+      if (verification.verified === null) {
+        // Neither proven nor disproven (RPC unavailable / receipt not visible yet): keep the
+        // historical behavior rather than block a legitimate withdrawal.
+        console.warn('Relayer withdrawal could not be verified on-chain:', verification.reason)
+      } else {
+        commit('UPDATE_JOB', { id, netId, type, verification })
+      }
+    }
+
+    if (verification && verification.verified === false) {
+      dispatch('stopFinishJobWatcher', { id })
+      commit('UPDATE_JOB', {
+        id,
+        netId,
+        type,
+        status: 'FAILED',
+        failedReason: this.app.i18n.t('relayerWithdrawalUnverified')
+      })
+      dispatch(
+        'notice/updateNotice',
+        {
+          id: noticeId,
+          notice: { title: 'relayerWithdrawalUnverified', type: 'danger', routerLink: undefined }
+        },
+        { root: true }
+      )
+      throw new Error(this.app.i18n.t('relayerWithdrawalUnverified'))
     }
 
     if (txHash && noticeCalls === 0 && (Number(confirmations) > 0 || status === 'CONFIRMED')) {

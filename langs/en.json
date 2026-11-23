@@ -274,6 +274,7 @@
   "max": "Max",
   "withDisconnectedWallet": "Please, connect a wallet or change the type of withdrawal",
   "relayerError": "Selected relayer could not sent your tx. Please try again or choose a different relayer in settings.",
+  "relayerWithdrawalUnverified": "The relayer reported this withdrawal as completed, but the transaction could not be verified on-chain. Your note has NOT been marked as spent. Check the transaction hash on a block explorer before deleting the note.",
   "relayerIsNotResponding": "Relayer is not responding. Please try again or choose a different relayer in settings.",
   "transactionFailed": "Transaction failed",
   "none": "none",
